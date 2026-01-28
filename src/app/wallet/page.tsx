@@ -5,35 +5,48 @@ import { AppShell } from '@/components/layout/AppShell';
 import { WalletBalance } from '@/features/wallet/components/WalletBalance';
 import { TransactionHistory } from '@/features/wallet/components/TransactionHistory';
 import { ChargeModal } from '@/features/wallet/components/ChargeModal';
-
-interface Transaction {
-    id: string;
-    type: 'CHARGE' | 'USE';
-    amount: number;
-    description: string;
-    date: string;
-}
+import { useWallet, useWalletHistory } from '@/features/wallet/hooks/useWallet';
+import { Loader2 } from 'lucide-react';
+import type { TransactionType } from '@/types/wallet';
 
 export default function WalletPage() {
-    // Mock State (In real app, fetch from API)
-    const [balance, setBalance] = useState(15000);
-    const [transactions, setTransactions] = useState<Transaction[]>([
-        { id: '1', type: 'USE', amount: -4500, description: '스타벅스 아메리카노 구매', date: '2023.10.15' },
-        { id: '2', type: 'CHARGE', amount: 20000, description: '포인트 충전', date: '2023.10.10' },
-    ]);
     const [isChargeModalOpen, setIsChargeModalOpen] = useState(false);
+    const [filterType, setFilterType] = useState<TransactionType | undefined>(undefined);
 
-    const handleChargeSuccess = (amount: number) => {
-        setBalance((prev) => prev + amount);
-        const newTx: Transaction = {
-            id: `new_${Date.now()}`,
-            type: 'CHARGE',
-            amount: amount,
-            description: '포인트 충전',
-            date: new Date().toLocaleDateString()
-        };
-        setTransactions((prev) => [newTx, ...prev]);
-    };
+    const { data: wallet, isLoading: isLoadingWallet, error: walletError } = useWallet();
+    const { data: historyData, isLoading: isLoadingHistory, error: historyError } = useWalletHistory({
+        type: filterType
+    });
+
+    if (isLoadingWallet || isLoadingHistory) {
+        return (
+            <AppShell
+                headerTitle="내 지갑"
+                headerVariant="main"
+                showBottomNav={true}
+            >
+                <div className="flex items-center justify-center h-96">
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+            </AppShell>
+        );
+    }
+
+    if (walletError || historyError) {
+        return (
+            <AppShell
+                headerTitle="내 지갑"
+                headerVariant="main"
+                showBottomNav={true}
+            >
+                <div className="p-4">
+                    <div className="text-center text-muted-foreground">
+                        지갑 정보를 불러오는데 실패했습니다.
+                    </div>
+                </div>
+            </AppShell>
+        );
+    }
 
     return (
         <AppShell
@@ -44,20 +57,23 @@ export default function WalletPage() {
             <div className="p-4 space-y-8 pb-24">
                 <section>
                     <WalletBalance
-                        balance={balance}
+                        balance={wallet?.balance ?? 0}
                         onCharge={() => setIsChargeModalOpen(true)}
                     />
                 </section>
 
                 <section>
-                    <TransactionHistory transactions={transactions} />
+                    <TransactionHistory
+                        transactions={historyData?.content ?? []}
+                        filterType={filterType}
+                        onFilterChange={setFilterType}
+                    />
                 </section>
             </div>
 
             <ChargeModal
                 open={isChargeModalOpen}
                 onOpenChange={setIsChargeModalOpen}
-                onSuccess={handleChargeSuccess}
             />
         </AppShell>
     );

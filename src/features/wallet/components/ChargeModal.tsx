@@ -1,42 +1,49 @@
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { requestMockPayment, verifyMockPayment } from '@/features/payment/api/payment';
+import { Input } from '@/components/ui/input';
+import { useChargeWallet } from '@/features/wallet/hooks/useWalletMutations';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
 interface ChargeModalProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    onSuccess: (amount: number) => void;
 }
 
 const CHARGE_AMOUNTS = [10000, 30000, 50000, 100000];
 
-export function ChargeModal({ open, onOpenChange, onSuccess }: ChargeModalProps) {
+export function ChargeModal({ open, onOpenChange }: ChargeModalProps) {
     const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
-    const [loading, setLoading] = useState(false);
+    const [customAmount, setCustomAmount] = useState<string>('');
+    const chargeWallet = useChargeWallet();
 
     const handleCharge = async () => {
-        if (!selectedAmount) return;
-        setLoading(true);
-        try {
-            const { paymentKey } = await requestMockPayment({
-                orderId: `charge_${Date.now()}`,
-                orderName: `${selectedAmount.toLocaleString()}P 충전`,
-                amount: selectedAmount
-            });
-
-            await verifyMockPayment(paymentKey, `charge_${Date.now()}`, selectedAmount);
-
-            toast.success(`${selectedAmount.toLocaleString()}P 충전이 완료되었습니다.`);
-            onSuccess(selectedAmount);
-            onOpenChange(false);
-        } catch (e) {
-            toast.error('충전 중 오류가 발생했습니다.');
-        } finally {
-            setLoading(false);
+        const amount = selectedAmount ?? Number(customAmount);
+        if (!amount || amount <= 0) {
+            toast.error('충전할 금액을 선택하거나 입력해주세요.');
+            return;
         }
+
+        try {
+            await chargeWallet.mutateAsync({ amount });
+            toast.success(`${amount.toLocaleString()}원이 충전되었습니다.`);
+            onOpenChange(false);
+            setSelectedAmount(null);
+            setCustomAmount('');
+        } catch (error) {
+            toast.error('충전 중 오류가 발생했습니다.');
+        }
+    };
+
+    const handleCustomAmountChange = (value: string) => {
+        setCustomAmount(value);
+        setSelectedAmount(null);
+    };
+
+    const handlePresetAmountClick = (amount: number) => {
+        setSelectedAmount(amount);
+        setCustomAmount('');
     };
 
     return (
@@ -45,29 +52,43 @@ export function ChargeModal({ open, onOpenChange, onSuccess }: ChargeModalProps)
                 <DialogHeader>
                     <DialogTitle>포인트 충전</DialogTitle>
                     <DialogDescription>
-                        충전할 금액을 선택해주세요.
+                        충전할 금액을 선택하거나 직접 입력해주세요.
                     </DialogDescription>
                 </DialogHeader>
-                <div className="grid grid-cols-2 gap-3 py-4">
-                    {CHARGE_AMOUNTS.map((amount) => (
-                        <Button
-                            key={amount}
-                            variant={selectedAmount === amount ? "default" : "outline"}
-                            className={selectedAmount === amount ? "border-primary" : ""}
-                            onClick={() => setSelectedAmount(amount)}
-                        >
-                            {amount.toLocaleString()}원
-                        </Button>
-                    ))}
+                <div className="space-y-4 py-4">
+                    <div className="grid grid-cols-2 gap-3">
+                        {CHARGE_AMOUNTS.map((amount) => (
+                            <Button
+                                key={amount}
+                                variant={selectedAmount === amount ? "default" : "outline"}
+                                className={selectedAmount === amount ? "border-primary" : ""}
+                                onClick={() => handlePresetAmountClick(amount)}
+                            >
+                                {amount.toLocaleString()}원
+                            </Button>
+                        ))}
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">직접 입력</label>
+                        <Input
+                            type="number"
+                            placeholder="충전할 금액을 입력하세요"
+                            value={customAmount}
+                            onChange={(e) => handleCustomAmountChange(e.target.value)}
+                            min="0"
+                        />
+                    </div>
                 </div>
                 <DialogFooter>
                     <Button
                         className="w-full font-bold"
                         onClick={handleCharge}
-                        disabled={!selectedAmount || loading}
+                        disabled={(!selectedAmount && !customAmount) || chargeWallet.isPending}
                     >
-                        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        {selectedAmount ? `${selectedAmount.toLocaleString()}원 결제하기` : '금액을 선택해주세요'}
+                        {chargeWallet.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {selectedAmount || customAmount
+                            ? `${(selectedAmount ?? Number(customAmount)).toLocaleString()}원 충전하기`
+                            : '금액을 선택해주세요'}
                     </Button>
                 </DialogFooter>
             </DialogContent>
