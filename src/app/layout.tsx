@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { Providers } from '@/lib/providers';
 import { MSWProvider } from '@/lib/providers/msw-provider';
+import { OfflineIndicator } from '@/components/common/OfflineIndicator';
 import "./globals.css";
 
 const geistSans = Geist({
@@ -25,12 +26,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="ko">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <MSWProvider>
-          <Providers>{children}</Providers>
+          <Providers>
+            <OfflineIndicator />
+            {children}
+          </Providers>
         </MSWProvider>
       </body>
     </html>
