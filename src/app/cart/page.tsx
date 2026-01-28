@@ -1,57 +1,96 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AppShell } from '@/components/layout/AppShell';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
+import { Checkbox } from '@/components/ui/checkbox';
 import { CartItem } from '@/features/cart/components/CartItem';
-import { ShoppingBag } from 'lucide-react';
+import { CartSummary } from '@/features/cart/components/CartSummary';
+import { CartEmptyState } from '@/features/cart/components/CartEmptyState';
+import { useCart } from '@/features/cart/hooks/useCart';
+import { useUpdateCartItem, useRemoveCartItem, useToggleCartSelection } from '@/features/cart/hooks/useCartMutations';
+import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-
-// Mock Data
-const MOCK_CART_ITEMS = [
-    {
-        id: 'c1',
-        product: {
-            name: 'Sony WH-1000XM5',
-            price: 450000,
-            imageUrl: '/images/placeholder-product-3.jpg',
-        },
-        quantity: 1,
-    },
-    {
-        id: 'c2',
-        product: {
-            name: '스타벅스 아메리카노 T',
-            price: 4500,
-            imageUrl: '/images/placeholder-product-5.jpg',
-        },
-        quantity: 2,
-    }
-];
 
 export default function CartPage() {
     const router = useRouter();
-    const [items, setItems] = useState(MOCK_CART_ITEMS);
+    const { data: cart, isLoading } = useCart();
+    const updateCartItem = useUpdateCartItem();
+    const removeCartItem = useRemoveCartItem();
+    const toggleSelection = useToggleCartSelection();
 
-    const totalAmount = items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
-    const shippingFee = totalAmount > 50000 ? 0 : 3000;
-    const paymentAmount = totalAmount + shippingFee;
+    const selectedItems = cart?.items.filter(item => item.selected) || [];
+    const totalAmount = selectedItems.reduce((sum, item) => sum + item.amount, 0);
+    const allSelected = (cart?.items.length ?? 0) > 0 && cart?.items.every(item => item.selected);
+    const someSelected = cart?.items.some(item => item.selected);
 
-    const handleUpdateQuantity = (id: string, quantity: number) => {
-        setItems(items.map(item => item.id === id ? { ...item, quantity } : item));
+    const handleUpdateAmount = (id: string, amount: number) => {
+        updateCartItem.mutate(
+            { itemId: id, data: { amount } },
+            {
+                onError: () => {
+                    toast.error('금액 변경에 실패했습니다.');
+                }
+            }
+        );
+    };
+
+    const handleToggleSelect = (id: string, selected: boolean) => {
+        toggleSelection.mutate(
+            { itemId: id, selected },
+            {
+                onError: () => {
+                    toast.error('선택 변경에 실패했습니다.');
+                }
+            }
+        );
     };
 
     const handleRemove = (id: string) => {
-        setItems(items.filter(item => item.id !== id));
-        toast.success('상품이 삭제되었습니다.');
+        removeCartItem.mutate(id, {
+            onSuccess: () => {
+                toast.success('장바구니에서 삭제되었습니다.');
+            },
+            onError: () => {
+                toast.error('삭제에 실패했습니다.');
+            }
+        });
+    };
+
+    const handleSelectAll = () => {
+        if (!cart) return;
+        const newSelected = !allSelected;
+        cart.items.forEach(item => {
+            if (item.selected !== newSelected) {
+                toggleSelection.mutate({ itemId: item.id, selected: newSelected });
+            }
+        });
     };
 
     const handleCheckout = () => {
-        // Navigate to Checkout Page
+        if (selectedItems.length === 0) {
+            toast.error('결제할 상품을 선택해주세요.');
+            return;
+        }
         router.push('/checkout');
     };
+
+    if (isLoading) {
+        return (
+            <AppShell
+                headerTitle="장바구니"
+                headerVariant="detail"
+                hasBack={true}
+                showBottomNav={true}
+            >
+                <div className="flex items-center justify-center min-h-[calc(100vh-3.5rem)]">
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+            </AppShell>
+        );
+    }
+
+    const hasItems = cart && cart.items.length > 0;
 
     return (
         <AppShell
@@ -61,52 +100,38 @@ export default function CartPage() {
             showBottomNav={true}
         >
             <div className="flex flex-col min-h-[calc(100vh-3.5rem)] pb-24">
-                {items.length === 0 ? (
-                    <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center p-8">
-                        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted">
-                            <ShoppingBag className="h-10 w-10 text-muted-foreground/50" />
-                        </div>
-                        <div className="space-y-1">
-                            <h3 className="text-lg font-medium">장바구니가 비어있습니다</h3>
-                            <p className="text-sm text-muted-foreground">원하는 선물을 담아보세요! 🎁</p>
-                        </div>
-                        <Button variant="outline" className="mt-4">
-                            쇼핑하러 가기
-                        </Button>
-                    </div>
+                {!hasItems ? (
+                    <CartEmptyState />
                 ) : (
                     <>
-                        <div className="flex flex-col gap-4 p-4">
-                            {items.map((item) => (
+                        <div className="flex items-center gap-2 p-4 border-b">
+                            <Checkbox
+                                checked={allSelected}
+                                onCheckedChange={handleSelectAll}
+                                aria-label="전체 선택"
+                            />
+                            <span className="text-sm font-medium">
+                                전체 선택 ({selectedItems.length}/{cart.items.length})
+                            </span>
+                        </div>
+
+                        <div className="flex flex-col gap-3 p-4">
+                            {cart.items.map((item) => (
                                 <CartItem
                                     key={item.id}
                                     item={item}
-                                    onUpdateQuantity={handleUpdateQuantity}
+                                    onUpdateAmount={handleUpdateAmount}
+                                    onToggleSelect={handleToggleSelect}
                                     onRemove={handleRemove}
                                 />
                             ))}
                         </div>
 
-                        <div className="mt-auto bg-background p-4 border-t">
-                            <div className="space-y-3 mb-4">
-                                <div className="flex justify-between text-sm">
-                                    <span className="text-muted-foreground">총 상품금액</span>
-                                    <span>{totalAmount.toLocaleString()}원</span>
-                                </div>
-                                <div className="flex justify-between text-sm">
-                                    <span className="text-muted-foreground">배송비</span>
-                                    <span>{shippingFee.toLocaleString()}원</span>
-                                </div>
-                                <Separator />
-                                <div className="flex justify-between font-bold text-lg">
-                                    <span>결제 금액</span>
-                                    <span className="text-primary">{paymentAmount.toLocaleString()}원</span>
-                                </div>
-                            </div>
-                            <Button className="w-full h-12 text-lg" onClick={handleCheckout}>
-                                {items.length}개 주문하기
-                            </Button>
-                        </div>
+                        <CartSummary
+                            totalItems={selectedItems.length}
+                            totalAmount={totalAmount}
+                            onCheckout={handleCheckout}
+                        />
                     </>
                 )}
             </div>
