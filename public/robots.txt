@@ -1,0 +1,13 @@
+# Giftify Robots.txt
+User-agent: *
+Allow: /
+
+# Block API routes
+Disallow: /api/
+Disallow: /api/*
+
+# Block auth pages
+Disallow: /api/auth/
+
+# Sitemap
+Sitemap: https://giftify.app/sitemap.xml

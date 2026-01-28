@@ -1,8 +1,9 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { Providers } from '@/lib/providers';
 import { MSWProvider } from '@/lib/providers/msw-provider';
 import { OfflineIndicator } from '@/components/common/OfflineIndicator';
+import { BASE_METADATA } from '@/lib/seo/metadata';
 import "./globals.css";
 
 const geistSans = Geist({
@@ -15,9 +16,17 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 });
 
-export const metadata: Metadata = {
-  title: 'Giftify - 함께하는 선물 펀딩',
-  description: '친구들과 함께 특별한 선물을 만들어보세요',
+export const metadata: Metadata = BASE_METADATA;
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#0a0a0a' },
+  ],
 };
 
 export default function RootLayout({
