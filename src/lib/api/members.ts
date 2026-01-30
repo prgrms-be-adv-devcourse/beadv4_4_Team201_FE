@@ -11,7 +11,8 @@ export async function getMember(memberId: string): Promise<MemberPublic> {
   return apiClient.get<MemberPublic>(`/api/members/${memberId}`);
 }
 
-return apiClient.patch<Member>(`/api/members/${memberId}`, data);
+export async function updateMember(memberId: string, data: MemberUpdateRequest): Promise<Member> {
+  return apiClient.patch<Member>(`/api/members/${memberId}`, data);
 }
 
 export async function signupMember(data: MemberUpdateRequest): Promise<Member> {
