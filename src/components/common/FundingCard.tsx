@@ -25,8 +25,8 @@ export interface FundingCardProps {
         expiresAt: string; // ISO string
         participantCount: number;
         recipient: {
-            nickname: string;
-            avatarUrl?: string;
+            nickname: string | null;
+            avatarUrl?: string | null;
         };
     };
     onClick?: () => void;
@@ -42,6 +42,7 @@ export function FundingCard({
     const isCarousel = variant === 'carousel';
     const percentage = Math.round((funding.currentAmount / funding.targetAmount) * 100);
     const daysLeft = differenceInDays(parseISO(funding.expiresAt), new Date());
+    const recipientNickname = funding.recipient.nickname || '알 수 없음';
 
     const getDdayBadge = () => {
         if (funding.status === 'ACHIEVED' || funding.status === 'ACCEPTED') {
@@ -95,11 +96,11 @@ export function FundingCard({
 
                     <div className="flex items-center gap-2 pt-1">
                         <Avatar className="h-6 w-6">
-                            <AvatarImage src={funding.recipient.avatarUrl} />
-                            <AvatarFallback>{funding.recipient.nickname[0]}</AvatarFallback>
+                            <AvatarImage src={funding.recipient.avatarUrl || undefined} />
+                            <AvatarFallback>{recipientNickname[0]}</AvatarFallback>
                         </Avatar>
                         <span className="text-xs text-muted-foreground">
-                            <span className="font-medium text-foreground">@{funding.recipient.nickname}</span>에게 · {funding.participantCount}명 참여
+                            <span className="font-medium text-foreground">@{recipientNickname}</span>에게 · {funding.participantCount}명 참여
                         </span>
                     </div>
                 </div>
