@@ -14,7 +14,7 @@ export async function logout(): Promise<void> {
 }
 
 export async function getMe(): Promise<Member> {
-  return apiClient.get<Member>('/api/auth/me');
+  return apiClient.get<Member>('/api/v2/members/me');
 }
 
 /**

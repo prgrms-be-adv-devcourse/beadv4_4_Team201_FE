@@ -30,8 +30,7 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { updateMember } from '@/lib/api/members';
-import { getMe } from '@/lib/api/auth';
+import { signupMember } from '@/lib/api/members';
 import { Search } from 'lucide-react';
 
 const formSchema = z.object({
@@ -66,13 +65,7 @@ export default function CompleteSignupPage() {
         setPlaceholderNickname(`User_${Math.floor(1000 + Math.random() * 9000)}`);
     }, []);
 
-    // Fetch current member info to get the ID
-    const { data: member, isLoading: isMemberLoading } = useQuery({
-        queryKey: ['me'],
-        queryFn: getMe,
-        enabled: !!user,
-        retry: false,
-    });
+    // Removed getMe query as new users don't have a member profile yet
 
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
@@ -111,29 +104,16 @@ export default function CompleteSignupPage() {
         return () => subscription.unsubscribe();
     }, [form.watch]);
 
-    // Pre-fill form if member data exists
-    useEffect(() => {
-        if (member) {
-            if (member.nickname) form.setValue('nickname', member.nickname);
-            if (member.birthday) form.setValue('birthday', member.birthday);
-            if (member.address) form.setValue('address', member.address);
-            if (member.phoneNum) form.setValue('phoneNum', member.phoneNum);
-            // Defaulting detailAddress from previous address splitting is tricky, 
-            // but we don't have detail separated in DB yet as per code, so leaving blank or extracted if logic existed.
-            // For now, no extraction logic. 
-        }
-    }, [member, form]);
+    // Removed member pre-fill effect
 
     const updateMutation = useMutation({
         mutationFn: async (values: FormValues) => {
-            if (!member?.id) throw new Error('Member ID not found');
-
             // Combine address and detailAddress
             const fullAddress = values.address
                 ? `${values.address} ${values.detailAddress || ''}`.trim()
                 : undefined;
 
-            return updateMember(member.id, {
+            return signupMember({
                 nickname: values.nickname || undefined,
                 birthday: values.birthday || undefined,
                 address: fullAddress,
@@ -197,7 +177,7 @@ export default function CompleteSignupPage() {
     };
 
     // Conditional Returns START HERE (after all hooks)
-    if (isAuthLoading || isMemberLoading) {
+    if (isAuthLoading) {
         return (
             <div className="flex min-h-screen items-center justify-center">
                 <div className="text-center">

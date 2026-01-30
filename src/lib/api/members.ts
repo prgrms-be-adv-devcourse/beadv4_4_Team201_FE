@@ -11,8 +11,11 @@ export async function getMember(memberId: string): Promise<MemberPublic> {
   return apiClient.get<MemberPublic>(`/api/members/${memberId}`);
 }
 
-export async function updateMember(memberId: string, data: MemberUpdateRequest): Promise<Member> {
-  return apiClient.patch<Member>(`/api/members/${memberId}`, data);
+return apiClient.patch<Member>(`/api/members/${memberId}`, data);
+}
+
+export async function signupMember(data: MemberUpdateRequest): Promise<Member> {
+  return apiClient.post<Member>('/api/members/signup', data);
 }
 
 export async function getMemberFriends(memberId: string, params?: PageParams): Promise<MemberListResponse> {

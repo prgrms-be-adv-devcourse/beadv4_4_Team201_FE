@@ -14,22 +14,20 @@ export type MemberStatus = 'ACTIVE' | 'SUSPENDED' | 'WITHDRAWN';
  * Full member information (private)
  */
 export interface Member {
-    id: string;
+    id: string; // Backend sends number, JS runtime handles it.
     authSub: string;
-    nickname: string | null; // Make nickname nullable as per new requirements
+    nickname: string | null;
     email: string;
+    name?: string | null; // Added based on spec
     avatarUrl: string | null;
     role: MemberRole;
     status: MemberStatus;
-    birthday?: string; // ISO date string (YYYY-MM-DD)
+    birthday?: string;
     address?: string;
     phoneNum?: string;
-    createdAt: string;
+    createdAt?: string; // Spec didn't mention this in v2 response but maybe present? kept optional.
 }
 
-/**
- * Public member information visible to other users
- */
 export interface MemberPublic {
     id: string;
     nickname: string | null;
@@ -38,21 +36,20 @@ export interface MemberPublic {
 
 export interface MemberUpdateRequest {
     nickname?: string;
-    avatarUrl?: string;
+    avatarUrl?: string; // Spec doesn't mention avatarUrl in PATCH, but logic might remain.
     birthday?: string;
     address?: string;
     phoneNum?: string;
+    name?: string; // Spec allows name update? Spec PATCH excludes name. Wait, "name" in Request body? "name" is in Response. Request: nickname, address, phoneNum.
+    // Let's keep existing fields plus whatever spec supports.
 }
 
-/**
- * Paginated list of public member information
- */
 export type MemberListResponse = PaginatedResponse<MemberPublic>;
 
-/**
- * Login response with member data and new user flag
- */
 export interface LoginResponse {
-    member: Member;
     isNewUser: boolean;
+    authSub: string; // Added
+    email: string;   // Added
+    name: string;    // Added
+    member: Member | null; // Nullable
 }
