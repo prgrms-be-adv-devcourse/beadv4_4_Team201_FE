@@ -2,23 +2,24 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import {
-    Menu,
-    Bell,
-    User,
     ChevronLeft,
-    MoreHorizontal,
     Search,
-    X
+    X,
+    ShoppingBag,
+    User,
+    Heart,
+    Home,
+    Wallet,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { LoginButton } from '@/features/auth/components/LoginButton';
 import { SignupButton } from '@/features/auth/components/SignupButton';
 import { UserMenu } from '@/features/auth/components/UserMenu';
+import { SearchOverlay } from '@/components/common/SearchOverlay';
+import { useCart } from '@/features/cart/hooks/useCart';
 
 export type HeaderVariant = 'main' | 'detail' | 'search';
 
@@ -50,6 +51,7 @@ export function Header({
     rightAction,
 }: HeaderProps) {
     const router = useRouter();
+    const [isSearchOpen, setIsSearchOpen] = React.useState(false);
 
     const handleBack = () => {
         if (onBack) {
@@ -64,32 +66,48 @@ export function Header({
             case 'detail':
                 return (
                     <div className="flex w-full items-center justify-between">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-3">
                             {hasBack && (
-                                <Button variant="ghost" size="icon" onClick={handleBack} aria-label="Go back">
-                                    <ChevronLeft className="h-6 w-6" />
-                                </Button>
+                                <button
+                                    onClick={handleBack}
+                                    aria-label="Go back"
+                                    className="p-1 hover:opacity-60 transition-opacity"
+                                >
+                                    <ChevronLeft className="h-5 w-5" strokeWidth={1.5} />
+                                </button>
                             )}
-                            {title && <h1 className="text-lg font-semibold">{title}</h1>}
+                            {title && (
+                                <h1 className="text-sm font-medium tracking-tight">{title}</h1>
+                            )}
                         </div>
-                        <div className="flex items-center gap-2">
-                            {rightAction || <AuthActions />}
+                        <div className="flex items-center gap-4">
+                            <button
+                                onClick={() => setIsSearchOpen(true)}
+                                className="hover:opacity-60 transition-opacity"
+                                aria-label="Search"
+                            >
+                                <Search className="h-5 w-5" strokeWidth={1.5} />
+                            </button>
+                            {rightAction || <NavigationIcons onSearchClick={() => setIsSearchOpen(true)} />}
                         </div>
                     </div>
                 );
 
             case 'search':
                 return (
-                    <div className="flex w-full items-center gap-2">
-                        <Button variant="ghost" size="icon" onClick={handleBack} aria-label="Go back">
-                            <ChevronLeft className="h-6 w-6" />
-                        </Button>
+                    <div className="flex w-full items-center gap-3">
+                        <button
+                            onClick={handleBack}
+                            aria-label="Go back"
+                            className="p-1 hover:opacity-60 transition-opacity"
+                        >
+                            <ChevronLeft className="h-5 w-5" strokeWidth={1.5} />
+                        </button>
                         <div className="relative flex-1">
-                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                type="search"
-                                placeholder="상품명 검색..."
-                                className="w-full bg-secondary pl-9 pr-8"
+                            <input
+                                type="text"
+                                placeholder="검색어를 입력하세요"
+                                className="w-full h-9 px-0 bg-transparent border-0 border-b border-border focus:border-foreground focus:outline-none text-sm"
                                 value={searchQuery}
                                 onChange={(e) => onSearchChange?.(e.target.value)}
                                 onKeyDown={(e) => e.key === 'Enter' && onSearchSubmit?.()}
@@ -99,57 +117,106 @@ export function Header({
                                 <button
                                     type="button"
                                     onClick={onSearchClear}
-                                    className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground"
+                                    className="absolute right-0 top-1/2 -translate-y-1/2 p-0.5 text-muted-foreground hover:text-foreground transition-colors"
                                 >
-                                    <X className="h-4 w-4" />
+                                    <X className="h-4 w-4" strokeWidth={1.5} />
                                 </button>
                             )}
                         </div>
-                        <Button variant="ghost" onClick={handleBack}>
-                            취소
-                        </Button>
                     </div>
                 );
 
             case 'main':
             default:
-                return <MainHeaderContent />;
+                return <MainHeaderContent onSearchClick={() => setIsSearchOpen(true)} />;
         }
     };
 
     return (
-        <header
-            className={cn(
-                'sticky top-0 z-50 flex h-14 w-full items-center border-b bg-background px-4 shadow-sm',
-                className
-            )}
-        >
-            {renderContent()}
-        </header>
+        <>
+            <header
+                className={cn(
+                    'sticky top-0 z-50 flex h-14 w-full items-center bg-background px-4 md:px-8 border-b border-border/50',
+                    className
+                )}
+            >
+                {renderContent()}
+            </header>
+
+            {/* Search Overlay */}
+            <SearchOverlay
+                isOpen={isSearchOpen}
+                onClose={() => setIsSearchOpen(false)}
+            />
+        </>
     );
 }
 
 /**
- * Auth actions for Header (Notifications + UserMenu or Login/Signup)
+ * Navigation Icons - Combined from BottomNav
+ * 29cm minimal icon style
  */
-function AuthActions() {
+function NavigationIcons({ onSearchClick }: { onSearchClick?: () => void }) {
     const { user, isLoading } = useAuth();
+    const pathname = usePathname();
+    const { data: cart } = useCart();
+
+    const cartItemCount = user ? (cart?.items.length || 0) : 0;
 
     if (isLoading) {
-        return <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />;
+        return <div className="h-5 w-5 animate-pulse rounded-full bg-muted" />;
     }
 
     return (
-        <div className="flex items-center gap-2">
-            {user && (
-                <Button variant="ghost" size="icon" aria-label="Notifications" className="hidden sm:flex">
-                    <Bell className="h-6 w-6" />
-                </Button>
-            )}
+        <div className="flex items-center gap-4">
             {user ? (
-                <UserMenu />
+                <>
+                    {/* Wishlist */}
+                    <Link
+                        href="/wishlist"
+                        className={cn(
+                            "hover:opacity-60 transition-opacity hidden sm:block",
+                            pathname.startsWith('/wishlist') && "opacity-100"
+                        )}
+                        aria-label="Wishlist"
+                    >
+                        <Heart className="h-5 w-5" strokeWidth={1.5} />
+                    </Link>
+
+                    {/* Cart with badge */}
+                    <Link
+                        href="/cart"
+                        className={cn(
+                            "hover:opacity-60 transition-opacity relative",
+                            pathname.startsWith('/cart') && "opacity-100"
+                        )}
+                        aria-label="Cart"
+                    >
+                        <ShoppingBag className="h-5 w-5" strokeWidth={1.5} />
+                        {cartItemCount > 0 && (
+                            <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-foreground px-1 text-[10px] text-background font-medium">
+                                {cartItemCount > 99 ? '99+' : cartItemCount}
+                            </span>
+                        )}
+                    </Link>
+
+                    {/* Wallet */}
+                    <Link
+                        href="/wallet"
+                        className={cn(
+                            "hover:opacity-60 transition-opacity hidden sm:block",
+                            pathname.startsWith('/wallet') && "opacity-100"
+                        )}
+                        aria-label="Wallet"
+                    >
+                        <Wallet className="h-5 w-5" strokeWidth={1.5} />
+                    </Link>
+
+                    {/* User Menu */}
+                    <UserMenu />
+                </>
             ) : (
-                <div className="flex gap-2">
+                <div className="flex items-center gap-3">
                     <LoginButton />
                     <SignupButton />
                 </div>
@@ -159,20 +226,46 @@ function AuthActions() {
 }
 
 /**
- * Main Header Content
+ * Main Header Content - 29cm Editorial Style
  */
-function MainHeaderContent() {
+function MainHeaderContent({ onSearchClick }: { onSearchClick: () => void }) {
     return (
         <div className="flex w-full items-center justify-between">
-            <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon" aria-label="Menu">
-                    <Menu className="h-6 w-6" />
-                </Button>
-                <Link href="/" className="text-xl font-bold text-primary">
-                    Giftify
+            {/* Logo */}
+            <Link
+                href="/"
+                className="text-lg font-semibold tracking-tight hover:opacity-60 transition-opacity"
+            >
+                Giftify
+            </Link>
+
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center gap-8">
+                <Link
+                    href="/products"
+                    className="text-sm font-medium hover:opacity-60 transition-opacity"
+                >
+                    PRODUCTS
                 </Link>
+                <Link
+                    href="/fundings"
+                    className="text-sm font-medium hover:opacity-60 transition-opacity"
+                >
+                    FUNDINGS
+                </Link>
+            </nav>
+
+            {/* Actions */}
+            <div className="flex items-center gap-4">
+                <button
+                    onClick={onSearchClick}
+                    className="hover:opacity-60 transition-opacity"
+                    aria-label="Search"
+                >
+                    <Search className="h-5 w-5" strokeWidth={1.5} />
+                </button>
+                <NavigationIcons onSearchClick={onSearchClick} />
             </div>
-            <AuthActions />
         </div>
     );
 }

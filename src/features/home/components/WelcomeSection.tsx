@@ -13,35 +13,46 @@ export function WelcomeSection() {
 
     if (isLoading) {
         return (
-            <section className="px-4 py-6">
-                <div className="h-20 animate-pulse rounded-lg bg-secondary" />
+            <section className="px-4 py-8 md:px-8">
+                <div className="h-16 animate-pulse bg-secondary" />
             </section>
         );
     }
 
     if (!user) {
         return (
-            <section className="px-4 py-6">
-                <div className="rounded-lg bg-indigo-50 p-6 text-center dark:bg-indigo-950/30">
-                    <h2 className="mb-2 text-lg font-bold">친구들과 함께 선물하기</h2>
-                    <p className="mb-4 text-sm text-muted-foreground">로그인하고 펀딩을 시작해보세요!</p>
-                    <Button asChild>
-                        <a href="/auth/login">로그인 / 회원가입</a>
-                    </Button>
+            <section className="px-4 py-8 md:px-8">
+                <div className="border-b border-border pb-8">
+                    <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">
+                        Better choice
+                        <br />
+                        Better gift
+                    </h1>
+                    <p className="mt-3 text-sm text-muted-foreground">
+                        친구들과 함께하는 특별한 선물 경험
+                    </p>
+                    <div className="mt-6 flex gap-3">
+                        <Button asChild size="lg">
+                            <a href="/auth/login">로그인</a>
+                        </Button>
+                        <Button asChild variant="outline" size="lg">
+                            <Link href="/products">둘러보기</Link>
+                        </Button>
+                    </div>
                 </div>
             </section>
         );
     }
 
     return (
-        <section className="px-4 py-6">
-            <div className="rounded-lg bg-indigo-50 p-6 dark:bg-indigo-950/30">
-                <h2 className="text-xl font-bold text-foreground">
-                    👋 안녕하세요, {member?.nickname || user.name || user.nickname || '친구'}님!
-                </h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                    오늘도 특별한 선물을 준비해보세요.
-                </p>
+        <section className="px-4 py-8 md:px-8">
+            <div className="border-b border-border pb-8">
+                <p className="text-sm text-muted-foreground">Welcome back</p>
+                <h1 className="mt-1 text-2xl font-semibold tracking-tight md:text-3xl">
+                    {member?.nickname || user.name || user.nickname || '친구'}님,
+                    <br />
+                    오늘의 선물을 찾아보세요
+                </h1>
             </div>
         </section>
     );

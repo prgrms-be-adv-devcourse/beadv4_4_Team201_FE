@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   Sheet,
@@ -17,8 +16,8 @@ import {
 import { SlidersHorizontal } from 'lucide-react';
 
 /**
- * ProductFilters - Filter sheet for category and price range
- * Updates URL params on apply
+ * ProductFilters - 29cm Style
+ * Clean filter sheet with minimal styling
  */
 export function ProductFilters() {
   const router = useRouter();
@@ -50,7 +49,7 @@ export function ProductFilters() {
       params.delete('maxPrice');
     }
 
-    params.delete('page'); // Reset page on filter change
+    params.delete('page');
 
     router.push(`/products?${params.toString()}`);
     setOpen(false);
@@ -76,31 +75,32 @@ export function ProductFilters() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2">
-          <SlidersHorizontal className="h-4 w-4" />
+        <button className="flex items-center gap-2 text-sm hover:opacity-60 transition-opacity">
+          <SlidersHorizontal className="h-4 w-4" strokeWidth={1.5} />
           필터
           {hasActiveFilters && (
-            <span className="h-2 w-2 rounded-full bg-indigo-500" />
+            <span className="h-1.5 w-1.5 rounded-full bg-foreground" />
           )}
-        </Button>
+        </button>
       </SheetTrigger>
       <SheetContent side="right">
         <SheetHeader>
-          <SheetTitle>필터</SheetTitle>
-          <SheetDescription>
-            카테고리와 가격 범위로 상품을 필터링하세요
+          <SheetTitle className="text-lg font-semibold tracking-tight">필터</SheetTitle>
+          <SheetDescription className="text-sm text-muted-foreground">
+            카테고리와 가격 범위로 필터링
           </SheetDescription>
         </SheetHeader>
 
-        <div className="mt-6 space-y-6">
+        <div className="mt-8 space-y-8">
           {/* Category Filter */}
-          <div className="space-y-2">
-            <Label htmlFor="category">카테고리</Label>
+          <div className="space-y-3">
+            <Label className="text-xs uppercase tracking-wider text-muted-foreground">
+              카테고리
+            </Label>
             <select
-              id="category"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full h-10 px-3 border rounded-md"
+              className="w-full h-10 px-0 bg-transparent border-0 border-b border-border focus:border-foreground focus:outline-none text-sm"
             >
               <option value="">전체</option>
               <option value="electronics">전자제품</option>
@@ -114,39 +114,37 @@ export function ProductFilters() {
 
           {/* Price Range Filter */}
           <div className="space-y-4">
-            <Label>가격 범위</Label>
-            <div className="space-y-2">
-              <div className="space-y-1">
-                <Label htmlFor="minPrice" className="text-sm text-gray-600">
-                  최소 가격
-                </Label>
-                <Input
-                  id="minPrice"
+            <Label className="text-xs uppercase tracking-wider text-muted-foreground">
+              가격 범위
+            </Label>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-xs text-muted-foreground">최소 가격</label>
+                <input
                   type="number"
                   value={minPrice}
                   onChange={(e) => setMinPrice(e.target.value)}
                   placeholder="0"
                   min="0"
+                  className="w-full h-10 px-0 bg-transparent border-0 border-b border-border focus:border-foreground focus:outline-none text-sm"
                 />
               </div>
-              <div className="space-y-1">
-                <Label htmlFor="maxPrice" className="text-sm text-gray-600">
-                  최대 가격
-                </Label>
-                <Input
-                  id="maxPrice"
+              <div className="space-y-2">
+                <label className="text-xs text-muted-foreground">최대 가격</label>
+                <input
                   type="number"
                   value={maxPrice}
                   onChange={(e) => setMaxPrice(e.target.value)}
-                  placeholder="1000000"
+                  placeholder="1,000,000"
                   min="0"
+                  className="w-full h-10 px-0 bg-transparent border-0 border-b border-border focus:border-foreground focus:outline-none text-sm"
                 />
               </div>
             </div>
           </div>
         </div>
 
-        <SheetFooter className="mt-6 gap-2">
+        <SheetFooter className="mt-8 gap-3">
           <Button variant="outline" onClick={handleReset} className="flex-1">
             초기화
           </Button>

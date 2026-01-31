@@ -87,12 +87,12 @@ export function WishItemCard({
                                 </Badge>
                             )}
                             {item.status === 'IN_FUNDING' && (
-                                <Badge variant="secondary" className="text-indigo-600 bg-indigo-50">
+                                <Badge variant="secondary">
                                     펀딩 진행중
                                 </Badge>
                             )}
                             {item.status === 'FUNDED' && (
-                                <Badge className="bg-green-500">
+                                <Badge variant="default">
                                     펀딩완료
                                 </Badge>
                             )}
@@ -172,7 +172,7 @@ export function WishItemCard({
                                 <span className="text-xs text-muted-foreground">
                                     완료: {item.fundedAt ? new Date(item.fundedAt).toLocaleDateString() : '-'}
                                 </span>
-                                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                                <Badge variant="outline">
                                     완료
                                 </Badge>
                             </div>

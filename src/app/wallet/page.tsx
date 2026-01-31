@@ -23,7 +23,7 @@ export default function WalletPage() {
             <AppShell
                 headerTitle="내 지갑"
                 headerVariant="main"
-                showBottomNav={true}
+                showBottomNav={false}
             >
                 <div className="flex items-center justify-center h-96">
                     <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -37,7 +37,7 @@ export default function WalletPage() {
             <AppShell
                 headerTitle="내 지갑"
                 headerVariant="main"
-                showBottomNav={true}
+                showBottomNav={false}
             >
                 <div className="p-4">
                     <div className="text-center text-muted-foreground">
@@ -52,7 +52,7 @@ export default function WalletPage() {
         <AppShell
             headerTitle="내 지갑"
             headerVariant="main"
-            showBottomNav={true}
+            showBottomNav={false}
         >
             <div className="p-4 space-y-8 pb-24">
                 <section>

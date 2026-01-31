@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ChevronRight, Gift } from 'lucide-react';
+import { ArrowRight, Gift } from 'lucide-react';
 import { FundingCard } from '@/components/common/FundingCard';
 import { Button } from '@/components/ui/button';
 import type { Funding } from '@/types/funding';
@@ -16,39 +16,45 @@ export function MyFundingsSection({ fundings }: MyFundingsSectionProps) {
 
     if (fundings.length === 0) {
         return (
-            <section className="space-y-4 py-6">
-                <div className="flex items-center justify-between px-4">
-                    <h2 className="text-lg font-bold">🎁 참여 중인 펀딩</h2>
+            <section className="py-8">
+                <div className="px-4 md:px-8 mb-6">
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">My Fundings</p>
+                    <h2 className="text-xl font-semibold tracking-tight mt-1">참여 중인 펀딩</h2>
                 </div>
-                <div className="px-4">
-                    <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-12 text-center bg-secondary/20">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 mb-3">
-                            <Gift className="h-6 w-6 text-primary" />
-                        </div>
-                        <p className="text-sm font-medium mb-1">아직 참여 중인 펀딩이 없어요</p>
-                        <p className="text-xs text-muted-foreground mb-4">
-                            친구의 위시리스트를 구경해보세요!
-                        </p>
-                        <Button variant="outline" size="sm" asChild>
-                            <Link href="/wishlist">위시리스트 보기</Link>
-                        </Button>
-                    </div>
+
+                <div className="mx-4 md:mx-8 border border-dashed border-border py-16 flex flex-col items-center">
+                    <Gift className="h-8 w-8 text-muted-foreground mb-4" strokeWidth={1} />
+                    <p className="text-sm font-medium">아직 참여 중인 펀딩이 없어요</p>
+                    <p className="text-xs text-muted-foreground mt-1 mb-6">
+                        친구의 위시리스트를 구경해보세요
+                    </p>
+                    <Button variant="outline" asChild>
+                        <Link href="/wishlist">위시리스트 보기</Link>
+                    </Button>
                 </div>
             </section>
         );
     }
 
     return (
-        <section className="space-y-4 py-6">
-            <div className="flex items-center justify-between px-4">
-                <h2 className="text-lg font-bold">🎁 참여 중인 펀딩</h2>
-                <Link href="/fundings/participated" className="flex items-center text-xs text-muted-foreground hover:text-primary">
-                    더보기 <ChevronRight className="h-3 w-3" />
+        <section className="py-8">
+            {/* Section Header */}
+            <div className="flex items-end justify-between px-4 md:px-8 mb-6">
+                <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">My Fundings</p>
+                    <h2 className="text-xl font-semibold tracking-tight mt-1">참여 중인 펀딩</h2>
+                </div>
+                <Link
+                    href="/fundings/participated"
+                    className="flex items-center gap-1 text-sm hover:opacity-60 transition-opacity"
+                >
+                    더보기
+                    <ArrowRight className="h-4 w-4" strokeWidth={1.5} />
                 </Link>
             </div>
 
-            {/* Horizontal Scroll Area */}
-            <div className="flex gap-4 overflow-x-auto px-4 pb-4 scrollbar-hide snap-x snap-mandatory">
+            {/* Horizontal Scroll */}
+            <div className="flex gap-4 overflow-x-auto px-4 md:px-8 pb-4 scrollbar-hide snap-x snap-mandatory">
                 {fundings.map((funding) => (
                     <FundingCard
                         key={funding.id}

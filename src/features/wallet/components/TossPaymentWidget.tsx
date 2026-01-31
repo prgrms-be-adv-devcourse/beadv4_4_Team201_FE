@@ -49,8 +49,8 @@ export function TossPaymentWidget({ amount, onSuccess, onFail }: TossPaymentWidg
                     </div>
                 </div>
 
-                <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-                    <p className="text-xs text-yellow-800 dark:text-yellow-200">
+                <div className="p-4 bg-muted border border-border">
+                    <p className="text-xs text-muted-foreground">
                         이것은 모의 결제 시스템입니다. 실제 결제는 진행되지 않습니다.
                     </p>
                 </div>

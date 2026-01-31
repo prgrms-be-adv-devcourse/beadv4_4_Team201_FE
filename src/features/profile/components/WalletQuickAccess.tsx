@@ -1,9 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import { ArrowRight, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Wallet, ArrowRight, Plus } from 'lucide-react';
 import { useWallet } from '@/features/wallet/hooks/useWallet';
 import { formatCurrency } from '@/lib/utils/format';
 
@@ -11,47 +10,50 @@ interface WalletQuickAccessProps {
     onChargeClick?: () => void;
 }
 
+/**
+ * Wallet Quick Access - 29cm Style
+ * Clean section with balance display
+ */
 export function WalletQuickAccess({ onChargeClick }: WalletQuickAccessProps) {
     const { data: wallet, isLoading } = useWallet();
 
     return (
-        <Card>
-            <CardHeader className="border-b">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <Wallet className="h-5 w-5 text-primary" />
-                        <CardTitle>내 지갑</CardTitle>
-                    </div>
-                    <Link href="/wallet">
-                        <Button variant="ghost" size="icon-sm">
-                            <ArrowRight />
-                        </Button>
-                    </Link>
-                </div>
-            </CardHeader>
-            <CardContent className="pt-6">
-                <div className="space-y-4">
-                    <div>
-                        <p className="text-sm text-muted-foreground mb-1">현재 잔액</p>
-                        {isLoading ? (
-                            <div className="h-8 w-32 bg-secondary rounded animate-pulse" />
-                        ) : (
-                            <p className="text-2xl font-bold">
-                                {formatCurrency(wallet?.balance ?? 0)}
-                            </p>
-                        )}
-                    </div>
+        <div className="py-6 border-b border-border">
+            <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
+                    Wallet
+                </h3>
+                <Link
+                    href="/wallet"
+                    className="flex items-center gap-1 text-sm hover:opacity-60 transition-opacity"
+                >
+                    상세보기
+                    <ArrowRight className="h-4 w-4" strokeWidth={1.5} />
+                </Link>
+            </div>
 
-                    <Button
-                        onClick={onChargeClick}
-                        className="w-full"
-                        disabled={isLoading}
-                    >
-                        <Plus />
-                        충전하기
-                    </Button>
+            <div className="flex items-end justify-between">
+                <div>
+                    <p className="text-xs text-muted-foreground mb-1">현재 잔액</p>
+                    {isLoading ? (
+                        <div className="h-8 w-32 bg-secondary animate-pulse" />
+                    ) : (
+                        <p className="text-2xl font-semibold tracking-tight">
+                            {formatCurrency(wallet?.balance ?? 0)}
+                        </p>
+                    )}
                 </div>
-            </CardContent>
-        </Card>
+
+                <Button
+                    onClick={onChargeClick}
+                    variant="outline"
+                    size="sm"
+                    disabled={isLoading}
+                >
+                    <Plus className="h-4 w-4 mr-1" strokeWidth={1.5} />
+                    충전
+                </Button>
+            </div>
+        </div>
     );
 }

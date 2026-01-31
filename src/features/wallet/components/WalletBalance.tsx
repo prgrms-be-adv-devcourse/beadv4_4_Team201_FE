@@ -1,5 +1,4 @@
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus } from 'lucide-react';
 
 interface WalletBalanceProps {
@@ -7,23 +6,26 @@ interface WalletBalanceProps {
     onCharge: () => void;
 }
 
+/**
+ * Wallet Balance - 29cm Style
+ * Clean typography-focused balance display
+ */
 export function WalletBalance({ balance, onCharge }: WalletBalanceProps) {
     return (
-        <Card className="border-border bg-card">
-            <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">보유 포인트</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <div className="flex items-end justify-between">
-                    <div className="text-3xl font-bold tracking-tight">
-                        {balance.toLocaleString()} P
-                    </div>
-                    <Button onClick={onCharge} size="sm" className="gap-1 rounded-full text-xs font-semibold">
-                        <Plus className="h-3.5 w-3.5" />
-                        충전하기
-                    </Button>
+        <div className="border-b border-border pb-8">
+            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
+                Balance
+            </p>
+            <div className="flex items-end justify-between">
+                <div className="text-3xl font-semibold tracking-tight">
+                    {balance.toLocaleString()}
+                    <span className="text-lg font-medium ml-1">P</span>
                 </div>
-            </CardContent>
-        </Card>
+                <Button onClick={onCharge} variant="outline" size="sm">
+                    <Plus className="h-4 w-4 mr-1" strokeWidth={1.5} />
+                    충전
+                </Button>
+            </div>
+        </div>
     );
 }

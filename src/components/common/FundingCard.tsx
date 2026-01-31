@@ -2,8 +2,6 @@
 
 import Image from 'next/image';
 import { differenceInDays, parseISO } from 'date-fns';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { FundingProgress } from './FundingProgress';
 import { cn } from '@/lib/utils';
@@ -22,7 +20,7 @@ export interface FundingCardProps {
         targetAmount: number;
         currentAmount: number;
         status: FundingStatus;
-        expiresAt: string; // ISO string
+        expiresAt: string;
         participantCount: number;
         recipient: {
             nickname: string | null;
@@ -44,77 +42,85 @@ export function FundingCard({
     const daysLeft = differenceInDays(parseISO(funding.expiresAt), new Date());
     const recipientNickname = funding.recipient.nickname || '알 수 없음';
 
-    const getDdayBadge = () => {
+    const getStatusLabel = () => {
         if (funding.status === 'ACHIEVED' || funding.status === 'ACCEPTED') {
-            return <Badge className="bg-green-500 hover:bg-green-600">달성!</Badge>;
+            return <span className="text-xs font-medium text-foreground">달성</span>;
         }
         if (daysLeft < 0) {
-            return <Badge variant="secondary">종료</Badge>;
+            return <span className="text-xs text-muted-foreground">종료</span>;
         }
         if (daysLeft === 0) {
-            return <Badge variant="destructive">D-Day</Badge>;
+            return <span className="text-xs font-medium text-foreground">D-Day</span>;
         }
-        return <Badge variant="default" className="bg-indigo-500 hover:bg-indigo-600">D-{daysLeft}</Badge>;
+        return <span className="text-xs text-muted-foreground">D-{daysLeft}</span>;
     };
 
     if (isCarousel) {
         return (
-            <Card
-                className={cn('w-[280px] shrink-0 overflow-hidden cursor-pointer transition-shadow hover:shadow-md', className)}
+            <div
+                className={cn(
+                    'w-[260px] shrink-0 cursor-pointer group',
+                    className
+                )}
                 onClick={onClick}
             >
-                {/* Image Section */}
-                <div className="relative aspect-video w-full bg-secondary">
+                {/* Image */}
+                <div className="relative aspect-[4/5] w-full bg-secondary overflow-hidden">
                     <Image
                         src={funding.product.imageUrl}
                         alt={funding.product.name}
                         fill
-                        className="object-cover"
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
                     />
-                    <div className="absolute left-2 top-2">
-                        {getDdayBadge()}
+                    <div className="absolute top-3 left-3">
+                        {getStatusLabel()}
                     </div>
                 </div>
 
-                {/* Content Section */}
-                <div className="flex flex-col gap-3 p-4">
-                    <h3 className="line-clamp-1 text-base font-semibold">{funding.product.name}</h3>
+                {/* Content */}
+                <div className="py-4">
+                    <h3 className="text-sm font-medium line-clamp-1 group-hover:opacity-60 transition-opacity">
+                        {funding.product.name}
+                    </h3>
 
-                    <div className="space-y-1.5">
-                        <div className="flex items-center justify-between text-xs font-medium">
-                            <span className="text-muted-foreground">
-                                {funding.currentAmount.toLocaleString()}원 / {funding.product.price.toLocaleString()}원
-                            </span>
-                            <span className="text-primary">{percentage}%</span>
-                        </div>
+                    <div className="mt-3 space-y-2">
                         <FundingProgress
                             current={funding.currentAmount}
                             target={funding.targetAmount}
                             size="sm"
                         />
+                        <div className="flex items-center justify-between text-xs">
+                            <span className="text-muted-foreground">
+                                {funding.currentAmount.toLocaleString()}원
+                            </span>
+                            <span className="font-medium">{percentage}%</span>
+                        </div>
                     </div>
 
-                    <div className="flex items-center gap-2 pt-1">
-                        <Avatar className="h-6 w-6">
+                    <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
+                        <Avatar className="h-5 w-5">
                             <AvatarImage src={funding.recipient.avatarUrl || undefined} />
-                            <AvatarFallback>{recipientNickname[0]}</AvatarFallback>
+                            <AvatarFallback className="text-[10px]">{recipientNickname[0]}</AvatarFallback>
                         </Avatar>
                         <span className="text-xs text-muted-foreground">
-                            <span className="font-medium text-foreground">@{recipientNickname}</span>에게 · {funding.participantCount}명 참여
+                            @{recipientNickname} · {funding.participantCount}명
                         </span>
                     </div>
                 </div>
-            </Card>
+            </div>
         );
     }
 
     // List Variant
     return (
-        <Card
-            className={cn('flex overflow-hidden p-3 cursor-pointer hover:bg-accent/5 transition-colors', className)}
+        <div
+            className={cn(
+                'flex py-4 cursor-pointer hover:opacity-70 transition-opacity',
+                className
+            )}
             onClick={onClick}
         >
-            <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-md bg-secondary">
+            <div className="relative h-20 w-20 shrink-0 bg-secondary overflow-hidden">
                 <Image
                     src={funding.product.imageUrl}
                     alt={funding.product.name}
@@ -123,29 +129,27 @@ export function FundingCard({
                 />
             </div>
 
-            <div className="flex flex-1 flex-col justify-between pl-3">
+            <div className="flex flex-1 flex-col justify-between pl-4">
                 <div>
-                    <h3 className="line-clamp-1 text-sm font-semibold">{funding.product.name}</h3>
+                    <h3 className="text-sm font-medium line-clamp-1">{funding.product.name}</h3>
                     <p className="mt-0.5 text-xs text-muted-foreground">
                         {funding.targetAmount.toLocaleString()}원 목표
                     </p>
                 </div>
 
-                <div className="space-y-1.5">
-                    <div className="flex items-center justify-between">
-                        <FundingProgress
-                            current={funding.currentAmount}
-                            target={funding.targetAmount}
-                            size="sm"
-                            className="w-full max-w-[120px]"
-                        />
-                        <div className="ml-2 flex items-center gap-2 text-xs">
-                            <span className="font-bold text-primary">{percentage}%</span>
-                            {getDdayBadge()}
-                        </div>
+                <div className="flex items-center justify-between">
+                    <FundingProgress
+                        current={funding.currentAmount}
+                        target={funding.targetAmount}
+                        size="sm"
+                        className="w-full max-w-[100px]"
+                    />
+                    <div className="ml-3 flex items-center gap-2 text-xs">
+                        <span className="font-medium">{percentage}%</span>
+                        {getStatusLabel()}
                     </div>
                 </div>
             </div>
-        </Card>
+        </div>
     );
 }

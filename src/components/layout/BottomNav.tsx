@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Search, ShoppingCart, Wallet } from 'lucide-react';
+import { Home, Search, ShoppingBag, Wallet } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { useCart } from '@/features/cart/hooks/useCart';
@@ -30,7 +30,7 @@ export function BottomNav() {
         {
             label: '장바구니',
             href: '/cart',
-            icon: ShoppingCart,
+            icon: ShoppingBag,
             isActive: pathname.startsWith('/cart'),
             badge: cartItemCount,
         },
@@ -43,8 +43,8 @@ export function BottomNav() {
     ];
 
     return (
-        <nav className="fixed bottom-0 left-0 right-0 z-50 h-16 border-t bg-background pb-safe">
-            <div className="grid h-full grid-cols-4">
+        <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border/50 bg-background pb-safe">
+            <div className="grid h-14 grid-cols-4">
                 {navItems.map((item) => {
                     const Icon = item.icon;
                     return (
@@ -52,26 +52,24 @@ export function BottomNav() {
                             key={item.href}
                             href={item.href}
                             className={cn(
-                                'flex flex-col items-center justify-center gap-1 text-xs font-medium transition-colors',
+                                'flex flex-col items-center justify-center gap-0.5 text-xs font-medium transition-opacity',
                                 item.isActive
-                                    ? 'text-primary'
-                                    : 'text-muted-foreground hover:text-primary/70'
+                                    ? 'text-foreground'
+                                    : 'text-muted-foreground hover:text-foreground/80'
                             )}
                         >
                             <div className="relative">
                                 <Icon
-                                    className={cn(
-                                        'h-6 w-6',
-                                        item.isActive && 'fill-current'
-                                    )}
+                                    className="h-5 w-5"
+                                    strokeWidth={item.isActive ? 2 : 1.5}
                                 />
                                 {item.badge ? (
-                                    <span className="absolute -right-2 -top-2 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-destructive px-1 text-[10px] text-destructive-foreground">
+                                    <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-foreground px-1 text-[10px] text-background font-medium">
                                         {item.badge > 99 ? '99+' : item.badge}
                                     </span>
                                 ) : null}
                             </div>
-                            <span>{item.label}</span>
+                            <span className="text-[10px] tracking-tight">{item.label}</span>
                         </Link>
                     );
                 })}

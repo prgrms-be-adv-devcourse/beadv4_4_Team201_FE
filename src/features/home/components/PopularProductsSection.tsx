@@ -2,8 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { ArrowRight } from 'lucide-react';
 import type { Product } from '@/types/product';
 
 interface PopularProductsSectionProps {
@@ -14,41 +13,50 @@ export function PopularProductsSection({ products }: PopularProductsSectionProps
     const displayProducts = products.slice(0, 8);
 
     return (
-        <section className="space-y-4 py-6 pb-12">
-            <div className="flex items-center justify-between px-4">
-                <h2 className="text-lg font-bold">🔥 인기 상품</h2>
-                <Link href="/products" className="text-xs text-muted-foreground hover:text-primary">
+        <section className="py-8">
+            {/* Section Header */}
+            <div className="flex items-end justify-between px-4 md:px-8 mb-6">
+                <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Popular</p>
+                    <h2 className="text-xl font-semibold tracking-tight mt-1">인기 상품</h2>
+                </div>
+                <Link
+                    href="/products"
+                    className="flex items-center gap-1 text-sm hover:opacity-60 transition-opacity"
+                >
                     전체보기
+                    <ArrowRight className="h-4 w-4" strokeWidth={1.5} />
                 </Link>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 px-4">
+            {/* Product Grid - Editorial Style */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-border">
                 {displayProducts.map((product) => (
-                    <Link key={product.id} href={`/products/${product.id}`}>
-                        <Card className="overflow-hidden hover:shadow-md transition-shadow">
-                            <div className="relative aspect-square w-full bg-secondary">
-                                <Image
-                                    src={product.imageUrl}
-                                    alt={product.name}
-                                    fill
-                                    className="object-cover"
-                                    sizes="(max-width: 768px) 50vw, 33vw"
-                                />
-                                {product.status === 'ON_SALE' && (
-                                    <Badge className="absolute top-2 right-2 bg-green-500 hover:bg-green-600">
-                                        판매중
-                                    </Badge>
-                                )}
-                            </div>
-                            <div className="p-3">
-                                <h3 className="line-clamp-2 text-sm font-medium min-h-[2.5rem]">
-                                    {product.name}
-                                </h3>
-                                <p className="font-bold text-base mt-1">
-                                    ₩{product.price.toLocaleString()}
-                                </p>
-                            </div>
-                        </Card>
+                    <Link
+                        key={product.id}
+                        href={`/products/${product.id}`}
+                        className="group bg-background"
+                    >
+                        {/* Image */}
+                        <div className="relative aspect-[4/5] w-full bg-secondary overflow-hidden">
+                            <Image
+                                src={product.imageUrl}
+                                alt={product.name}
+                                fill
+                                className="object-cover transition-transform duration-500 group-hover:scale-105"
+                                sizes="(max-width: 768px) 50vw, 25vw"
+                            />
+                        </div>
+
+                        {/* Info */}
+                        <div className="p-4">
+                            <h3 className="text-sm font-medium line-clamp-2 min-h-[2.5rem] group-hover:opacity-60 transition-opacity">
+                                {product.name}
+                            </h3>
+                            <p className="text-sm font-semibold mt-2">
+                                ₩{product.price.toLocaleString()}
+                            </p>
+                        </div>
                     </Link>
                 ))}
             </div>

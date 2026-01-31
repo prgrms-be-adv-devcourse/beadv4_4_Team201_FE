@@ -18,18 +18,12 @@ interface AppShellProps {
 export function AppShell({
     children,
     showHeader = true,
-    showBottomNav = true,
+    showBottomNav = false,
     headerVariant = 'main',
     headerTitle,
     hasBack,
     className,
 }: AppShellProps) {
-    const pathname = usePathname();
-
-    // Hide BottomNav on detail pages automatically if needed, or control via props
-    // For now, we rely on props, but we could add logic like:
-    // const isDetailPage = pathname.split('/').length > 2;
-
     return (
         <div className="flex min-h-screen flex-col bg-background">
             {showHeader && (
@@ -42,13 +36,9 @@ export function AppShell({
 
             <main
                 className={cn(
-                    'flex-1 overflow-x-hidden',
-                    // Add padding for fixed header/bottom nav
-                    // Header height is h-14 (3.5rem)
-                    // BottomNav height is h-16 (4rem)
-                    // We don't apply padding-top here if Header is sticky (it is sticky in Header.tsx)
-                    // But we need safe area handling
-                    showBottomNav && 'pb-16',
+                    'flex-1',
+                    // BottomNav height is h-14 (3.5rem) + safe area
+                    showBottomNav && 'pb-14',
                     className
                 )}
             >

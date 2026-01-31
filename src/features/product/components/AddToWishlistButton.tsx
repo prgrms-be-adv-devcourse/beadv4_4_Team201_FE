@@ -15,8 +15,8 @@ export interface AddToWishlistButtonProps {
 }
 
 /**
- * AddToWishlistButton - Button to add product to user's wishlist
- * Shows success/error feedback via toast
+ * AddToWishlistButton - 29cm Style
+ * Monochrome heart button
  */
 export function AddToWishlistButton({
   productId,
@@ -37,7 +37,6 @@ export function AddToWishlistButton({
     } catch (error: any) {
       console.error('Failed to add to wishlist:', error);
 
-      // Handle specific error cases
       if (error.code === 'WISHLIST_001') {
         toast.error('이미 위시리스트에 있는 상품입니다');
       } else if (error.status === 401) {
@@ -52,24 +51,22 @@ export function AddToWishlistButton({
 
   if (variant === 'icon') {
     return (
-      <Button
-        variant="outline"
-        size="icon"
+      <button
         onClick={handleAdd}
         disabled={addToWishlist.isPending || isAdded}
         className={cn(
-          'transition-colors',
-          isAdded && 'bg-pink-50 border-pink-300',
+          'p-2 transition-opacity hover:opacity-60 disabled:opacity-40',
           className
         )}
       >
         <Heart
           className={cn(
-            'h-5 w-5 transition-all',
-            isAdded && 'fill-pink-500 text-pink-500'
+            'h-5 w-5',
+            isAdded ? 'fill-foreground text-foreground' : 'text-muted-foreground'
           )}
+          strokeWidth={1.5}
         />
-      </Button>
+      </button>
     );
   }
 
@@ -78,19 +75,16 @@ export function AddToWishlistButton({
       variant="outline"
       onClick={handleAdd}
       disabled={addToWishlist.isPending || isAdded}
-      className={cn(
-        'gap-2 transition-colors',
-        isAdded && 'bg-pink-50 border-pink-300 text-pink-700',
-        className
-      )}
+      className={cn('gap-2', className)}
     >
       <Heart
         className={cn(
-          'h-5 w-5 transition-all',
-          isAdded && 'fill-pink-500 text-pink-500'
+          'h-4 w-4',
+          isAdded && 'fill-foreground'
         )}
+        strokeWidth={1.5}
       />
-      {isAdded ? '위시리스트에 추가됨' : '위시리스트에 추가'}
+      {isAdded ? '추가됨' : '위시리스트'}
     </Button>
   );
 }

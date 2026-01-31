@@ -7,7 +7,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { Globe, Users, Lock, ChevronDown, Settings } from 'lucide-react';
+import { Globe, Users, Lock, ChevronDown } from 'lucide-react';
 import { WishlistVisibility } from '@/types/wishlist';
 import { LucideIcon } from 'lucide-react';
 
@@ -19,6 +19,10 @@ interface WishlistHeaderProps {
     ownerName?: string;
 }
 
+/**
+ * Wishlist Header - 29cm Style
+ * Clean header with visibility controls
+ */
 export function WishlistHeader({
     isOwner,
     itemCount,
@@ -29,57 +33,48 @@ export function WishlistHeader({
 
     const visibilityConfig: Record<WishlistVisibility, { icon: LucideIcon; label: string }> = {
         PUBLIC: { icon: Globe, label: '전체 공개' },
-        FRIENDS_ONLY: { icon: Users, label: '친구만 공개' },
+        FRIENDS_ONLY: { icon: Users, label: '친구만' },
         PRIVATE: { icon: Lock, label: '비공개' },
     };
 
     const { icon: VisIcon, label: visLabel } = visibilityConfig[visibility];
 
     return (
-        <div className="flex flex-col gap-4 bg-background px-4 py-4 shadow-sm">
+        <div className="border-b border-border px-4 py-4 md:px-8">
             {isOwner ? (
-                // Owner View: Controls
                 <div className="flex items-center justify-between">
+                    <div>
+                        <p className="text-xs text-muted-foreground uppercase tracking-wider">
+                            Wishlist
+                        </p>
+                        <p className="text-sm mt-1">
+                            <span className="font-medium">{itemCount}</span>개의 아이템
+                        </p>
+                    </div>
+
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm" className="h-8 gap-2 text-xs font-medium">
-                                <VisIcon className="h-3.5 w-3.5" />
+                            <button className="flex items-center gap-1 text-sm hover:opacity-60 transition-opacity">
+                                <VisIcon className="h-4 w-4" strokeWidth={1.5} />
                                 {visLabel}
-                                <ChevronDown className="h-3 w-3 opacity-50" />
-                            </Button>
+                                <ChevronDown className="h-3 w-3" strokeWidth={1.5} />
+                            </button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="start">
+                        <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={onVisibilityChange}>
-                                <Globe className="mr-2 h-4 w-4" /> 공개 설정 변경
+                                공개 설정 변경
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
-
-                    <span className="text-sm text-muted-foreground">
-                        총 <span className="font-bold text-foreground">{itemCount}</span>개의 위시 아이템
-                    </span>
                 </div>
             ) : (
-                // Visitor View: Profile Summary
-                <div className="flex flex-col gap-2">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <div className="h-10 w-10 bg-secondary rounded-full flex items-center justify-center text-lg">
-                                {/* Placeholder Avatar */}
-                                👤
-                            </div>
-                            <div>
-                                <h2 className="text-lg font-bold">{ownerName}님의 위시리스트</h2>
-                                <p className="text-xs text-muted-foreground">친구</p>
-                            </div>
-                        </div>
-                        <Button variant="ghost" size="icon">
-                            <Settings className="h-5 w-5" />
-                        </Button>
-                    </div>
-                    <div className="text-sm text-muted-foreground mt-2">
-                        총 <span className="font-bold text-foreground">{itemCount}</span>개의 위시 아이템
-                    </div>
+                <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">
+                        {ownerName}님의 Wishlist
+                    </p>
+                    <p className="text-sm mt-1">
+                        <span className="font-medium">{itemCount}</span>개의 아이템
+                    </p>
                 </div>
             )}
         </div>

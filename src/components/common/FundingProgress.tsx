@@ -11,6 +11,10 @@ export interface FundingProgressProps {
     className?: string;
 }
 
+/**
+ * Funding Progress - 29cm Style
+ * Monochrome progress bar with opacity variations
+ */
 export function FundingProgress({
     current,
     target,
@@ -18,21 +22,21 @@ export function FundingProgress({
     showLabel = false,
     className,
 }: FundingProgressProps) {
-    const percentage = Math.min(100, Math.max(0, (current / target) * 100)); // Cap at 100 for visual bar, but logic might allow >100
+    const percentage = Math.min(100, Math.max(0, (current / target) * 100));
     const realPercentage = (current / target) * 100;
 
-    // Color logic based on wireframe
+    // 29cm Style - Monochrome with opacity variations
     const getColorClass = (percent: number) => {
-        if (percent >= 100) return 'bg-green-500';
-        if (percent >= 70) return 'bg-blue-500';
-        if (percent >= 30) return 'bg-yellow-500';
-        return 'bg-gray-300';
+        if (percent >= 100) return 'bg-foreground';
+        if (percent >= 70) return 'bg-foreground/80';
+        if (percent >= 30) return 'bg-foreground/60';
+        return 'bg-foreground/40';
     };
 
     const heightClass = {
-        sm: 'h-1.5',
-        md: 'h-2',
-        lg: 'h-3',
+        sm: 'h-1',
+        md: 'h-1.5',
+        lg: 'h-2',
     }[size];
 
     return (
@@ -40,7 +44,7 @@ export function FundingProgress({
             <div className="relative">
                 <Progress
                     value={percentage}
-                    className={cn(heightClass, 'bg-secondary')}
+                    className={cn(heightClass, 'bg-border')}
                     indicatorClassName={getColorClass(realPercentage)}
                 />
             </div>

@@ -18,7 +18,7 @@ export default function OrganizedFundingsPage() {
             headerTitle="내가 주최한 펀딩"
             headerVariant="detail"
             hasBack={true}
-            showBottomNav={true}
+            showBottomNav={false}
         >
             <div className="p-4 space-y-4">
                 <Tabs defaultValue="all" onValueChange={(value) => {

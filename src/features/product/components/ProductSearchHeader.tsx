@@ -3,16 +3,14 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Search, X } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 
 export interface ProductSearchHeaderProps {
   onSearchChange?: (query: string) => void;
 }
 
 /**
- * ProductSearchHeader - Search input with debouncing
- * Updates URL params on search
+ * ProductSearchHeader - 29cm Style
+ * Clean search bar with minimal styling
  */
 export function ProductSearchHeader({ onSearchChange }: ProductSearchHeaderProps) {
   const router = useRouter();
@@ -21,7 +19,6 @@ export function ProductSearchHeader({ onSearchChange }: ProductSearchHeaderProps
 
   const [query, setQuery] = useState(initialQuery);
 
-  // Debounce search
   useEffect(() => {
     const timer = setTimeout(() => {
       if (query !== initialQuery) {
@@ -31,7 +28,7 @@ export function ProductSearchHeader({ onSearchChange }: ProductSearchHeaderProps
         } else {
           params.delete('q');
         }
-        params.delete('page'); // Reset page on new search
+        params.delete('page');
 
         router.push(`/products?${params.toString()}`);
         onSearchChange?.(query);
@@ -45,49 +42,28 @@ export function ProductSearchHeader({ onSearchChange }: ProductSearchHeaderProps
     setQuery('');
   };
 
-  const handleBack = () => {
-    router.back();
-  };
-
   return (
-    <div className="flex items-center gap-2 px-4 py-3 bg-white border-b sticky top-0 z-10">
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={handleBack}
-        className="shrink-0"
-      >
-        ←
-      </Button>
-
-      <div className="relative flex-1">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-        <Input
+    <div className="px-4 md:px-8 py-4 border-b border-border">
+      <div className="relative">
+        <Search
+          className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground"
+          strokeWidth={1.5}
+        />
+        <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="상품명 검색..."
-          className="pl-9 pr-9"
+          placeholder="상품 검색..."
+          className="w-full pl-8 pr-8 py-2 bg-transparent border-b border-border focus:border-foreground focus:outline-none text-sm"
         />
         {query && (
-          <Button
-            variant="ghost"
-            size="sm"
+          <button
             onClick={handleClear}
-            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
+            className="absolute right-0 top-1/2 -translate-y-1/2 p-1 hover:opacity-60 transition-opacity"
           >
-            <X className="h-4 w-4" />
-          </Button>
+            <X className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+          </button>
         )}
       </div>
-
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={handleBack}
-        className="shrink-0"
-      >
-        취소
-      </Button>
     </div>
   );
 }

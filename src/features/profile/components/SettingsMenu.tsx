@@ -1,8 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     Bell,
     Palette,
@@ -23,9 +21,11 @@ interface SettingItem {
     isDanger?: boolean;
 }
 
+/**
+ * Settings Menu - 29cm Style
+ * Clean list with dividers
+ */
 export function SettingsMenu() {
-    const router = useRouter();
-
     const handleLogout = () => {
         window.location.href = '/auth/logout';
     };
@@ -65,86 +65,77 @@ export function SettingsMenu() {
     ];
 
     return (
-        <Card>
-            <CardHeader className="border-b">
-                <CardTitle>설정</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-6">
-                <div className="space-y-2">
-                    {settings.map((setting, index) => {
-                        const Icon = setting.icon;
-                        const isClickable = !setting.isPlaceholder && (setting.href || setting.onClick);
-                        const baseClassName = cn(
-                            'flex items-center justify-between p-3 rounded-lg w-full text-left transition-colors',
-                            isClickable
-                                ? 'hover:bg-secondary/50 group'
-                                : 'cursor-default',
-                            setting.isPlaceholder && 'opacity-50',
-                            setting.isDanger && isClickable && 'hover:bg-destructive/10'
-                        );
+        <div className="py-6">
+            <h3 className="text-sm font-medium uppercase tracking-wider text-muted-foreground mb-4 px-4 md:px-0">
+                Settings
+            </h3>
 
-                        const content = (
-                            <>
-                                <div className="flex items-center gap-3">
-                                    <div
-                                        className={cn(
-                                            'p-2 rounded-full bg-secondary',
-                                            setting.isDanger && 'text-destructive'
-                                        )}
-                                    >
-                                        <Icon className="h-5 w-5" />
-                                    </div>
-                                    <span
-                                        className={cn(
-                                            'font-medium',
-                                            setting.isDanger && 'text-destructive'
-                                        )}
-                                    >
-                                        {setting.label}
-                                    </span>
-                                    {setting.isPlaceholder && (
-                                        <span className="text-xs text-muted-foreground">
-                                            (준비 중)
-                                        </span>
+            <div className="divide-y divide-border">
+                {settings.map((setting, index) => {
+                    const Icon = setting.icon;
+                    const isClickable = !setting.isPlaceholder && (setting.href || setting.onClick);
+
+                    const baseClassName = cn(
+                        'flex items-center justify-between py-4 w-full text-left transition-opacity',
+                        isClickable ? 'hover:opacity-60' : 'cursor-default',
+                        setting.isPlaceholder && 'opacity-40',
+                    );
+
+                    const content = (
+                        <>
+                            <div className="flex items-center gap-3">
+                                <Icon
+                                    className={cn(
+                                        'h-5 w-5',
+                                        setting.isDanger ? 'text-destructive' : 'text-muted-foreground'
                                     )}
-                                </div>
-                                {isClickable && (
-                                    <ChevronRight
-                                        className={cn(
-                                            'h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors',
-                                            setting.isDanger && 'group-hover:text-destructive'
-                                        )}
-                                    />
-                                )}
-                            </>
-                        );
-
-                        if (setting.href && !setting.isPlaceholder) {
-                            return (
-                                <Link
-                                    key={index}
-                                    href={setting.href}
-                                    className={baseClassName}
+                                    strokeWidth={1.5}
+                                />
+                                <span
+                                    className={cn(
+                                        'text-sm font-medium',
+                                        setting.isDanger && 'text-destructive'
+                                    )}
                                 >
-                                    {content}
-                                </Link>
-                            );
-                        }
+                                    {setting.label}
+                                </span>
+                                {setting.isPlaceholder && (
+                                    <span className="text-xs text-muted-foreground">
+                                        준비 중
+                                    </span>
+                                )}
+                            </div>
+                            {isClickable && !setting.isDanger && (
+                                <ChevronRight className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+                            )}
+                        </>
+                    );
 
+                    if (setting.href && !setting.isPlaceholder) {
                         return (
-                            <button
+                            <Link
                                 key={index}
-                                type="button"
-                                onClick={setting.onClick}
-                                disabled={setting.isPlaceholder}
+                                href={setting.href}
                                 className={baseClassName}
                             >
                                 {content}
-                            </button>
+                            </Link>
                         );
-                    })}
-                </div>
-            </CardContent>
-        </Card>
+                    }
+
+                    return (
+                        <button
+                            key={index}
+                            type="button"
+                            onClick={setting.onClick}
+                            disabled={setting.isPlaceholder}
+                            className={baseClassName}
+                        >
+                            {content}
+                        </button>
+                    );
+                })}
+            </div>
+        </div>
     );
 }

@@ -18,7 +18,7 @@ export default function ReceivedFundingsPage() {
             headerTitle="받은 펀딩"
             headerVariant="detail"
             hasBack={true}
-            showBottomNav={true}
+            showBottomNav={false}
         >
             <div className="p-4 space-y-4">
                 <Tabs defaultValue="all" onValueChange={(value) => {

@@ -20,7 +20,7 @@ export default function HomePage() {
       <AppShell
         headerVariant="main"
         showHeader={true}
-        showBottomNav={true}
+        showBottomNav={false}
       >
         <HomePageSkeleton />
       </AppShell>
@@ -32,7 +32,7 @@ export default function HomePage() {
       <AppShell
         headerVariant="main"
         showHeader={true}
-        showBottomNav={true}
+        showBottomNav={false}
       >
         <div className="flex items-center justify-center min-h-[60vh] px-4">
           <Alert variant="destructive" className="max-w-md">
@@ -65,7 +65,7 @@ export default function HomePage() {
     <AppShell
       headerVariant="main"
       showHeader={true}
-      showBottomNav={true}
+      showBottomNav={false}
     >
       <div className="flex flex-col min-h-full">
         {/* Welcome Greeting */}

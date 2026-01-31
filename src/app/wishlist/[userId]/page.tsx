@@ -48,7 +48,7 @@ export default function FriendWishlistPage({ params }: FriendWishlistPageProps) 
             <AppShell
                 headerTitle="위시리스트"
                 headerVariant="detail"
-                showBottomNav={true}
+                showBottomNav={false}
             >
                 <div className="p-4 space-y-4">
                     <Skeleton className="h-20 w-full" />
@@ -70,7 +70,7 @@ export default function FriendWishlistPage({ params }: FriendWishlistPageProps) 
                 <AppShell
                     headerTitle="위시리스트"
                     headerVariant="detail"
-                    showBottomNav={true}
+                    showBottomNav={false}
                 >
                     <AccessDeniedView />
                 </AppShell>
@@ -82,7 +82,7 @@ export default function FriendWishlistPage({ params }: FriendWishlistPageProps) 
             <AppShell
                 headerTitle="위시리스트"
                 headerVariant="detail"
-                showBottomNav={true}
+                showBottomNav={false}
             >
                 <div className="flex items-center justify-center min-h-[50vh] p-4">
                     <div className="text-center space-y-2">
@@ -103,7 +103,7 @@ export default function FriendWishlistPage({ params }: FriendWishlistPageProps) 
             <AppShell
                 headerTitle="위시리스트"
                 headerVariant="detail"
-                showBottomNav={true}
+                showBottomNav={false}
             >
                 <WishlistHeader
                     isOwner={false}
@@ -126,7 +126,7 @@ export default function FriendWishlistPage({ params }: FriendWishlistPageProps) 
         <AppShell
             headerTitle="위시리스트"
             headerVariant="detail"
-            showBottomNav={true}
+            showBottomNav={false}
         >
             <WishlistHeader
                 isOwner={false}
