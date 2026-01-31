@@ -1,4 +1,4 @@
-import { http, HttpResponse } from 'msw';
+import { http, HttpResponse, passthrough } from 'msw';
 import {
   currentUser,
   members,
@@ -61,30 +61,19 @@ export const handlers = [
       isNewUser,
     });
   }),
-  http.post('*/api/v2/auth/login', () => {
-    const isNewUser = !currentUser.nickname || currentUser.email.includes('new');
-    return HttpResponse.json({
-      isNewUser,
-      authSub: currentUser.authSub,
-      email: currentUser.email,
-      member: isNewUser ? null : currentUser,
-    });
-  }),
+  // BFF sync route still mocked or passthrough? 
+  // User says: /api/v2/auth/login and /api/v2/members/me should be passthrough.
 
-  http.post('*/api/v2/auth/logout', () => {
-    return new HttpResponse(null, { status: 204 });
-  }),
+  http.post('*/api/v2/auth/login', () => passthrough()),
 
-  http.get('*/api/v2/auth/me', () => {
-    return HttpResponse.json(currentUser);
-  }),
+  http.post('*/api/v2/auth/logout', () => passthrough()),
+
+  http.get('*/api/v2/auth/me', () => passthrough()),
 
   // ============================================
   // MEMBERS
   // ============================================
-  http.get('*/api/v2/members/me', () => {
-    return HttpResponse.json(currentUser);
-  }),
+  http.get('*/api/v2/members/me', () => passthrough()),
 
   http.get('*/api/v2/members/:memberId', ({ params }) => {
     const { memberId } = params;
