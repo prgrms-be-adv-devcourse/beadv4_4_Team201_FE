@@ -1,7 +1,7 @@
 // import { NextRequest } from 'next/server'; // Not needed if using standard Request?
 import { auth0 } from '@/lib/auth/auth0';
 
-export async function proxy(request: Request) {
+export async function middleware(request: Request) {
     return await auth0.middleware(request);
 }
 
