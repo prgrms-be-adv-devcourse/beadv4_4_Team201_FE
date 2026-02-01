@@ -15,8 +15,11 @@ interface TossPaymentMethod {
   requestPayment: (options: TossPaymentOptions) => Promise<void>;
 }
 
+// 지원하는 결제 수단
+export type PaymentMethod = 'CARD' | 'TOSSPAY' | 'TRANSFER' | 'VIRTUAL_ACCOUNT' | 'MOBILE_PHONE';
+
 interface TossPaymentOptions {
-  method: 'CARD' | 'TRANSFER' | 'VIRTUAL_ACCOUNT' | 'MOBILE_PHONE';
+  method: PaymentMethod;
   amount: {
     currency: 'KRW';
     value: number;
@@ -45,6 +48,7 @@ interface UseTossPaymentsResult {
 interface RequestPaymentOptions {
   orderId: string;
   amount: number;
+  method?: PaymentMethod;
   orderName?: string;
   customerEmail?: string;
   customerName?: string;
@@ -135,12 +139,19 @@ export function useTossPayments(customerKey: string): UseTossPaymentsResult {
         throw new Error('Toss Payments SDK가 준비되지 않았습니다.');
       }
 
-      const { orderId, amount, orderName = 'Giftify 캐시 충전', customerEmail, customerName } = options;
+      const {
+        orderId,
+        amount,
+        method = 'CARD',
+        orderName = 'Giftify 캐시 충전',
+        customerEmail,
+        customerName
+      } = options;
 
       const baseUrl = window.location.origin;
 
-      await paymentInstance.requestPayment({
-        method: 'CARD',
+      const paymentOptions: TossPaymentOptions = {
+        method,
         amount: {
           currency: 'KRW',
           value: amount,
@@ -151,13 +162,19 @@ export function useTossPayments(customerKey: string): UseTossPaymentsResult {
         failUrl: `${baseUrl}/wallet/charge/fail`,
         customerEmail,
         customerName,
-        card: {
+      };
+
+      // 카드 결제일 경우 추가 옵션
+      if (method === 'CARD') {
+        paymentOptions.card = {
           useEscrow: false,
           flowMode: 'DEFAULT',
           useCardPoint: false,
           useAppCardOnly: false,
-        },
-      });
+        };
+      }
+
+      await paymentInstance.requestPayment(paymentOptions);
     },
     [paymentInstance]
   );
