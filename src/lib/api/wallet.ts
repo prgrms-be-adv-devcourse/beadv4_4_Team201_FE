@@ -3,6 +3,8 @@ import type {
   Wallet,
   WalletChargeRequest,
   WalletChargeResponse,
+  WalletWithdrawRequest,
+  WalletWithdrawResponse,
   TransactionType,
   WalletHistoryResponse,
   WalletHistoryQueryParams
@@ -30,4 +32,8 @@ export async function getWalletHistory(params?: WalletHistoryParams): Promise<Wa
   const endpoint = queryString ? `/api/v2/wallet/history?${queryString}` : '/api/v2/wallet/history';
 
   return apiClient.get<WalletHistoryResponse>(endpoint);
+}
+
+export async function withdrawWallet(data: WalletWithdrawRequest): Promise<WalletWithdrawResponse> {
+  return apiClient.post<WalletWithdrawResponse>('/api/v2/wallet/withdraw', data);
 }

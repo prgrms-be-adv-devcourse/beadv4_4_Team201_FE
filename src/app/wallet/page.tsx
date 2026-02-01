@@ -1,23 +1,35 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { AppShell } from '@/components/layout/AppShell';
 import { Footer } from '@/components/layout/Footer';
 import { WalletBalance } from '@/features/wallet/components/WalletBalance';
 import { TransactionHistory } from '@/features/wallet/components/TransactionHistory';
 import { ChargeModal } from '@/features/wallet/components/ChargeModal';
+import { WithdrawModal } from '@/features/wallet/components/WithdrawModal';
 import { useWallet, useWalletHistory } from '@/features/wallet/hooks/useWallet';
 import { Loader2 } from 'lucide-react';
 import type { TransactionType } from '@/types/wallet';
 
 export default function WalletPage() {
     const [isChargeModalOpen, setIsChargeModalOpen] = useState(false);
+    const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
     const [filterType, setFilterType] = useState<TransactionType | undefined>(undefined);
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
-    const { data: wallet, isLoading: isLoadingWallet, error: walletError } = useWallet();
-    const { data: historyData, isLoading: isLoadingHistory, error: historyError } = useWalletHistory({
+    const { data: wallet, isLoading: isLoadingWallet, error: walletError, refetch: refetchWallet } = useWallet();
+    const { data: historyData, isLoading: isLoadingHistory, error: historyError, refetch: refetchHistory } = useWalletHistory({
         type: filterType
     });
+
+    const handleRefresh = useCallback(async () => {
+        setIsRefreshing(true);
+        try {
+            await Promise.all([refetchWallet(), refetchHistory()]);
+        } finally {
+            setIsRefreshing(false);
+        }
+    }, [refetchWallet, refetchHistory]);
 
     if (isLoadingWallet || isLoadingHistory) {
         return (
@@ -60,6 +72,9 @@ export default function WalletPage() {
                     <WalletBalance
                         balance={wallet?.balance ?? 0}
                         onCharge={() => setIsChargeModalOpen(true)}
+                        onWithdraw={() => setIsWithdrawModalOpen(true)}
+                        onRefresh={handleRefresh}
+                        isRefreshing={isRefreshing}
                     />
                 </section>
 
@@ -77,6 +92,12 @@ export default function WalletPage() {
             <ChargeModal
                 open={isChargeModalOpen}
                 onOpenChange={setIsChargeModalOpen}
+            />
+
+            <WithdrawModal
+                open={isWithdrawModalOpen}
+                onOpenChange={setIsWithdrawModalOpen}
+                currentBalance={wallet?.balance ?? 0}
             />
         </AppShell>
     );

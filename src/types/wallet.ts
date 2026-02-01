@@ -4,9 +4,9 @@ import { PaginatedResponse } from './api';
  * Transaction type enumeration
  * - CHARGE: Wallet charge (deposit)
  * - PAYMENT: Payment (withdrawal)
- * - REFUND: Refund (deposit)
+ * - WITHDRAW: Withdrawal to bank account
  */
-export type TransactionType = 'CHARGE' | 'PAYMENT' | 'REFUND';
+export type TransactionType = 'CHARGE' | 'PAYMENT' | 'WITHDRAW';
 
 /**
  * Wallet information
@@ -57,4 +57,32 @@ export interface WalletHistoryQueryParams {
     type?: TransactionType;
     page?: number;
     size?: number;
+}
+
+/**
+ * Request body for wallet withdrawal
+ */
+export interface WalletWithdrawRequest {
+    amount: number;
+    bankCode: string;
+    accountNumber: string;
+}
+
+/**
+ * Response for wallet withdrawal request
+ */
+export interface WalletWithdrawResponse {
+    walletId: number;
+    balance: number;
+    withdrawnAmount: number;
+    transactionId: string;
+    status: 'PENDING' | 'COMPLETED' | 'FAILED';
+}
+
+/**
+ * Bank option for withdrawal
+ */
+export interface BankOption {
+    code: string;
+    name: string;
 }
