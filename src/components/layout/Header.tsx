@@ -198,12 +198,9 @@ function DesktopTopNav() {
                         <User className="w-3 h-3" />
                         MY PAGE
                     </Link>
-                    <Link 
-                        href="/wallet" 
-                        className="flex items-center gap-1.5 bg-primary text-primary-foreground px-2.5 py-1 rounded-sm hover:bg-primary/90 transition-colors"
-                    >
+                    <Link href="/wallet" className="flex items-center gap-1 hover:opacity-60 transition-opacity">
                         <Wallet className="w-3 h-3" />
-                        <span className="font-semibold">{formatPrice(wallet?.balance || 0)}</span>
+                        {formatPrice(wallet?.balance || 0)}
                     </Link>
                     <Link href="/wishlist" className="flex items-center gap-1 hover:opacity-60 transition-opacity">
                         <Heart className="w-3 h-3" />
