@@ -153,9 +153,17 @@ export function ChargeModal({ open, onOpenChange }: ChargeModalProps) {
           </div>
 
           {/* 토스페이로 결제됩니다 */}
-          <div className="flex items-center justify-center gap-2 rounded-md border-2 border-primary bg-primary/5 p-3">
+          <div className="flex items-center justify-center gap-2 rounded-md border bg-secondary/30 p-3">
             <span className="text-xl">🔵</span>
             <span className="text-sm font-medium">토스페이로 결제됩니다</span>
+          </div>
+
+          <div className="rounded-md bg-amber-50 p-3 border border-amber-200">
+            <p className="text-xs text-amber-800 font-medium text-center">
+              ⚠️ 본 결제는 테스트 결제입니다.
+              <br />
+              실제 결제가 발생하지 않으니 안심하고 진행해주세요.
+            </p>
           </div>
 
           {isTossLoading && (

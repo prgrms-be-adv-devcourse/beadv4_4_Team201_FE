@@ -52,11 +52,11 @@ export default function WalletPage() {
                 headerVariant="main"
                 showBottomNav={false}
             >
-                <div className="p-4">
-                    <div className="text-center text-muted-foreground">
-                        지갑 정보를 불러오는데 실패했습니다.
-                    </div>
+            <div className="max-w-screen-2xl mx-auto px-8 py-10">
+                <div className="text-center text-muted-foreground">
+                    지갑 정보를 불러오는데 실패했습니다.
                 </div>
+            </div>
             </AppShell>
         );
     }
@@ -67,7 +67,7 @@ export default function WalletPage() {
             headerVariant="main"
             showBottomNav={false}
         >
-            <div className="p-4 space-y-8 pb-24">
+            <div className="max-w-screen-2xl mx-auto px-8 py-10 space-y-8 pb-24 w-full">
                 <section>
                     <WalletBalance
                         balance={wallet?.balance ?? 0}

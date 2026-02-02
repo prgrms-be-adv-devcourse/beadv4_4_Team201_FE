@@ -15,12 +15,12 @@ export function FriendsWishlistSection({ friendsWishlists }: FriendsWishlistSect
         return (
             <section className="py-8">
                 <div className="max-w-screen-2xl mx-auto w-full">
-                    <div className="px-4 md:px-8 mb-6">
+                    <div className="px-8 mb-6">
                         <p className="text-xs text-muted-foreground uppercase tracking-wider">Friends</p>
                         <h2 className="text-xl font-semibold tracking-tight mt-1">친구들의 위시리스트</h2>
                     </div>
 
-                    <div className="mx-4 md:mx-8 border border-dashed border-border py-16 flex flex-col items-center">
+                    <div className="mx-8 border border-dashed border-border py-16 flex flex-col items-center">
                         <Users className="h-8 w-8 text-muted-foreground mb-4" strokeWidth={1} />
                         <p className="text-sm font-medium">친구들의 위시리스트가 없어요</p>
                         <p className="text-xs text-muted-foreground mt-1 mb-6">
@@ -39,7 +39,7 @@ export function FriendsWishlistSection({ friendsWishlists }: FriendsWishlistSect
         <section className="py-8">
             <div className="max-w-screen-2xl mx-auto w-full">
                 {/* Section Header */}
-                <div className="flex items-end justify-between px-4 md:px-8 mb-6">
+                <div className="flex items-end justify-between px-8 mb-6">
                     <div>
                         <p className="text-xs text-muted-foreground uppercase tracking-wider">Friends</p>
                         <h2 className="text-xl font-semibold tracking-tight mt-1">친구들의 위시리스트</h2>
@@ -54,7 +54,7 @@ export function FriendsWishlistSection({ friendsWishlists }: FriendsWishlistSect
                 </div>
 
                 {/* Wishlist Items */}
-                <div className="px-4 md:px-8 space-y-0 divide-y divide-border">
+                <div className="px-8 space-y-0 divide-y divide-border">
                     {friendsWishlists.map((item) => {
                         const topItems = item.previewItems.slice(0, 3);
                         const itemCountText =

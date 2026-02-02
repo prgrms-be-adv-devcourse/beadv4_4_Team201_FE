@@ -43,7 +43,7 @@ export function Footer() {
     return (
         <footer className="border-t border-border bg-background mt-16">
             {/* Customer Service & Links */}
-            <div className="max-w-screen-2xl mx-auto px-4 md:px-8 py-10">
+            <div className="max-w-screen-2xl mx-auto px-8 py-10">
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
                     {/* Customer Center */}
                     <div className="col-span-2 md:col-span-1">
@@ -179,7 +179,7 @@ export function Footer() {
 
             {/* Bottom Section */}
             <div className="border-t border-border">
-                <div className="max-w-screen-2xl mx-auto px-4 md:px-8 py-6">
+                <div className="max-w-screen-2xl mx-auto px-8 py-6">
                     {/* Legal Links */}
                     <div className="flex flex-wrap gap-4 text-xs mb-4">
                         <Link href="/terms" className="hover:text-muted-foreground transition-colors">

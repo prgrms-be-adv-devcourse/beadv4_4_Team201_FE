@@ -18,12 +18,12 @@ export function MyFundingsSection({ fundings }: MyFundingsSectionProps) {
         return (
             <section className="py-8">
                 <div className="max-w-screen-2xl mx-auto w-full">
-                    <div className="px-4 md:px-8 mb-6">
+                    <div className="px-8 mb-6">
                         <p className="text-xs text-muted-foreground uppercase tracking-wider">My Fundings</p>
                         <h2 className="text-xl font-semibold tracking-tight mt-1">참여 중인 펀딩</h2>
                     </div>
 
-                    <div className="mx-4 md:mx-8 border border-dashed border-border py-16 flex flex-col items-center">
+                    <div className="mx-8 border border-dashed border-border py-16 flex flex-col items-center">
                         <Gift className="h-8 w-8 text-muted-foreground mb-4" strokeWidth={1} />
                         <p className="text-sm font-medium">아직 참여 중인 펀딩이 없어요</p>
                         <p className="text-xs text-muted-foreground mt-1 mb-6">
@@ -42,7 +42,7 @@ export function MyFundingsSection({ fundings }: MyFundingsSectionProps) {
         <section className="py-8">
             <div className="max-w-screen-2xl mx-auto w-full">
                 {/* Section Header */}
-                <div className="flex items-end justify-between px-4 md:px-8 mb-6">
+                <div className="flex items-end justify-between px-8 mb-6">
                     <div>
                         <p className="text-xs text-muted-foreground uppercase tracking-wider">My Fundings</p>
                         <h2 className="text-xl font-semibold tracking-tight mt-1">참여 중인 펀딩</h2>
@@ -57,7 +57,7 @@ export function MyFundingsSection({ fundings }: MyFundingsSectionProps) {
                 </div>
 
                 {/* Horizontal Scroll */}
-                <div className="flex gap-4 overflow-x-auto px-4 md:px-8 pb-4 scrollbar-hide snap-x snap-mandatory">
+                <div className="flex gap-4 overflow-x-auto px-8 pb-4 scrollbar-hide snap-x snap-mandatory">
                     {fundings.map((funding) => (
                         <FundingCard
                             key={funding.id}

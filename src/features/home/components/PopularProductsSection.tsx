@@ -28,7 +28,7 @@ export function PopularProductsSection({ products }: PopularProductsSectionProps
         <section className="py-8">
             <div className="max-w-screen-2xl mx-auto w-full">
                 {/* Section Header */}
-                <div className="flex items-end justify-between px-4 md:px-8 mb-6">
+                <div className="flex items-end justify-between px-8 mb-6">
                     <div>
                         <p className="text-xs text-muted-foreground uppercase tracking-wider">Popular</p>
                         <h2 className="text-xl font-semibold tracking-tight mt-1">인기 상품</h2>

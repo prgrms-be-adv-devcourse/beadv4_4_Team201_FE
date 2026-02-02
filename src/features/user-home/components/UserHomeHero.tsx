@@ -37,7 +37,7 @@ export function UserHomeHero({ user }: UserHomeHeroProps) {
             </div>
 
             {/* Profile Info */}
-            <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-screen-2xl mx-auto px-8">
                 <div className="relative -mt-16 flex flex-col items-center text-center">
                     <Avatar className="h-32 w-32 border-4 border-white shadow-sm">
                         <AvatarImage src={user.avatarUrl} alt={user.nickname} />

@@ -155,6 +155,9 @@ export default function ChargeSuccessPage() {
           <Button onClick={handleGoToWallet} className="w-full">
             지갑으로 이동
           </Button>
+          <p className="text-center text-[11px] text-muted-foreground">
+            ※ 본 결제는 테스트 결제이며 실제 비용이 청구되지 않았습니다.
+          </p>
         </CardContent>
       </Card>
     </div>

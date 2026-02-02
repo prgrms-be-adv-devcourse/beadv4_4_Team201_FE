@@ -92,7 +92,7 @@ export function HomePageClient() {
                 <Separator className="h-2 bg-secondary/30" />
 
                 {/* Discovery Section */}
-                <div className="py-16 px-4 md:px-8 max-w-screen-2xl mx-auto w-full">
+                <div className="py-16 px-8 max-w-screen-2xl mx-auto w-full">
                     <h2 className="text-2xl font-bold tracking-tight mb-8">Discover Giftify</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {/* 1. Curation */}
