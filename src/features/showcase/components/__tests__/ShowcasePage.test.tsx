@@ -33,7 +33,7 @@ describe('ShowcasePage', () => {
         });
 
         render(<ShowcaseContent id="123" />);
-        expect(screen.getByText('Loading Showcase')).toBeInTheDocument();
+        expect(screen.getByText('Loading Product')).toBeInTheDocument();
     });
 
     it('renders funding showcase content when data is loaded', async () => {
@@ -65,6 +65,6 @@ describe('ShowcasePage', () => {
             expect(screen.getByText('Test Product')).toBeInTheDocument();
         });
 
-        expect(screen.getByText('SPECIAL FUNDING SHOWCASE')).toBeInTheDocument();
+        expect(screen.getByText('SPECIAL FUNDING PRODUCT')).toBeInTheDocument();
     });
 });

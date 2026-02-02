@@ -26,7 +26,7 @@ describe('Header Component', () => {
         render(<Header variant="main" />);
 
         expect(screen.getByRole('link', { name: /FUNDING/i })).toBeInTheDocument();
-        expect(screen.getByRole('link', { name: /SHOWCASE/i })).toBeInTheDocument();
+        expect(screen.getByRole('link', { name: /PRODUCT/i })).toBeInTheDocument();
         expect(screen.getByRole('link', { name: /CURATION/i })).toBeInTheDocument();
         expect(screen.getByRole('link', { name: /STORY/i })).toBeInTheDocument();
     });

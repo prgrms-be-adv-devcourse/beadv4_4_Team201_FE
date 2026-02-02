@@ -16,7 +16,7 @@ const showcaseContents: Record<string, any> = {
     'default': {
         hero: {
             title: "소중한 마음을 전하는\n가장 특별한 방법",
-            subtitle: "SPECIAL FUNDING SHOWCASE",
+            subtitle: "SPECIAL FUNDING PRODUCT",
             image: "https://images.unsplash.com/photo-1513201099705-a9746e1e201f?q=80&w=2894&auto=format&fit=crop"
         },
         stories: [
@@ -76,7 +76,7 @@ export function ShowcaseContent({ id }: { id: string }) {
         return (
             <div className="h-screen bg-white flex flex-col items-center justify-center animate-pulse">
                 <div className="w-12 h-12 border-4 border-black border-t-transparent rounded-full animate-spin mb-4" />
-                <p className="text-sm font-medium tracking-widest uppercase">Loading Showcase</p>
+                <p className="text-sm font-medium tracking-widest uppercase">Loading Product</p>
             </div>
         );
     }

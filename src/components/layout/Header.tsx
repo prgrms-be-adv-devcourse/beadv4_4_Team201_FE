@@ -225,7 +225,7 @@ function DesktopMainNav() {
                 FUNDING
             </Link>
             <Link href="/showcase/1" className="text-4xl font-extrabold tracking-tight hover:text-gray-600 transition-colors">
-                SHOWCASE
+                PRODUCT
             </Link>
             <Link href="/curation/birthday-men" className="text-4xl font-extrabold tracking-tight hover:text-gray-600 transition-colors">
                 CURATION
