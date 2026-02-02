@@ -34,6 +34,7 @@ interface HeaderProps {
     onSearchSubmit?: () => void;
     onSearchClear?: () => void;
     rightAction?: React.ReactNode;
+    hideActions?: boolean;
 }
 
 export function Header({
@@ -47,6 +48,7 @@ export function Header({
     onSearchSubmit,
     onSearchClear,
     rightAction,
+    hideActions = false,
 }: HeaderProps) {
     const router = useRouter();
     const [isSearchOpen, setIsSearchOpen] = React.useState(false);
@@ -98,12 +100,14 @@ export function Header({
                         )}
                         {title && <h1 className="text-base font-medium">{title}</h1>}
                     </div>
-                    <div className="flex items-center gap-4">
-                        <button onClick={() => setIsSearchOpen(true)}>
-                            <Search className="h-6 w-6" strokeWidth={1.5} />
-                        </button>
-                        {rightAction || <MobileNavigationIcons />}
-                    </div>
+                    {!hideActions && (
+                        <div className="flex items-center gap-4">
+                            <button onClick={() => setIsSearchOpen(true)}>
+                                <Search className="h-6 w-6" strokeWidth={1.5} />
+                            </button>
+                            {rightAction || <MobileNavigationIcons />}
+                        </div>
+                    )}
                 </div>
             );
         }

@@ -12,6 +12,7 @@ interface AppShellProps {
     headerVariant?: HeaderVariant;
     headerTitle?: string;
     hasBack?: boolean;
+    hideHeaderActions?: boolean;
     className?: string;
 }
 
@@ -22,6 +23,7 @@ export function AppShell({
     headerVariant = 'main',
     headerTitle,
     hasBack,
+    hideHeaderActions,
     className,
 }: AppShellProps) {
     return (
@@ -31,6 +33,7 @@ export function AppShell({
                     variant={headerVariant}
                     title={headerTitle}
                     hasBack={hasBack}
+                    hideActions={hideHeaderActions}
                 />
             )}
 

@@ -210,8 +210,8 @@ export default function CompleteSignupPage() {
     return (
         <AppShell
             headerVariant="detail"
-            headerTitle="회원가입 마무리"
             showBottomNav={false}
+            hideHeaderActions
         >
             <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center bg-background p-4 pb-20">
                 <Card className="w-full max-w-md">
