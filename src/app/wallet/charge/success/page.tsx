@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 
 import { useQueryClient } from '@tanstack/react-query';
 import { CheckCircle, Loader2, XCircle } from 'lucide-react';
@@ -18,7 +18,23 @@ interface ErrorState {
   message: string;
 }
 
-export default function ChargeSuccessPage() {
+function LoadingFallback() {
+  return (
+    <div className="flex min-h-[60vh] items-center justify-center">
+      <Card className="w-full max-w-md">
+        <CardContent className="flex flex-col items-center gap-4 py-12">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+          <div className="text-center">
+            <p className="text-lg font-semibold">페이지 로딩 중...</p>
+            <p className="text-sm text-muted-foreground">잠시만 기다려주세요.</p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function ChargeSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
@@ -161,5 +177,13 @@ export default function ChargeSuccessPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function ChargeSuccessPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <ChargeSuccessContent />
+    </Suspense>
   );
 }

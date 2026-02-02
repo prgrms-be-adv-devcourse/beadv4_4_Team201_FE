@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Loader2 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
@@ -31,7 +31,23 @@ const ERROR_MESSAGES: Record<string, string> = {
   NOT_AVAILABLE_PAYMENT: '결제가 불가능한 상태입니다.',
 };
 
-export default function ChargeFailPage() {
+function LoadingFallback() {
+  return (
+    <div className="flex min-h-[60vh] items-center justify-center">
+      <Card className="w-full max-w-md">
+        <CardContent className="flex flex-col items-center gap-4 py-12">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+          <div className="text-center">
+            <p className="text-lg font-semibold">페이지 로딩 중...</p>
+            <p className="text-sm text-muted-foreground">잠시만 기다려주세요.</p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function ChargeFailContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -90,5 +106,13 @@ export default function ChargeFailPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function ChargeFailPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <ChargeFailContent />
+    </Suspense>
   );
 }
