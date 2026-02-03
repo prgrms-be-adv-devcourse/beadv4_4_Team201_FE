@@ -37,6 +37,30 @@ import { signupMember } from '@/lib/api/members';
 import { queryKeys } from '@/lib/query/keys';
 import { Search } from 'lucide-react';
 
+// 전화번호 자동 포맷팅 함수 (하이픈 자동 추가)
+function formatPhoneNumber(value: string): string {
+    // 숫자만 추출
+    const numbers = value.replace(/[^\d]/g, '');
+    
+    // 최대 11자리까지만
+    const limited = numbers.slice(0, 11);
+    
+    // 포맷팅
+    if (limited.length <= 3) {
+        return limited;
+    } else if (limited.length <= 7) {
+        return `${limited.slice(0, 3)}-${limited.slice(3)}`;
+    } else {
+        // 010으로 시작하면 010-XXXX-XXXX, 그 외는 01X-XXX-XXXX
+        const isSeoul = limited.startsWith('010');
+        if (isSeoul) {
+            return `${limited.slice(0, 3)}-${limited.slice(3, 7)}-${limited.slice(7)}`;
+        } else {
+            return `${limited.slice(0, 3)}-${limited.slice(3, 6)}-${limited.slice(6)}`;
+        }
+    }
+}
+
 const formSchema = z.object({
     nickname: z
         .string()
@@ -48,7 +72,16 @@ const formSchema = z.object({
     detailAddress: z.string().optional().or(z.literal('')),
     phoneNum: z
         .string()
-        .regex(/^01[0-9]-?[0-9]{3,4}-?[0-9]{4}$/, { message: '올바른 전화번호 형식이 아닙니다. (예: 010-1234-5678)' })
+        .refine(
+            (val) => {
+                if (!val || val === '') return true; // 빈 값은 허용 (선택 필드)
+                // 010-XXXX-XXXX (13자) 또는 01X-XXX-XXXX (12자) 형식 검증
+                const pattern010 = /^010-\d{4}-\d{4}$/;
+                const patternOther = /^01[1-9]-\d{3}-\d{4}$/;
+                return pattern010.test(val) || patternOther.test(val);
+            },
+            { message: '올바른 전화번호 형식이 아닙니다. (예: 010-1234-5678)' }
+        )
         .optional()
         .or(z.literal('')),
 });
@@ -255,7 +288,16 @@ export default function CompleteSignupPage() {
                                         <FormItem>
                                             <FormLabel>휴대전화번호</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="010-1234-5678 (선택)" {...field} />
+                                                <Input 
+                                                    placeholder="010-1234-5678 (선택)" 
+                                                    value={field.value}
+                                                    onChange={(e) => {
+                                                        const formatted = formatPhoneNumber(e.target.value);
+                                                        field.onChange(formatted);
+                                                    }}
+                                                    inputMode="numeric"
+                                                    maxLength={13}
+                                                />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
