@@ -41,7 +41,7 @@ export function ProductCard({ product, onClick, className }: ProductCardProps) {
       {/* Product Image */}
       <div className="relative aspect-square w-full overflow-hidden bg-gray-100 mb-3">
         <Image
-          src={product.imageUrl || '/images/placeholder-product.jpg'}
+          src={product.imageUrl || '/images/placeholder-product.svg'}
           alt={product.name}
           fill
           className="object-cover transition-transform duration-500 group-hover:scale-105"

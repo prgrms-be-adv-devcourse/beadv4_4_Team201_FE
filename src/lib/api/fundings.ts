@@ -17,198 +17,343 @@ export interface RefuseFundingRequest {
   reason?: string;
 }
 
-// --- Legacy Backend Types ---
-interface LegacyFunding {
+// --- Backend V2 API Response Types ---
+
+/**
+ * 백엔드 FundingResponseDto (공개 펀딩 조회)
+ * @see FundingController GET /api/v2/fundings/{id}, GET /api/v2/fundings/list
+ */
+interface BackendFundingResponse {
   fundingId: number;
-  fundingStatus: string; // "IN_PROGRESS"
-  targetPrice: number;
-  totalAmount: number; // 0
+  targetAmount: number;
+  currentAmount: number;
+  status: string; // FundingStatus enum
+  deadline: string; // LocalDateTime
+  wishlistItemId: number;
   productId: number;
   productName: string;
   productPrice: number;
-  productImageUrl: string; // "url"
-  description: string; // "description"
-  endDate: string; // "2026-02-19T06:05:43"
-  createdAt: string; // "2026-02-05T06:05:43"
+  achievementRate: number; // 달성률 (%)
+  daysRemaining: number; // 남은 일수
 }
 
-// 펀딩 상태 매핑 함수
+/**
+ * 백엔드 ContributeFundingResponseDto (참여 펀딩 조회)
+ * @see FundingController GET /api/v2/fundings/participated/{id}, GET /api/v2/fundings/participated/list
+ */
+interface BackendContributeFundingResponse extends BackendFundingResponse {
+  myContribution: number; // 나의 기여금
+}
+
+/**
+ * 백엔드 MyFundingSummaryDto (받은 펀딩 조회)
+ * @see FundingController GET /api/v2/fundings/my/list
+ */
+interface BackendMyFundingSummary {
+  fundingId: number;
+  wishlistItemId: number;
+  status: string;
+  targetAmount: number;
+  currentAmount: number;
+  achievementRate: number;
+  daysRemaining: number;
+}
+
+/**
+ * 백엔드 PageResponse wrapper
+ */
+interface BackendPageResponse<T> {
+  content: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
+}
+
+// --- Mapping Functions ---
+
 function mapFundingStatus(status: string): FundingStatus {
   switch (status) {
-    case 'IN_PROGRESS': return 'IN_PROGRESS';
-    case 'ACHIEVED': return 'ACHIEVED';
-    case 'EXPIRED': return 'EXPIRED';
-    case 'CLOSED': return 'CLOSED';
-    case 'ACCEPTED': return 'ACCEPTED';
-    case 'REFUSED': return 'REFUSED';
-    default: return 'PENDING';
+    case "IN_PROGRESS":
+      return "IN_PROGRESS";
+    case "ACHIEVED":
+      return "ACHIEVED";
+    case "EXPIRED":
+      return "EXPIRED";
+    case "CLOSED":
+      return "CLOSED";
+    case "ACCEPTED":
+      return "ACCEPTED";
+    case "REFUSED":
+      return "REFUSED";
+    default:
+      return "PENDING";
   }
 }
 
-function mapLegacyFunding(legacy: LegacyFunding): Funding {
+function mapBackendFunding(backend: BackendFundingResponse): Funding {
   return {
-    id: legacy.fundingId.toString(),
-    wishItemId: "", // Legacy API does not return this
+    id: backend.fundingId.toString(),
+    wishItemId: backend.wishlistItemId.toString(),
     product: {
-      id: legacy.productId.toString(),
-      name: legacy.productName,
-      price: legacy.productPrice,
-      imageUrl: legacy.productImageUrl || "/images/placeholder-product.jpg",
-      status: "ON_SALE", // Default
-      brandName: "", // Legacy API does not return this
+      id: backend.productId.toString(),
+      name: backend.productName,
+      price: backend.productPrice,
+      imageUrl: "/images/placeholder-product.svg", // 백엔드에서 제공하지 않음
+      status: "ON_SALE",
+      brandName: "",
     },
-    organizerId: "", // Legacy API does not return this
+    organizerId: "", // 백엔드에서 제공하지 않음
     organizer: {
       id: "",
       nickname: "Organizer",
       avatarUrl: null,
     },
-    recipientId: "", // Legacy API does not return this
+    recipientId: "", // 백엔드에서 제공하지 않음
     recipient: {
       id: "",
       nickname: "Recipient",
       avatarUrl: null,
     },
-    targetAmount: legacy.targetPrice,
-    currentAmount: legacy.totalAmount,
-    status: mapFundingStatus(legacy.fundingStatus),
-    participantCount: 0, // Legacy API does not return this
-    expiresAt: legacy.endDate,
-    createdAt: legacy.createdAt,
+    targetAmount: backend.targetAmount,
+    currentAmount: backend.currentAmount,
+    status: mapFundingStatus(backend.status),
+    participantCount: 0, // 백엔드에서 제공하지 않음
+    expiresAt: backend.deadline,
+    createdAt: "", // 백엔드에서 제공하지 않음
+  };
+}
+
+function mapBackendMyFundingSummary(backend: BackendMyFundingSummary): Funding {
+  return {
+    id: backend.fundingId.toString(),
+    wishItemId: backend.wishlistItemId.toString(),
+    product: {
+      id: "",
+      name: "",
+      price: backend.targetAmount, // 상품 가격 = 목표 금액
+      imageUrl: "/images/placeholder-product.svg",
+      status: "ON_SALE",
+      brandName: "",
+    },
+    organizerId: "",
+    organizer: {
+      id: "",
+      nickname: "Organizer",
+      avatarUrl: null,
+    },
+    recipientId: "",
+    recipient: {
+      id: "",
+      nickname: "Recipient",
+      avatarUrl: null,
+    },
+    targetAmount: backend.targetAmount,
+    currentAmount: backend.currentAmount,
+    status: mapFundingStatus(backend.status),
+    participantCount: 0,
+    expiresAt: "",
+    createdAt: "",
+  };
+}
+
+function mapPageResponse<T>(
+  backendPage: BackendPageResponse<T>,
+  mapper: (item: T) => Funding,
+): FundingListResponse {
+  const mapped = backendPage.content.map(mapper);
+  return {
+    content: mapped,
+    items: mapped,
+    page: {
+      page: backendPage.page,
+      size: backendPage.size,
+      totalElements: backendPage.totalElements,
+      totalPages: backendPage.totalPages,
+      hasNext: backendPage.hasNext,
+      hasPrevious: backendPage.hasPrevious,
+    },
   };
 }
 
 // --- API Functions ---
 
+/**
+ * 펀딩 단건 조회
+ * @endpoint GET /api/v2/fundings/{id}
+ */
 export async function getFunding(fundingId: string): Promise<FundingDetail> {
-  // TODO: Check if legacy API returns details matching FundingDetail
-  const legacy = await apiClient.get<LegacyFunding>(
-    `/api/fundings/${fundingId}`,
+  const backend = await apiClient.get<BackendFundingResponse>(
+    `/api/v2/fundings/${fundingId}`,
   );
-  const funding = mapLegacyFunding(legacy);
+  const funding = mapBackendFunding(backend);
   return {
     ...funding,
-    participants: [], // Legacy detail might need separate call or different type
+    participants: [],
     myParticipation: null,
   };
 }
 
+/**
+ * 펀딩 목록 조회 (공개)
+ * @endpoint GET /api/v2/fundings/list
+ */
+export async function getFundings(
+  params?: FundingsParams,
+): Promise<FundingListResponse> {
+  const queryParams = new URLSearchParams();
+  if (params?.page !== undefined)
+    queryParams.append("page", params.page.toString());
+  if (params?.size !== undefined)
+    queryParams.append("size", params.size.toString());
+  if (params?.status !== undefined) queryParams.append("status", params.status);
+
+  const queryString = queryParams.toString();
+  const endpoint = queryString
+    ? `/api/v2/fundings/list?${queryString}`
+    : "/api/v2/fundings/list";
+
+  const response =
+    await apiClient.get<BackendPageResponse<BackendFundingResponse>>(endpoint);
+  return mapPageResponse(response, mapBackendFunding);
+}
+
+/**
+ * 참여한 펀딩 목록 조회
+ * @endpoint GET /api/v2/fundings/participated/list
+ */
+export async function getMyParticipatedFundings(
+  params?: FundingsParams,
+): Promise<FundingListResponse> {
+  const queryParams = new URLSearchParams();
+  if (params?.page !== undefined)
+    queryParams.append("page", params.page.toString());
+  if (params?.size !== undefined)
+    queryParams.append("size", params.size.toString());
+  if (params?.status !== undefined) queryParams.append("status", params.status);
+
+  const queryString = queryParams.toString();
+  const endpoint = queryString
+    ? `/api/v2/fundings/participated/list?${queryString}`
+    : "/api/v2/fundings/participated/list";
+
+  const response =
+    await apiClient.get<BackendPageResponse<BackendContributeFundingResponse>>(
+      endpoint,
+    );
+  return mapPageResponse(response, mapBackendFunding);
+}
+
+/**
+ * 받은 펀딩 목록 조회 (수령자)
+ * @endpoint GET /api/v2/fundings/my/list
+ */
+export async function getMyReceivedFundings(
+  params?: FundingsParams,
+): Promise<FundingListResponse> {
+  const queryParams = new URLSearchParams();
+  if (params?.page !== undefined)
+    queryParams.append("page", params.page.toString());
+  if (params?.size !== undefined)
+    queryParams.append("size", params.size.toString());
+  if (params?.status !== undefined) queryParams.append("status", params.status);
+
+  const queryString = queryParams.toString();
+  const endpoint = queryString
+    ? `/api/v2/fundings/my/list?${queryString}`
+    : "/api/v2/fundings/my/list";
+
+  const response =
+    await apiClient.get<BackendPageResponse<BackendMyFundingSummary>>(endpoint);
+  return mapPageResponse(response, mapBackendMyFundingSummary);
+}
+
+/**
+ * 주최한 펀딩 목록 조회
+ * @note 백엔드에 해당 API 없음 - 빈 배열 반환
+ * @todo 백엔드에 GET /api/v2/fundings/organized/list 추가 요청 필요
+ */
+export async function getMyOrganizedFundings(
+  _params?: FundingsParams,
+): Promise<FundingListResponse> {
+  // TODO: 백엔드에 API 추가 후 구현
+  // const endpoint = `/api/v2/fundings/organized/list`;
+  return {
+    content: [],
+    items: [],
+    page: {
+      page: 0,
+      size: 10,
+      totalElements: 0,
+      totalPages: 0,
+      hasNext: false,
+      hasPrevious: false,
+    },
+  };
+}
+
+/**
+ * 펀딩 생성
+ * @note 펀딩 생성은 장바구니 → 주문 → 결제 플로우로 처리됨
+ * @see Cart API: POST /api/v2/carts/{cartId} with targetType: "FUNDING_PENDING"
+ */
 export async function createFunding(
-  _data: FundingCreateRequest, // Changed 'data' to '_data'
+  _data: FundingCreateRequest,
 ): Promise<Funding> {
-  // Note: Legacy might not support creation via this exact path/body
-  throw new Error("Create funding not supported in legacy adaptation yet");
-  // return apiClient.post<Funding>('/api/v2/fundings', data);
+  throw new Error(
+    "펀딩 생성은 장바구니에 FUNDING_PENDING 타입으로 추가한 후 주문/결제로 처리됩니다.",
+  );
 }
 
+/**
+ * 펀딩 참여
+ * @note 펀딩 참여는 장바구니 → 주문 → 결제 플로우로 처리됨
+ * @see Cart API: POST /api/v2/carts/{cartId} with targetType: "FUNDING"
+ * @deprecated 장바구니 API를 직접 사용하세요
+ */
 export async function participateFunding(
-  fundingId: string,
-  amount: number,
+  _fundingId: string,
+  _amount: number,
 ): Promise<void> {
-  // Legacy participation often doesn't return the full object
-  return apiClient.post<void>(`/api/fundings/${fundingId}/participate`, {
-    amount,
-  });
+  throw new Error(
+    "펀딩 참여는 장바구니에 FUNDING 타입으로 추가한 후 주문/결제로 처리됩니다.",
+  );
 }
 
+/**
+ * 펀딩 수락 (수령자)
+ * @endpoint POST /api/v2/fundings/{id}/accept
+ */
 export async function acceptFunding(fundingId: string): Promise<void> {
-  return apiClient.post<void>(`/api/fundings/${fundingId}/accept`, {});
+  return apiClient.post<void>(`/api/v2/fundings/${fundingId}/accept`, {});
 }
 
+/**
+ * 펀딩 거절 (수령자)
+ * @endpoint POST /api/v2/fundings/{id}/refuse
+ */
 export async function refuseFunding(
   fundingId: string,
   data?: RefuseFundingRequest,
 ): Promise<void> {
-  return apiClient.post<void>(`/api/fundings/${fundingId}/refuse`, data || {});
-}
-
-export async function getMyOrganizedFundings(
-  _params?: FundingsParams, // Changed 'params' to '_params'
-): Promise<FundingListResponse> {
-  // Legacy does not seem to have specific "organized" endpoint, possibly just 'list' filtered?
-  // Falling back to empty mainly because we saw 'participated' but not explicit 'organized' in the scan
-  return {
-    content: [],
-    items: [],
-    page: {
-      page: 0,
-      size: 10,
-      totalElements: 0,
-      totalPages: 0,
-      hasNext: false,
-      hasPrevious: false,
-    },
-  };
-}
-
-export async function getMyParticipatedFundings(
-  _params?: FundingsParams, // Changed 'params' to '_params'
-): Promise<FundingListResponse> {
-  // Legacy Endpoint: /api/fundings/participated/list
-  // Note: Legacy list endpoints often return Array directly, not Page object.
-  const response = await apiClient.get<LegacyFunding[]>(
-    "/api/fundings/participated/list",
+  return apiClient.post<void>(
+    `/api/v2/fundings/${fundingId}/refuse`,
+    data || {},
   );
-
-  const mapped = response.map(mapLegacyFunding);
-
-  return {
-    content: mapped,
-    items: mapped,
-    page: {
-      page: 0,
-      size: mapped.length,
-      totalElements: mapped.length,
-      totalPages: 1,
-      hasNext: false,
-      hasPrevious: false,
-    },
-  };
 }
 
-export async function getMyReceivedFundings(
-  _params?: FundingsParams, // Changed 'params' to '_params'
-): Promise<FundingListResponse> {
-  return {
-    content: [],
-    items: [],
-    page: {
-      page: 0,
-      size: 10,
-      totalElements: 0,
-      totalPages: 0,
-      hasNext: false,
-      hasPrevious: false,
-    },
-  };
-}
-
-export async function getFundings(
-  _params?: FundingsParams, // Changed 'params' to '_params'
-): Promise<FundingListResponse> {
-  // Legacy Endpoint: /api/fundings/list (Assuming public list)
-  const response = await apiClient.get<LegacyFunding[]>("/api/fundings/list");
-  const mapped = response.map(mapLegacyFunding);
-
-  return {
-    content: mapped,
-    items: mapped,
-    page: {
-      page: 0,
-      size: mapped.length,
-      totalElements: mapped.length,
-      totalPages: 1,
-      hasNext: false,
-      hasPrevious: false,
-    },
-  };
-}
-
+/**
+ * 펀딩 참여자 목록 조회
+ * @note 백엔드에 해당 API 없음 - 빈 배열 반환
+ * @todo 필요 시 백엔드에 API 추가 요청
+ */
 export async function getFundingParticipants(
-  _fundingId: string, // Changed 'fundingId' to '_fundingId'
-  _params?: PageParams, // Changed 'params' to '_params'
+  _fundingId: string,
+  _params?: PageParams,
 ): Promise<ParticipantListResponse> {
-  // Placeholder
+  // TODO: 백엔드에 API 추가 후 구현
   return {
     content: [],
     items: [],

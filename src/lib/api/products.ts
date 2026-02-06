@@ -38,7 +38,7 @@ function mapBackendProduct(product: BackendProduct): Product {
     id: product.id.toString(),
     name: product.name,
     price: product.price,
-    imageUrl: '/images/placeholder-product.jpg', // 백엔드에 이미지 없음
+    imageUrl: '/images/placeholder-product.svg', // 백엔드에 이미지 없음
     status: 'ON_SALE',
     brandName: product.sellerNickName,
   };
@@ -98,7 +98,7 @@ export async function getProduct(productId: string): Promise<ProductDetail> {
     id: product.id.toString(),
     name: product.name,
     price: product.price,
-    imageUrl: '/images/placeholder-product.jpg',
+    imageUrl: '/images/placeholder-product.svg',
     status: 'ON_SALE',
     brandName: product.sellerNickName,
     sellerId: '', // 백엔드에서 제공하지 않음

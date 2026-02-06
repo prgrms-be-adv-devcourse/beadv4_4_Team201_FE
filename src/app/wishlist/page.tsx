@@ -95,9 +95,8 @@ export default function MyWishlistPage() {
         router.push(`/fundings/${fundingId}`);
     };
 
-    // Filter items
-    // Filter items
-    const wishlistItems = wishlist?.items || [];
+    // Filter items - exclude items without valid product data
+    const wishlistItems = (wishlist?.items || []).filter(item => item?.product?.id);
     const filteredItems = wishlistItems.filter(item => {
         // Status filter
         if (activeStatus && item.status !== activeStatus) return false;
@@ -113,13 +112,12 @@ export default function MyWishlistPage() {
         return true;
     });
 
-    // Count by status
-    const items = wishlist?.items || [];
+    // Count by status (using validated wishlistItems)
     const countByStatus = {
-        '': items.length,
-        'AVAILABLE': items.filter(i => i.status === 'AVAILABLE').length,
-        'IN_FUNDING': items.filter(i => i.status === 'IN_FUNDING').length,
-        'FUNDED': items.filter(i => i.status === 'FUNDED').length,
+        '': wishlistItems.length,
+        'AVAILABLE': wishlistItems.filter(i => i.status === 'AVAILABLE').length,
+        'IN_FUNDING': wishlistItems.filter(i => i.status === 'IN_FUNDING').length,
+        'FUNDED': wishlistItems.filter(i => i.status === 'FUNDED').length,
     };
 
     // Loading state
@@ -312,7 +310,7 @@ export default function MyWishlistPage() {
                             <div className="flex items-center justify-between">
                                 <h1 className="text-lg font-semibold">LIKE</h1>
                                 <span className="text-sm text-muted-foreground">
-                                    {wishlist?.items?.length || 0}개
+                                    {wishlistItems.length}개
                                 </span>
                             </div>
                         </div>

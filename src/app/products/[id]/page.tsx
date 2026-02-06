@@ -99,7 +99,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
   const images = product.images?.length > 0 
     ? product.images 
-    : [product.imageUrl || '/images/placeholder-product.jpg'];
+    : [product.imageUrl || '/images/placeholder-product.svg'];
 
   return (
     <AppShell headerVariant="detail">

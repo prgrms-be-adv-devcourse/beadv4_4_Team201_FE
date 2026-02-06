@@ -234,7 +234,7 @@ export default function FriendWishlistPage({ params }: FriendWishlistPageProps) 
                         <div className="flex gap-4 p-4 bg-gray-50 rounded-lg">
                             <div className="relative w-20 h-20 rounded-md overflow-hidden bg-gray-100">
                                 <Image
-                                    src={selectedItem.product.imageUrl || '/images/placeholder-product.jpg'}
+                                    src={selectedItem.product.imageUrl || '/images/placeholder-product.svg'}
                                     alt={selectedItem.product.name}
                                     fill
                                     className="object-cover"
@@ -269,7 +269,7 @@ function FundingCard({ item, onParticipate }: { item: WishItem; onParticipate: (
         <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" onClick={onParticipate}>
             <div className="relative aspect-square bg-gray-100">
                 <Image
-                    src={item.product.imageUrl || '/images/placeholder-product.jpg'}
+                    src={item.product.imageUrl || '/images/placeholder-product.svg'}
                     alt={item.product.name}
                     fill
                     className="object-cover"
@@ -301,7 +301,7 @@ function AvailableItemCard({ item, onStartFunding }: { item: WishItem; onStartFu
         <Card className="overflow-hidden hover:shadow-lg transition-shadow">
             <div className="relative aspect-square bg-gray-100">
                 <Image
-                    src={item.product.imageUrl || '/images/placeholder-product.jpg'}
+                    src={item.product.imageUrl || '/images/placeholder-product.svg'}
                     alt={item.product.name}
                     fill
                     className="object-cover"
@@ -332,7 +332,7 @@ function FundedItemCard({ item }: { item: WishItem }) {
         <Card className="overflow-hidden">
             <div className="relative aspect-square bg-gray-100 grayscale">
                 <Image
-                    src={item.product.imageUrl || '/images/placeholder-product.jpg'}
+                    src={item.product.imageUrl || '/images/placeholder-product.svg'}
                     alt={item.product.name}
                     fill
                     className="object-cover"
