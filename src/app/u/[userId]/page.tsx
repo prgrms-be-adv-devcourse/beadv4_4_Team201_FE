@@ -1,6 +1,7 @@
 'use client';
 
 import { use, useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { AppShell } from '@/components/layout/AppShell';
 import { Footer } from '@/components/layout/Footer';
 import { UserHomeHero } from '@/features/user-home/components/UserHomeHero';
@@ -132,9 +133,34 @@ export function UserHomeContent({ userId }: { userId: string }) {
     );
 }
 
+
 export default function UserHomePage({ params }: { params: Promise<{ userId: string }> }) {
     const container = use(params);
     const { userId } = container;
+    const router = useRouter(); // Import useRouter needed
+
+    if (userId === 'me') {
+         // Perform redirect logic instantly or use effect
+         // Since this is client component, we can just return null and push/replace in effect,
+         // but strictly calling per render might be ok with 'redirect' next/navigation in newer versions,
+         // but useRouter is safer for 'use client' explicit usage.
+    }
+    
+    // Better implementation check below
+    return <UserHomeContentWithRedirect userId={userId} />;
+}
+
+function UserHomeContentWithRedirect({ userId }: { userId: string }) {
+    const router = useRouter();
+    
+    // Logic moved inside to use hooks
+    if (userId === 'me') {
+        if (typeof window !== 'undefined') {
+             router.replace('/profile');
+        }
+        return null;
+    }
+    
     return <UserHomeContent userId={userId} />;
 }
 

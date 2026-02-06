@@ -44,6 +44,10 @@ const BENEFITS_MENU = [
     { label: 'Giftify 이벤트', href: '/events' },
 ];
 
+const MY_ACTIVITY_MENU = [
+    { label: '나의 활동 (공개 프로필)', href: '/u/me' }, // Will require dynamic replacement in component or use /u/[id]
+];
+
 // About Giftify
 const ABOUT_MENU = [
     { label: 'Giftify 소개', href: '/about' },
@@ -171,6 +175,19 @@ export default function ProfilePage() {
                                         {item.label}
                                     </Link>
                                 ))}
+                            </nav>
+                        </div>
+
+                        {/* 나의 활동 */}
+                        <div className="mb-6">
+                            <h3 className="text-xs font-medium mb-3">나의 활동</h3>
+                            <nav className="space-y-2">
+                                <Link
+                                    href={`/u/${member.id}`}
+                                    className="block text-sm text-muted-foreground hover:text-foreground transition-colors py-0.5"
+                                >
+                                    내 공개 프로필 보기
+                                </Link>
                             </nav>
                         </div>
 
@@ -400,6 +417,20 @@ export default function ProfilePage() {
                                             <ChevronRight className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
                                         </Link>
                                     ))}
+                                </div>
+                            </div>
+
+                            {/* 나의 활동 */}
+                            <div>
+                                <h3 className="text-xs font-medium mb-3">나의 활동</h3>
+                                <div className="border-t border-border">
+                                    <Link
+                                        href={`/u/${member.id}`}
+                                        className="flex items-center justify-between py-3 border-b border-border"
+                                    >
+                                        <span className="text-sm">내 공개 프로필 보기</span>
+                                        <ChevronRight className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+                                    </Link>
                                 </div>
                             </div>
 
