@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
-import { useQueryClient, useQuery } from '@tanstack/react-query';
+import { useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query/keys';
 import { useAddWishlistItem, useRemoveWishlistItem } from './useWishlistMutations';
 import { useUser } from '@auth0/nextjs-auth0/client';
@@ -13,12 +13,9 @@ export function useWishlistItem(productId: string) {
   const queryClient = useQueryClient();
   const addMutation = useAddWishlistItem();
   const removeMutation = useRemoveWishlistItem();
-  
-  // Get wishlist data from cache
-  const { data: wishlist } = useQuery({
-    queryKey: queryKeys.myWishlist,
-    enabled: false, // Don't fetch, just use cached data
-  });
+
+  // Read wishlist from cache without triggering a fetch
+  const wishlist = queryClient.getQueryData(queryKeys.myWishlist) as any;
 
   // Check if product is in wishlist
   const wishlistItem = (wishlist as any)?.items?.find(

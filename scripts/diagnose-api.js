@@ -1,12 +1,12 @@
 const { DefaultAzureCredential } = require('@azure/identity');
 const fetch = require('node-fetch');
 
-// Environment variables
-const AUTH0_DOMAIN = 'dev-qpuevxs5iduyblx4.us.auth0.com';
-const AUTH0_CLIENT_ID = 'lQuUF8GyiLEqTjBdtTuizDVgGM1Z1wHN';
-const AUTH0_CLIENT_SECRET = 'lSm221SponmMFhIg--75DbnCd16y9TAjyjnhjmgKPDc72LRIKQPBBDmpYvYWjdSr';
-const AUTH0_AUDIENCE = 'https://api.giftify.app';
-const API_URL = 'http://localhost:8080';
+// Environment variables - load from .env.local or set before running
+const AUTH0_DOMAIN = process.env.AUTH0_DOMAIN || '';
+const AUTH0_CLIENT_ID = process.env.AUTH0_CLIENT_ID || '';
+const AUTH0_CLIENT_SECRET = process.env.AUTH0_CLIENT_SECRET || '';
+const AUTH0_AUDIENCE = process.env.AUTH0_AUDIENCE || 'https://api.giftify.app';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
 async function getToken() {
     console.log('Fetching access token from Auth0...');
