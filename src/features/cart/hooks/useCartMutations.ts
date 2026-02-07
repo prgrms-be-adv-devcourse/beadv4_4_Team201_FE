@@ -127,9 +127,8 @@ export function useRemoveCartItem() {
 /**
  * Hook to toggle cart item selection (checkbox)
  *
- * Invalidates: cart
- *
- * Includes optimistic update for better UX
+ * @note 선택 상태는 백엔드에 저장되지 않으므로 로컬 캐시에서만 관리합니다.
+ *       서버 refetch 시 선택 상태가 리셋되지 않도록 invalidateQueries를 호출하지 않습니다.
  */
 export function useToggleCartSelection() {
   const queryClient = useQueryClient();
@@ -138,13 +137,10 @@ export function useToggleCartSelection() {
     mutationFn: ({ itemId, selected }: { itemId: string; selected: boolean }) =>
       toggleCartItemSelection(itemId, selected),
     onMutate: async ({ itemId, selected }) => {
-      // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: queryKeys.cart });
 
-      // Snapshot the previous value
       const previousCart = queryClient.getQueryData(queryKeys.cart);
 
-      // Optimistically update to the new value
       queryClient.setQueryData(queryKeys.cart, (old: any) => {
         if (!old) return old;
         return {
@@ -155,18 +151,13 @@ export function useToggleCartSelection() {
         };
       });
 
-      // Return a context with the previous value
       return { previousCart };
     },
-    onError: (err, variables, context) => {
-      // If the mutation fails, use the context to roll back
+    onError: (_err, _variables, context) => {
       if (context?.previousCart) {
         queryClient.setQueryData(queryKeys.cart, context.previousCart);
       }
     },
-    onSettled: () => {
-      // Always refetch after error or success
-      queryClient.invalidateQueries({ queryKey: queryKeys.cart });
-    },
+    // onSettled 제거: 서버 refetch하면 selected 상태가 리셋됨
   });
 }

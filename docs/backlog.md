@@ -25,16 +25,26 @@ MSW 목 데이터 기반에서 실제 백엔드 API로 전환하는 작업입니
 
 #### A2. 장바구니 API 엔드포인트 정렬
 
-- **상태**: 미해결
+- **상태**: 해결 (2026-02-07, 프론트 버그 수정 완료)
 - **설명**: 프론트의 장바구니 API 경로와 백엔드 실제 경로 불일치 가능성
-- **백엔드 API**:
-  - `GET /api/v2/carts/{cartId}` - 장바구니 조회 (`RsDataCartResponse`)
-  - `POST /api/v2/carts/{cartId}` - 장바구니에 상품 추가 (`CartItemRequest`)
-- **프론트 파일**: `src/features/cart/api/`, `src/features/cart/hooks/`
-- **확인 사항**:
-  - `cartId`를 어떻게 획득하는지 (회원가입 시 자동 생성 여부)
-  - `CartItemRequest.targetType`: `GENERAL_PRODUCT` | `FUNDING_PENDING` | `FUNDING`
-  - `CartItemResponse`에 `productName`, `productPrice`, `contributionAmount` 포함
+- **백엔드 API**: `GET /api/v2/carts`, `POST /api/v2/carts` (인증 토큰으로 사용자 식별)
+- **프론트 파일**: `src/lib/api/cart.ts`, `src/features/cart/hooks/`
+- **해결 내용**:
+  - 엔드포인트 경로 확인: `/api/v2/carts` (user-centric) 정상
+  - RsData 이중 언래핑 버그 수정 (`client.ts` 자동 언래핑과 충돌)
+  - `toggleCartItemSelection` → 로컬 캐시 전용으로 전환 (서버 refetch 시 리셋 방지)
+- **백엔드 요청 필요** → A2-1 참조
+
+#### A2-1. 장바구니 CRUD API 추가 요청 (백엔드)
+
+- **상태**: 백엔드팀 요청 필요
+- **설명**: 장바구니 아이템 수정/삭제/비우기 API가 백엔드에 없음
+- **필요 API**:
+  - `PATCH /api/v2/carts/items/{itemId}` - 아이템 금액 수정
+  - `DELETE /api/v2/carts/items/{itemId}` - 아이템 삭제
+  - `DELETE /api/v2/carts` - 장바구니 비우기
+- **프론트 현황**: 해당 함수들이 `throw Error`로 구현되어, 장바구니 페이지에서 금액 변경/삭제 시 에러 발생
+- **프론트 파일**: `src/lib/api/cart.ts` (`updateCartItem`, `removeCartItem`, `clearCart`)
 
 #### A3. 펀딩 생성 API 연동
 

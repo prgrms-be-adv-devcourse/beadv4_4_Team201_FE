@@ -44,15 +44,6 @@ interface BackendCartResponse {
   totalAmount: number;
 }
 
-/**
- * 백엔드 RsData wrapper
- */
-interface RsData<T> {
-  resultCode: string;
-  msg: string;
-  data: T;
-}
-
 // --- Mapping Functions ---
 
 function mapBackendCart(backend: BackendCartResponse): Cart {
@@ -106,10 +97,11 @@ function mapBackendCartItem(item: BackendCartItemResponse, cartId: number, index
 /**
  * 내 장바구니 조회
  * @endpoint GET /api/v2/carts
+ * @note client.ts가 RsData wrapper를 자동 언래핑하므로 BackendCartResponse를 직접 받음
  */
 export async function getCart(): Promise<Cart> {
-  const response = await apiClient.get<RsData<BackendCartResponse>>('/api/v2/carts');
-  return mapBackendCart(response.data);
+  const response = await apiClient.get<BackendCartResponse>('/api/v2/carts');
+  return mapBackendCart(response);
 }
 
 /**
@@ -147,7 +139,7 @@ export async function addCartItem(data: CartItemCreateRequest): Promise<void> {
     amount,
   };
 
-  await apiClient.post<RsData<void>>('/api/v2/carts', request);
+  await apiClient.post<void>('/api/v2/carts', request);
 }
 
 /**
@@ -174,12 +166,12 @@ export async function removeCartItem(_itemId: string): Promise<void> {
 
 /**
  * 장바구니 아이템 선택 토글
- * @note 백엔드에 해당 API 없음 - 프론트엔드 로컬 상태로 관리
+ * @note 백엔드에 해당 API 없음 - 프론트엔드 로컬 상태로만 관리
+ *       useToggleCartSelection에서 optimistic update로 처리
  */
-export async function toggleCartItemSelection(_itemId: string, _selected: boolean): Promise<CartItem> {
-  throw new Error(
-    '장바구니 아이템 선택 상태는 프론트엔드 로컬 상태로 관리해주세요.'
-  );
+export async function toggleCartItemSelection(_itemId: string, _selected: boolean): Promise<void> {
+  // 서버 API 없음 - optimistic update만으로 처리 (mutationFn은 no-op)
+  return Promise.resolve();
 }
 
 /**
