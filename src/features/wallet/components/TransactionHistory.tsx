@@ -37,12 +37,12 @@ export function TransactionHistory({ transactions, filterType, onFilterChange }:
     return (
         <div className="py-6">
             {/* Header with Filter */}
-            <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
+            <div className="flex items-center justify-between mb-4 gap-2">
+                <h3 className="text-sm font-medium uppercase tracking-wider text-muted-foreground shrink-0">
                     History
                 </h3>
                 {onFilterChange && (
-                    <div className="flex gap-2">
+                    <div className="flex gap-1 sm:gap-2 overflow-x-auto scrollbar-hide">
                         <button
                             onClick={() => onFilterChange(undefined)}
                             className={cn(

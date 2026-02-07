@@ -11,13 +11,15 @@ import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useCart } from '@/features/cart/hooks/useCart';
 import { useUpdateCartItem, useRemoveCartItem, useToggleCartSelection } from '@/features/cart/hooks/useCartMutations';
-import { Loader2, Minus, Plus, Gift } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { InlineError } from '@/components/common/InlineError';
+import { Minus, Plus, Gift } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatPrice } from '@/lib/format';
 
 export default function CartPage() {
     const router = useRouter();
-    const { data: cart, isLoading } = useCart();
+    const { data: cart, isLoading, isError, refetch } = useCart();
     const updateCartItem = useUpdateCartItem();
     const removeCartItem = useRemoveCartItem();
     const toggleSelection = useToggleCartSelection();
@@ -94,8 +96,71 @@ export default function CartPage() {
     if (isLoading) {
         return (
             <AppShell headerVariant="main">
-                <div className="flex items-center justify-center min-h-[calc(100vh-3.5rem)]">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" strokeWidth={1.5} />
+                <div className="max-w-7xl mx-auto px-4 lg:px-8 py-8 lg:py-12">
+                    <Skeleton className="h-7 w-24 mb-8 lg:mb-12" />
+                    {/* Mobile skeleton */}
+                    <div className="lg:hidden space-y-0">
+                        <div className="flex items-center justify-between py-4 border-b border-foreground">
+                            <Skeleton className="h-5 w-32" />
+                            <Skeleton className="h-4 w-16" />
+                        </div>
+                        {[1, 2, 3].map((i) => (
+                            <div key={i} className="flex gap-3 py-5 border-b border-border">
+                                <Skeleton className="w-5 h-5 mt-1" />
+                                <Skeleton className="w-20 h-24 flex-shrink-0" />
+                                <div className="flex-1 space-y-2">
+                                    <Skeleton className="h-3 w-20" />
+                                    <Skeleton className="h-4 w-full" />
+                                    <Skeleton className="h-1 w-full mt-2" />
+                                    <div className="flex justify-between">
+                                        <Skeleton className="h-3 w-16" />
+                                        <Skeleton className="h-3 w-12" />
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    {/* Desktop skeleton */}
+                    <div className="hidden lg:block">
+                        <div className="grid grid-cols-12 gap-4 border-b border-foreground pb-3">
+                            <Skeleton className="col-span-1 h-4 w-4" />
+                            <Skeleton className="col-span-5 h-4 w-20" />
+                            <Skeleton className="col-span-2 h-4 w-16 mx-auto" />
+                            <Skeleton className="col-span-2 h-4 w-12 mx-auto" />
+                            <Skeleton className="col-span-2 h-4 w-12 mx-auto" />
+                        </div>
+                        {[1, 2, 3].map((i) => (
+                            <div key={i} className="grid grid-cols-12 gap-4 border-b border-border py-6 items-start">
+                                <Skeleton className="col-span-1 h-4 w-4 mt-1" />
+                                <div className="col-span-5 flex gap-4">
+                                    <Skeleton className="w-[100px] h-[130px] flex-shrink-0" />
+                                    <div className="flex-1 space-y-2 py-1">
+                                        <Skeleton className="h-3 w-24" />
+                                        <Skeleton className="h-4 w-full" />
+                                        <Skeleton className="h-4 w-20 mt-2" />
+                                        <Skeleton className="h-3 w-28" />
+                                    </div>
+                                </div>
+                                <Skeleton className="col-span-2 h-6 w-20 mx-auto" />
+                                <Skeleton className="col-span-2 h-4 w-full" />
+                                <Skeleton className="col-span-2 h-5 w-12 mx-auto" />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </AppShell>
+        );
+    }
+
+    if (isError) {
+        return (
+            <AppShell headerVariant="main">
+                <div className="max-w-7xl mx-auto px-4 lg:px-8 py-8 lg:py-12">
+                    <h1 className="text-xl lg:text-2xl font-medium tracking-tight mb-8">장바구니</h1>
+                    <InlineError
+                        message="장바구니를 불러오는데 실패했습니다."
+                        onRetry={() => refetch()}
+                    />
                 </div>
             </AppShell>
         );

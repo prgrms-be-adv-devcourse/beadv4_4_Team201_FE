@@ -34,19 +34,19 @@ export function WalletBalance({ balance, onCharge, onWithdraw, onRefresh, isRefr
                     </button>
                 )}
             </div>
-            <div className="flex items-end justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                 <div className="text-3xl font-semibold tracking-tight">
                     {balance.toLocaleString()}
                     <span className="text-lg font-medium ml-1">P</span>
                 </div>
                 <div className="flex gap-2">
                     {onWithdraw && (
-                        <Button onClick={onWithdraw} variant="outline" size="sm">
+                        <Button onClick={onWithdraw} variant="outline" className="h-11 px-4 text-sm">
                             <ArrowDownCircle className="h-4 w-4 mr-1" strokeWidth={1.5} />
                             출금
                         </Button>
                     )}
-                    <Button onClick={onCharge} variant="default" size="sm">
+                    <Button onClick={onCharge} variant="default" className="h-11 px-4 text-sm">
                         <Plus className="h-4 w-4 mr-1" strokeWidth={1.5} />
                         충전
                     </Button>
