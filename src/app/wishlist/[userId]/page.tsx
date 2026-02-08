@@ -10,18 +10,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { usePublicWishlist } from '@/features/wishlist/hooks/useWishlist';
-import { useCreateFunding } from '@/features/funding/hooks/useFundingMutations';
-import { Gift, Users, Sparkles, PartyPopper, Loader2 } from 'lucide-react';
+import { CreateFundingModal } from '@/features/funding/components/CreateFundingModal';
+import { Gift } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils/format';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
-import { toast } from 'sonner';
 
 import type { PublicWishlistItem } from '@/types/wishlist';
 
@@ -37,29 +28,10 @@ export default function FriendWishlistPage({ params }: FriendWishlistPageProps) 
     const { data: wishlist, isLoading, error } = usePublicWishlist(userId);
     const [selectedItem, setSelectedItem] = useState<PublicWishlistItem | null>(null);
     const [isStartFundingOpen, setIsStartFundingOpen] = useState(false);
-    const createFunding = useCreateFunding();
 
     const handleStartFundingClick = (item: PublicWishlistItem) => {
         setSelectedItem(item);
         setIsStartFundingOpen(true);
-    };
-
-    const handleConfirmStartFunding = async () => {
-        if (!selectedItem) return;
-
-        createFunding.mutate(
-            { wishItemId: selectedItem.wishlistItemId, amount: selectedItem.price },
-            {
-                onSuccess: () => {
-                    toast.success('장바구니에 펀딩이 추가되었습니다. 결제를 진행해주세요!');
-                    setIsStartFundingOpen(false);
-                    router.push('/cart');
-                },
-                onError: () => {
-                    toast.error('펀딩 추가에 실패했습니다');
-                },
-            },
-        );
     };
 
     if (isLoading) {
@@ -162,40 +134,21 @@ export default function FriendWishlistPage({ params }: FriendWishlistPageProps) 
                 </section>
             </div>
 
-            <Dialog open={isStartFundingOpen} onOpenChange={setIsStartFundingOpen}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>펀딩 개설하기</DialogTitle>
-                        <DialogDescription>
-                            {wishlist.nickname}님을 위한 펀딩을 개설하시겠습니까?
-                        </DialogDescription>
-                    </DialogHeader>
-                    {selectedItem && (
-                        <div className="flex gap-4 p-4 bg-gray-50 rounded-lg">
-                            <div className="w-20 h-20 rounded-md bg-gray-200 flex items-center justify-center">
-                                <Gift className="w-8 h-8 text-gray-400" />
-                            </div>
-                            <div>
-                                <h4 className="font-medium">{selectedItem.productName}</h4>
-                                <p className="text-lg font-bold">{formatCurrency(selectedItem.price)}</p>
-                            </div>
-                        </div>
-                    )}
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsStartFundingOpen(false)} disabled={createFunding.isPending}>
-                            취소
-                        </Button>
-                        <Button onClick={handleConfirmStartFunding} disabled={createFunding.isPending}>
-                            {createFunding.isPending ? (
-                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            ) : (
-                                <Gift className="w-4 h-4 mr-2" />
-                            )}
-                            {createFunding.isPending ? '처리 중...' : '펀딩 개설하기'}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            {selectedItem && (
+                <CreateFundingModal
+                    open={isStartFundingOpen}
+                    onOpenChange={setIsStartFundingOpen}
+                    wishItem={{
+                        id: selectedItem.wishlistItemId,
+                        product: {
+                            name: selectedItem.productName,
+                            price: selectedItem.price,
+                            imageUrl: '',
+                        },
+                    }}
+                    onSuccess={() => router.push('/cart')}
+                />
+            )}
 
             <Footer />
         </AppShell>

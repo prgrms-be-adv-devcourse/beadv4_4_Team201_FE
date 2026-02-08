@@ -128,9 +128,17 @@ export async function placeOrder(
   request: PlaceOrderRequest,
   idempotencyKey?: string
 ): Promise<PlaceOrderResult> {
+  const backendRequest = {
+    items: request.items.map(item => ({
+      ...item,
+      amount: { amount: item.amount },
+    })),
+    method: request.method,
+  };
+
   const response = await apiClient.post<BackendPlaceOrderResult>(
     '/api/v2/orders',
-    request,
+    backendRequest,
     { idempotencyKey }
   );
   return {

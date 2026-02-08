@@ -7,10 +7,9 @@ import Image from 'next/image';
 import { AppShell } from '@/components/layout/AppShell';
 import { Footer } from '@/components/layout/Footer';
 import { VisibilitySheet } from '@/features/wishlist/components/VisibilitySheet';
-import { CreateFundingModal } from '@/features/funding/components/CreateFundingModal';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Heart, ExternalLink, Gift, ChevronDown } from 'lucide-react';
+import { Heart, ExternalLink, ChevronDown } from 'lucide-react';
 import { useMyWishlist } from '@/features/wishlist/hooks/useWishlist';
 import { useUpdateVisibility, useRemoveWishlistItem } from '@/features/wishlist/hooks/useWishlistMutations';
 import { WishlistVisibility, WishItem } from '@/types/wishlist';
@@ -64,8 +63,6 @@ export default function MyWishlistPage() {
     const [activeStatus, setActiveStatus] = useState('');
     const [activePriceRange, setActivePriceRange] = useState('');
     const [visibilitySheetOpen, setVisibilitySheetOpen] = useState(false);
-    const [fundingModalOpen, setFundingModalOpen] = useState(false);
-    const [selectedWishItem, setSelectedWishItem] = useState<WishItem | null>(null);
     const [expandedFilter, setExpandedFilter] = useState<string | null>(null);
 
     const handleVisibilityChange = async (visibility: WishlistVisibility) => {
@@ -75,11 +72,6 @@ export default function MyWishlistPage() {
         } catch {
             toast.error('공개 설정 변경에 실패했습니다');
         }
-    };
-
-    const handleStartFunding = (item: WishItem) => {
-        setSelectedWishItem(item);
-        setFundingModalOpen(true);
     };
 
     const handleDeleteItem = async (itemId: string) => {
@@ -369,7 +361,6 @@ export default function MyWishlistPage() {
                                         key={item.id}
                                         item={item}
                                         onDelete={() => handleDeleteItem(item.id)}
-                                        onStartFunding={() => handleStartFunding(item)}
                                         onViewFunding={() => item.fundingId && handleViewFunding(item.fundingId)}
                                     />
                                 ))}
@@ -390,20 +381,6 @@ export default function MyWishlistPage() {
                 onVisibilityChange={handleVisibilityChange}
             />
 
-            {selectedWishItem && (
-                <CreateFundingModal
-                    open={fundingModalOpen}
-                    onOpenChange={setFundingModalOpen}
-                    wishItem={{
-                        id: selectedWishItem.id,
-                        product: selectedWishItem.product,
-                    }}
-                    onSuccess={() => {
-                        setFundingModalOpen(false);
-                        toast.success('펀딩이 생성되었습니다');
-                    }}
-                />
-            )}
         </AppShell>
     );
 }
@@ -414,12 +391,10 @@ export default function MyWishlistPage() {
 function WishItemCard29cm({
     item,
     onDelete,
-    onStartFunding,
     onViewFunding,
 }: {
     item: WishItem;
     onDelete: () => void;
-    onStartFunding: () => void;
     onViewFunding: () => void;
 }) {
     return (
@@ -468,15 +443,6 @@ function WishItemCard29cm({
 
             {/* Status Badge & Action Buttons - 29cm Style */}
             <div className="mt-3 space-y-2">
-                {item.status === 'AVAILABLE' && (
-                    <button
-                        onClick={onStartFunding}
-                        className="w-full py-2 border border-border text-xs hover:bg-secondary transition-colors flex items-center justify-center gap-1"
-                    >
-                        <Gift className="h-3 w-3" strokeWidth={1.5} />
-                        펀딩 시작
-                    </button>
-                )}
                 {item.status === 'IN_FUNDING' && (
                     <button
                         onClick={onViewFunding}

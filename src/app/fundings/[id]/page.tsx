@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { AppShell } from '@/components/layout/AppShell';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -18,6 +18,7 @@ import { Users } from 'lucide-react';
 
 export default function FundingDetailPage() {
     const params = useParams();
+    const router = useRouter();
     const id = params.id as string;
     const [participateModalOpen, setParticipateModalOpen] = useState(false);
     const [participantsModalOpen, setParticipantsModalOpen] = useState(false);
@@ -162,7 +163,7 @@ export default function FundingDetailPage() {
                     open={participateModalOpen}
                     onOpenChange={setParticipateModalOpen}
                     funding={funding}
-                    onSuccess={() => {}}
+                    onSuccess={() => router.push('/cart')}
                 />
 
                 {/* Participants Modal */}
