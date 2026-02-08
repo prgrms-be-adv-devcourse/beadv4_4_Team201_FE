@@ -86,17 +86,6 @@ vi.mock('@/features/order/hooks/useOrderMutations', () => ({
     }),
 }));
 
-vi.mock('@/features/payment/hooks/usePayment', () => ({
-    useProcessPayment: () => ({
-        mutateAsync: vi.fn().mockResolvedValue({ status: 'SUCCESS' }),
-        isPending: false,
-    }),
-    useCreatePayment: () => ({
-        mutateAsync: vi.fn().mockResolvedValue({ id: 'payment-1', status: 'SUCCESS' }),
-        isPending: false,
-    }),
-}));
-
 // Setup mock for toast
 vi.mock('sonner', () => ({
     toast: {

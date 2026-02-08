@@ -5,6 +5,6 @@ export * from './products';
 export * from './fundings';
 export * from './cart';
 export * from './orders';
-export * from './payments';
+export * from './payment';
 export * from './wallet';
 export { apiClient, ApiError } from './client';
