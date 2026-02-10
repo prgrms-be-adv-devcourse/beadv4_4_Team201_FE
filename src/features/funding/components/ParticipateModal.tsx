@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -10,24 +11,19 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { Separator } from '@/components/ui/separator';
 import { AmountInput } from '@/components/common/AmountInput';
 import { useWallet } from '@/features/wallet/hooks/useWallet';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ShoppingCart } from 'lucide-react';
 import { toast } from 'sonner';
 import { useParticipateFunding } from '@/features/funding/hooks/useFundingMutations';
+import type { Funding } from '@/types/funding';
 
 interface ParticipateModalProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    funding: {
-        id: string;
-        product: {
-            name: string;
-        };
-        currentAmount: number;
-        targetAmount: number;
-    };
-    onSuccess: () => void;
+    funding: Pick<Funding, 'id' | 'product' | 'recipient' | 'currentAmount' | 'targetAmount'>;
+    onSuccess: (mode: 'cart' | 'checkout') => void;
 }
 
 export function ParticipateModal({
@@ -42,9 +38,7 @@ export function ParticipateModal({
     const participateFunding = useParticipateFunding();
     const remainingAmount = funding.targetAmount - funding.currentAmount;
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-
+    const handleSubmit = (mode: 'cart' | 'checkout') => {
         if (amount <= 0) {
             toast.error('참여 금액을 입력해주세요.');
             return;
@@ -64,7 +58,7 @@ export function ParticipateModal({
                 onSuccess: () => {
                     toast.success('장바구니에 담겼습니다. 결제를 진행해주세요.');
                     onOpenChange(false);
-                    onSuccess();
+                    onSuccess(mode);
                     setAmount(0);
                 },
                 onError: (error) => {
@@ -84,7 +78,26 @@ export function ParticipateModal({
                     </DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="grid gap-6 py-4">
+                <div className="grid gap-4 py-4">
+                    {/* Product Summary Card */}
+                    <div className="flex items-center gap-3">
+                        <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-secondary">
+                            <Image
+                                src={funding.product.imageUrl}
+                                alt={funding.product.name}
+                                fill
+                                className="object-cover"
+                            />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium truncate">{funding.product.name}</p>
+                            <p className="text-xs text-muted-foreground">for @{funding.recipient.nickname}</p>
+                            <p className="text-sm font-bold mt-1">₩{funding.product.price.toLocaleString()}</p>
+                        </div>
+                    </div>
+
+                    <Separator />
+
                     <AmountInput
                         value={amount}
                         onChange={setAmount}
@@ -94,22 +107,43 @@ export function ParticipateModal({
 
                     <div className="text-sm text-muted-foreground space-y-1">
                         <div className="flex justify-between">
-                            <span>현재 모금액</span>
-                            <span className="font-medium">₩{funding.currentAmount.toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between">
-                            <span>남은 금액</span>
+                            <span>남은 목표 금액</span>
                             <span className="font-medium">₩{remainingAmount.toLocaleString()}</span>
                         </div>
+                        {wallet && (
+                            <div className="flex justify-between">
+                                <span>내 지갑 잔액</span>
+                                <span className="font-medium">₩{wallet.balance.toLocaleString()}</span>
+                            </div>
+                        )}
                     </div>
 
-                    <DialogFooter>
-                        <Button type="submit" disabled={participateFunding.isPending || amount <= 0} className="w-full">
+                    <DialogFooter className="flex gap-2 sm:gap-2">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            disabled={participateFunding.isPending || amount <= 0}
+                            className="flex-1"
+                            onClick={() => handleSubmit('cart')}
+                        >
+                            {participateFunding.isPending ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                                <ShoppingCart className="mr-2 h-4 w-4" />
+                            )}
+                            장바구니에 담기
+                        </Button>
+                        <Button
+                            type="button"
+                            disabled={participateFunding.isPending || amount <= 0}
+                            className="flex-1"
+                            onClick={() => handleSubmit('checkout')}
+                        >
                             {participateFunding.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            {amount > 0 ? `₩${amount.toLocaleString()} 참여하기` : '참여하기'}
+                            바로 결제하기
                         </Button>
                     </DialogFooter>
-                </form>
+                </div>
             </DialogContent>
         </Dialog>
     );

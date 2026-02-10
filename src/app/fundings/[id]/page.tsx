@@ -165,7 +165,7 @@ export default function FundingDetailPage() {
                     open={participateModalOpen}
                     onOpenChange={setParticipateModalOpen}
                     funding={funding}
-                    onSuccess={() => router.push('/cart')}
+                    onSuccess={(mode) => router.push(mode === 'cart' ? '/cart' : '/checkout')}
                 />
 
                 {/* Participants Modal */}

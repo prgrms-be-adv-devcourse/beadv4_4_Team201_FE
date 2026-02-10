@@ -3,17 +3,23 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ParticipateModal } from '../ParticipateModal';
 import type { Funding } from '@/types/funding';
 
-// Mock UI components that might cause issues in test environment
 vi.mock('@/components/ui/dialog', () => ({
     Dialog: ({ open, children }: any) => (open ? <div>{children}</div> : null),
     DialogContent: ({ children }: any) => <div>{children}</div>,
     DialogHeader: ({ children }: any) => <div data-testid="dialog-header">{children}</div>,
     DialogTitle: ({ children }: any) => <h2>{children}</h2>,
     DialogDescription: ({ children }: any) => <p>{children}</p>,
-    DialogFooter: ({ children }: any) => <div>{children}</div>,
+    DialogFooter: ({ children, className }: any) => <div className={className}>{children}</div>,
 }));
 
-// Setup mock for toast
+vi.mock('@/components/ui/separator', () => ({
+    Separator: () => <hr />,
+}));
+
+vi.mock('next/image', () => ({
+    default: ({ alt, ...props }: any) => <img alt={alt} {...props} />,
+}));
+
 vi.mock('sonner', () => ({
     toast: {
         success: vi.fn(),
@@ -21,12 +27,17 @@ vi.mock('sonner', () => ({
     },
 }));
 
-// Mock the useFundingMutations hook
 const mockMutate = vi.fn();
 vi.mock('@/features/funding/hooks/useFundingMutations', () => ({
     useParticipateFunding: () => ({
         mutate: mockMutate,
         isPending: false,
+    }),
+}));
+
+vi.mock('@/features/wallet/hooks/useWallet', () => ({
+    useWallet: () => ({
+        data: { walletId: 1, balance: 120000 },
     }),
 }));
 
@@ -38,7 +49,7 @@ describe('ParticipateModal Component', () => {
         organizer: { id: 'user-2', nickname: 'Jane', avatarUrl: '' },
         recipientId: 'user-1',
         recipient: { id: 'user-1', nickname: 'John', avatarUrl: '' },
-        product: { id: 'p1', name: 'Test Funding Item', price: 100000, imageUrl: '', status: 'ON_SALE' as const },
+        product: { id: 'p1', name: 'Test Funding Item', price: 100000, imageUrl: '/test-img.jpg', status: 'ON_SALE' as const },
         targetAmount: 100000,
         currentAmount: 50000,
         status: 'IN_PROGRESS',
@@ -54,7 +65,7 @@ describe('ParticipateModal Component', () => {
         vi.clearAllMocks();
     });
 
-    it('GIVEN user opens the modal, THEN it should display funding product name', () => {
+    it('GIVEN user opens the modal, THEN it should display product image, name, and recipient', () => {
         render(
             <ParticipateModal
                 open={true}
@@ -64,11 +75,14 @@ describe('ParticipateModal Component', () => {
             />
         );
 
-        expect(screen.getByText('Test Funding Item')).toBeInTheDocument();
         expect(screen.getByText('펀딩 참여하기')).toBeInTheDocument();
+        expect(screen.getAllByText('Test Funding Item')).toHaveLength(2);
+        expect(screen.getByAltText('Test Funding Item')).toBeInTheDocument();
+        expect(screen.getByText('for @John')).toBeInTheDocument();
+        expect(screen.getByText('₩100,000')).toBeInTheDocument();
     });
 
-    it('GIVEN funding progress, THEN it should display remaining amount text', () => {
+    it('GIVEN wallet has balance, THEN it should display wallet balance', () => {
         render(
             <ParticipateModal
                 open={true}
@@ -78,11 +92,11 @@ describe('ParticipateModal Component', () => {
             />
         );
 
-        // Should show remaining amount text
-        expect(screen.getByText(/남은 목표 금액/)).toBeInTheDocument();
+        expect(screen.getByText('내 지갑 잔액')).toBeInTheDocument();
+        expect(screen.getByText('₩120,000')).toBeInTheDocument();
     });
 
-    it('GIVEN user enters 0 amount, THEN submit button should be disabled', () => {
+    it('GIVEN funding progress, THEN it should display remaining amount', () => {
         render(
             <ParticipateModal
                 open={true}
@@ -92,7 +106,39 @@ describe('ParticipateModal Component', () => {
             />
         );
 
-        const submitBtn = screen.getByRole('button', { name: /참여하기/i });
-        expect(submitBtn).toBeDisabled();
+        expect(screen.getByText('남은 목표 금액')).toBeInTheDocument();
+        expect(screen.getByText('₩50,000')).toBeInTheDocument();
+    });
+
+    it('GIVEN modal is open, THEN it should show two CTA buttons', () => {
+        render(
+            <ParticipateModal
+                open={true}
+                onOpenChange={mockOnOpenChange}
+                funding={mockFunding}
+                onSuccess={mockOnSuccess}
+            />
+        );
+
+        const cartBtn = screen.getByRole('button', { name: /장바구니에 담기/i });
+        const checkoutBtn = screen.getByRole('button', { name: /바로 결제하기/i });
+        expect(cartBtn).toBeInTheDocument();
+        expect(checkoutBtn).toBeInTheDocument();
+    });
+
+    it('GIVEN user enters 0 amount, THEN both CTA buttons should be disabled', () => {
+        render(
+            <ParticipateModal
+                open={true}
+                onOpenChange={mockOnOpenChange}
+                funding={mockFunding}
+                onSuccess={mockOnSuccess}
+            />
+        );
+
+        const cartBtn = screen.getByRole('button', { name: /장바구니에 담기/i });
+        const checkoutBtn = screen.getByRole('button', { name: /바로 결제하기/i });
+        expect(cartBtn).toBeDisabled();
+        expect(checkoutBtn).toBeDisabled();
     });
 });
