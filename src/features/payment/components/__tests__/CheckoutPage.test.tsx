@@ -80,7 +80,7 @@ vi.mock('@/features/wallet/hooks/useWallet', () => ({
 
 // Mock order/payment mutations
 vi.mock('@/features/order/hooks/useOrderMutations', () => ({
-    useCreateOrder: () => ({
+    usePlaceOrder: () => ({
         mutateAsync: vi.fn().mockResolvedValue({ id: 'order-1' }),
         isPending: false,
     }),
