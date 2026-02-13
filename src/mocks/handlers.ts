@@ -16,7 +16,7 @@ import {
 import {
   fundings,
   fundingParticipants,
-  myOrganizedFundings,
+
   myParticipatedFundings,
   myReceivedFundings,
   type Funding,
@@ -561,33 +561,7 @@ export const handlers = [
     });
   }),
 
-  http.get('**/api/v2/fundings/my/organized', ({ request }) => {
-    const url = new URL(request.url);
-    const status = url.searchParams.get('status');
-    const page = parseInt(url.searchParams.get('page') || '0');
-    const size = parseInt(url.searchParams.get('size') || '20');
 
-    let filtered = myOrganizedFundings;
-    if (status) {
-      filtered = myOrganizedFundings.filter((f) => f.status === status);
-    }
-
-    const start = page * size;
-    const end = start + size;
-    const paginated = filtered.slice(start, end);
-
-    return HttpResponse.json({
-      items: paginated,
-      page: {
-        page,
-        size,
-        totalElements: filtered.length,
-        totalPages: Math.ceil(filtered.length / size),
-        hasNext: end < filtered.length,
-        hasPrevious: page > 0,
-      },
-    });
-  }),
 
   http.get('**/api/v2/fundings/my/participated', ({ request }) => {
     const url = new URL(request.url);

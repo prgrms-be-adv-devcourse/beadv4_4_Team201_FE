@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Gift, Heart, Package, ChevronRight } from 'lucide-react';
 import {
-    useMyOrganizedFundings,
+
     useMyParticipatedFundings,
     useMyReceivedFundings,
 } from '@/features/funding/hooks/useFunding';
@@ -20,17 +20,12 @@ interface ActivityItem {
  * Clean list with dividers
  */
 export function FundingActivityMenu() {
-    const { data: organized } = useMyOrganizedFundings();
+
     const { data: participated } = useMyParticipatedFundings();
     const { data: received } = useMyReceivedFundings();
 
     const activities: ActivityItem[] = [
-        {
-            icon: Package,
-            label: '내가 만든 펀딩',
-            count: organized?.page.totalElements ?? 0,
-            href: '/fundings/organized',
-        },
+
         {
             icon: Heart,
             label: '참여한 펀딩',

@@ -12,7 +12,6 @@ export const queryKeys = {
   // Fundings
   fundings: ['fundings'] as const,
   funding: (id: string) => ['fundings', id] as const,
-  myOrganizedFundings: ['fundings', 'organized'] as const,
   myParticipatedFundings: ['fundings', 'participated'] as const,
   myReceivedFundings: ['fundings', 'received'] as const,
 
@@ -31,10 +30,10 @@ export const queryKeys = {
 
   // Products
   products: Object.assign(
-      (params?: any) => ['products', params] as const,
-      {
-          popular: () => ['products', 'popular'] as const,
-      }
+    (params?: any) => ['products', params] as const,
+    {
+      popular: () => ['products', 'popular'] as const,
+    }
   ),
   product: (id: string) => ['products', id] as const,
 
@@ -58,7 +57,7 @@ export const queryKeys = {
  * | Add to cart             | cart, funding(id)                                 |
  * | Remove from cart        | cart                                              |
  * | Update cart item        | cart                                              |
- * | Create funding          | myWishlist, myOrganizedFundings, home             |
+ * | Create funding          | myWishlist,  home             |
  * | Participate in funding  | funding(id), cart                                 |
  * | Accept/Refuse funding   | funding(id), myReceivedFundings                   |
  * | Charge wallet           | wallet, walletHistory                             |
