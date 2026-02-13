@@ -8,15 +8,18 @@ import { UserHomeHero } from '@/features/user-home/components/UserHomeHero';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FundingCard } from '@/components/common/FundingCard';
 import { useProfile } from '@/features/profile/hooks/useProfile';
-import { useMyOrganizedFundings } from '@/features/funding/hooks/useFunding';
+
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { InlineError } from '@/components/common/InlineError';
 import { Loader2 } from 'lucide-react';
 
+import type { Funding } from '@/types/funding';
+
 export function UserHomeContent({ userId }: { userId: string }) {
     const { user: auth0User } = useAuth();
     const { data: profile, isLoading: isProfileLoading, isError: isProfileError, error: profileError, refetch: refetchProfile } = useProfile();
-    const { data: fundingsResponse, isLoading: isFundingsLoading } = useMyOrganizedFundings();
+    const isFundingsLoading = false;
+    const fundingsResponse = { items: [] };
 
     const user = useMemo(() => {
         if (!profile) return null;
@@ -31,8 +34,8 @@ export function UserHomeContent({ userId }: { userId: string }) {
         };
     }, [profile, auth0User]);
 
-    const fundings = fundingsResponse?.items || [];
-    
+    const fundings: Funding[] = [];
+
     const ongoingFundings = fundings.filter(f => f.status === 'IN_PROGRESS');
     const endedFundings = fundings.filter(f => f.status !== 'IN_PROGRESS');
 
@@ -65,8 +68,8 @@ export function UserHomeContent({ userId }: { userId: string }) {
             headerVariant="main"
             showBottomNav={false}
         >
-            <UserHomeHero 
-                user={user} 
+            <UserHomeHero
+                user={user}
                 isMe={userId === 'me' || (auth0User?.sub === user.id)}
             />
 
@@ -138,7 +141,7 @@ export function UserHomeContent({ userId }: { userId: string }) {
 export default function UserHomePage({ params }: { params: Promise<{ userId: string }> }) {
     const container = use(params);
     const { userId } = container;
-    
+
     return <UserHomeContentWithRedirect userId={userId} />;
 }
 
@@ -146,7 +149,7 @@ function UserHomeContentWithRedirect({ userId }: { userId: string }) {
     if (userId === 'me') {
         return <RedirectToProfile />;
     }
-    
+
     return <UserHomeContent userId={userId} />;
 }
 

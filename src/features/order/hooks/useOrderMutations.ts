@@ -9,7 +9,7 @@ import type { PlaceOrderRequest, PlaceOrderResult } from '@/types/order';
  * @note V2 API는 주문 생성과 결제를 한 번에 처리합니다.
  *       별도의 Payment API 호출이 필요하지 않습니다.
  *
- * Invalidates: orders, cart, myParticipatedFundings, myOrganizedFundings
+ * Invalidates: orders, cart, myParticipatedFundings
  */
 export function usePlaceOrder() {
   const queryClient = useQueryClient();
@@ -23,7 +23,6 @@ export function usePlaceOrder() {
       queryClient.invalidateQueries({ queryKey: queryKeys.orders });
       queryClient.invalidateQueries({ queryKey: queryKeys.cart });
       queryClient.invalidateQueries({ queryKey: queryKeys.myParticipatedFundings });
-      queryClient.invalidateQueries({ queryKey: queryKeys.myOrganizedFundings });
     },
   });
 }

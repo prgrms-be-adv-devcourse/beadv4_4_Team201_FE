@@ -270,29 +270,7 @@ export async function getMyReceivedFundings(
   return mapPageResponse(response, mapBackendMyFundingSummary);
 }
 
-/**
- * 주최한 펀딩 목록 조회
- * @note 백엔드에 해당 API 없음 - 빈 배열 반환
- * @todo 백엔드에 GET /api/v2/fundings/organized/list 추가 요청 필요
- */
-export async function getMyOrganizedFundings(
-  _params?: FundingsParams,
-): Promise<FundingListResponse> {
-  // TODO: 백엔드에 API 추가 후 구현
-  // const endpoint = `/api/v2/fundings/organized/list`;
-  return {
-    content: [],
-    items: [],
-    page: {
-      page: 0,
-      size: 10,
-      totalElements: 0,
-      totalPages: 0,
-      hasNext: false,
-      hasPrevious: false,
-    },
-  };
-}
+
 
 /**
  * 펀딩 생성

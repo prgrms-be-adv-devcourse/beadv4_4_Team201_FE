@@ -40,22 +40,7 @@ vi.mock('@/features/profile/hooks/useProfile', () => ({
     }),
 }));
 
-// Mock useMyOrganizedFundings hook
-vi.mock('@/features/funding/hooks/useFunding', () => ({
-    useMyOrganizedFundings: () => ({
-        data: {
-            items: [
-                {
-                    id: 1,
-                    status: 'IN_PROGRESS',
-                    product: { name: 'Test Funding' },
-                },
-            ],
-        },
-        isLoading: false,
-        error: null,
-    }),
-}));
+
 
 describe('UserHomePage', () => {
     it('renders user profile and content tabs', async () => {

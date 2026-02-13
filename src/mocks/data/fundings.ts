@@ -273,9 +273,7 @@ export const fundingParticipants: Record<string, FundingParticipant[]> = {
   ],
 };
 
-export const myOrganizedFundings = fundings.filter(
-  (f) => f.organizerId === members[0].id
-);
+
 
 export const myParticipatedFundings = fundings.filter((f) =>
   fundingParticipants[f.id]?.some((p) => p.memberId === members[0].id)
