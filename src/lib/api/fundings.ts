@@ -60,6 +60,46 @@ interface BackendMyFundingSummary {
 }
 
 /**
+ * 백엔드 MyFundingResponseDto (나의 펀딩 단건 조회)
+ * @see FundingController GET /api/v2/fundings/my/{id}
+ */
+interface BackendMyFundingResponse {
+  fundingId: number;
+  wishlistItemId: number;
+  targetAmount: number;
+  currentAmount: number;
+  status: string; // FundingStatus
+  deadline: string; // LocalDateTime
+  participants: {
+    participantId: number;
+    nickName: string;
+  }[] | null;
+  achievementRate: number;
+  daysRemaining: number;
+}
+
+// ... (existing code)
+
+/**
+ * 백엔드 MyFundingResponseDto (나의 펀딩 단건 조회)
+ * @see FundingController GET /api/v2/fundings/my/{id}
+ */
+interface BackendMyFundingResponse {
+  fundingId: number;
+  wishlistItemId: number;
+  targetAmount: number;
+  currentAmount: number;
+  status: string; // FundingStatus
+  deadline: string; // LocalDateTime
+  participants: {
+    participantId: number;
+    nickName: string;
+  }[] | null;
+  achievementRate: number;
+  daysRemaining: number;
+}
+
+/**
  * 백엔드 PageResponse wrapper
  */
 interface BackendPageResponse<T> {
@@ -159,6 +199,63 @@ function mapBackendMyFundingSummary(backend: BackendMyFundingSummary): Funding {
   };
 }
 
+function mapBackendMyFunding(backend: BackendMyFundingResponse): FundingDetail {
+  const status = mapFundingStatus(backend.status);
+
+  // 기본 Funding 정보 매핑
+  const funding: Funding = {
+    id: backend.fundingId.toString(),
+    wishItemId: backend.wishlistItemId.toString(),
+    product: {
+      id: "", // 백엔드 미제공
+      name: "", // 백엔드 미제공
+      price: backend.targetAmount, // 목표 금액을 상품 가격으로 가정
+      imageUrl: "/images/placeholder-product.svg",
+      status: "ON_SALE",
+      brandName: "",
+    },
+    organizerId: "", // 백엔드 미제공 (본인)
+    organizer: {
+      id: "",
+      nickname: "Me",
+      avatarUrl: null,
+    },
+    recipientId: "", // 백엔드 미제공 (본인)
+    recipient: {
+      id: "",
+      nickname: "Me",
+      avatarUrl: null,
+    },
+    targetAmount: backend.targetAmount,
+    currentAmount: backend.currentAmount,
+    status: status,
+    participantCount: backend.participants?.length || 0,
+    expiresAt: backend.deadline,
+    createdAt: "",
+  };
+
+  // Participants 매핑
+  const participants = (backend.participants || []).map(p => ({
+    id: p.participantId.toString(),
+    fundingId: backend.fundingId.toString(),
+    memberId: "", // 백엔드 미제공
+    member: {
+      id: "",
+      nickname: p.nickName,
+      avatarUrl: null,
+    },
+    amount: 0, // 백엔드 미제공 (삭제됨)
+    isOrganizer: false,
+    participatedAt: "", // 백엔드 미제공
+  }));
+
+  return {
+    ...funding,
+    participants: participants,
+    myParticipation: null, // 본인의 펀딩이므로 null 또는 적절한 값
+  };
+}
+
 function mapPageResponse<T>(
   backendPage: BackendPageResponse<T>,
   mapper: (item: T) => Funding,
@@ -179,6 +276,17 @@ function mapPageResponse<T>(
 }
 
 // --- API Functions ---
+
+/**
+ * 나의 펀딩 단건 조회
+ * @endpoint GET /api/v2/fundings/my/{id}
+ */
+export async function getMyFunding(fundingId: string): Promise<FundingDetail> {
+  const backend = await apiClient.get<BackendMyFundingResponse>(
+    `/api/v2/fundings/my/${fundingId}`
+  );
+  return mapBackendMyFunding(backend);
+}
 
 /**
  * 펀딩 단건 조회

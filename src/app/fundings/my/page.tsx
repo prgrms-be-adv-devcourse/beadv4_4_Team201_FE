@@ -7,12 +7,6 @@ import { Megaphone, Users, Gift } from 'lucide-react';
 
 const FUNDING_MENU = [
     {
-        href: '/fundings/organized',
-        icon: Megaphone,
-        title: '내가 주최한 펀딩',
-        description: '내가 만든 펀딩 목록',
-    },
-    {
         href: '/fundings/participated',
         icon: Users,
         title: '참여한 펀딩',

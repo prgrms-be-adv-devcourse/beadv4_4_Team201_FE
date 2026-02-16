@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { AppShell } from '@/components/layout/AppShell';
 import { Footer } from '@/components/layout/Footer';
 import { FundingCard } from '@/components/common/FundingCard';
@@ -95,10 +96,12 @@ function FundingList({ data, isLoading, isError, onRetry }: {
     }
 
     return (
-        <>
+        <div className="space-y-4">
             {data.items.map((funding: any) => (
-                <FundingCard key={funding.id} funding={funding} />
+                <Link key={funding.id} href={`/fundings/my/${funding.id}`} className="block">
+                    <FundingCard funding={funding} variant="list" />
+                </Link>
             ))}
-        </>
+        </div>
     );
 }
