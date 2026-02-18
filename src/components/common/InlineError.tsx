@@ -11,14 +11,14 @@ interface InlineErrorProps {
 function getErrorInfo(error: unknown): { icon: 'server' | 'network' | 'default'; message: string } {
     if (!error) return { icon: 'default', message: '데이터를 불러오는데 실패했습니다.' };
 
-    const status = (error as any)?.status;
+    const status = error instanceof Object && 'status' in error ? (error as { status: number }).status : undefined;
     const errorMessage = error instanceof Error ? error.message : '';
 
     if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError') || errorMessage.includes('ERR_CONNECTION_REFUSED')) {
         return { icon: 'network', message: '서버에 연결할 수 없습니다.\n네트워크 연결을 확인하거나 잠시 후 다시 시도해 주세요.' };
     }
 
-    if (status >= 500 || errorMessage.includes('Internal Server Error')) {
+    if ((status !== undefined && status >= 500) || errorMessage.includes('Internal Server Error')) {
         return { icon: 'server', message: '서버에 일시적인 문제가 발생했습니다.\n잠시 후 다시 시도해 주세요.' };
     }
 

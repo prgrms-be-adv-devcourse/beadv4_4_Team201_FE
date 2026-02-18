@@ -6,7 +6,7 @@ import {
   updateWishlistVisibility,
   type WishlistVisibilityUpdateRequest,
 } from '@/lib/api/wishlists';
-import type { WishItemCreateRequest } from '@/types/wishlist';
+import type { WishItemCreateRequest, Wishlist } from '@/types/wishlist';
 
 /**
  * Hook to add an item to the user's wishlist
@@ -42,11 +42,11 @@ export function useRemoveWishlistItem() {
       const previousWishlist = queryClient.getQueryData(queryKeys.myWishlist);
 
       // Optimistically update to the new value
-      queryClient.setQueryData(queryKeys.myWishlist, (old: any) => {
+      queryClient.setQueryData(queryKeys.myWishlist, (old: Wishlist | undefined) => {
         if (!old) return old;
         return {
           ...old,
-          items: old.items.filter((item: any) => item.id !== itemId),
+          items: old.items.filter((item) => item.id !== itemId),
           itemCount: Math.max(0, old.itemCount - 1),
         };
       });
