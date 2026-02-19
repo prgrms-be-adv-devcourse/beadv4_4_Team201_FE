@@ -13,13 +13,6 @@ export interface WishlistVisibilityUpdateRequest {
   visibility: WishlistVisibility;
 }
 
-interface WishlistInfoResponse {
-  id: string;
-  memberId: string;
-  visibility: WishlistVisibility;
-  // Add other fields if necessary
-}
-
 // Backend response types
 interface BackendWishlistItemResponse {
   id: number;

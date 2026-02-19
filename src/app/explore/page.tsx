@@ -143,7 +143,6 @@ export default function DiscoverPage() {
                             publicMembers.map((member) => (
                                 <MemberCard
                                     key={member.memberId}
-                                    memberId={member.memberId}
                                     nickname={member.nickname}
                                     onClick={() => handleViewWishlist(member.memberId)}
                                 />
@@ -201,8 +200,7 @@ export default function DiscoverPage() {
     );
 }
 
-function MemberCard({ memberId, nickname, onClick }: {
-    memberId: string;
+function MemberCard({ nickname, onClick }: {
     nickname: string;
     onClick: () => void;
 }) {

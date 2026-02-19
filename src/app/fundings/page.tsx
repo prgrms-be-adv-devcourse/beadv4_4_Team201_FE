@@ -1,6 +1,5 @@
 'use client';
 
-import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { AppShell } from '@/components/layout/AppShell';
@@ -10,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getFundings } from '@/lib/api/fundings';
 import { FundingStatus } from '@/types/funding';
-import { Sparkles, Trophy, Clock, Search, Filter } from 'lucide-react';
+import { Sparkles, Search, Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { EmptyState } from '@/components/common/EmptyState';
@@ -26,7 +25,7 @@ export default function FundingsPage() {
     const router = useRouter();
     const [statusFilter, setStatusFilter] = useState<FundingStatus | 'ALL'>('ALL');
 
-    const { data, isLoading, error } = useQuery({
+    const { data, isLoading } = useQuery({
         queryKey: ['fundings', statusFilter],
         queryFn: () => getFundings({ 
             status: statusFilter === 'ALL' ? undefined : statusFilter as FundingStatus,

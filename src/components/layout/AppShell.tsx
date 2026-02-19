@@ -1,6 +1,5 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
 import { Header, HeaderVariant } from './Header';
 import { BottomNav } from './BottomNav';
 import { cn } from '@/lib/utils';

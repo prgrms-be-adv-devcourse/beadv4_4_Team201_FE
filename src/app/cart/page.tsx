@@ -13,7 +13,7 @@ import { useCart } from '@/features/cart/hooks/useCart';
 import { useUpdateCartItem, useRemoveCartItems, useToggleCartSelection } from '@/features/cart/hooks/useCartMutations';
 import { Skeleton } from '@/components/ui/skeleton';
 import { InlineError } from '@/components/common/InlineError';
-import { Minus, Plus, Gift } from 'lucide-react';
+import { Gift } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatPrice } from '@/lib/format';
 

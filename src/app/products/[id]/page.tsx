@@ -4,7 +4,7 @@ import { use, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, Heart, Share2, Minus, Plus, ShoppingBag, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Heart, Share2, Minus, Plus, ShoppingBag, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';

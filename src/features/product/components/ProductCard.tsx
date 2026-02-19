@@ -2,7 +2,6 @@
 
 import Image from 'next/image';
 import { useQueryClient } from '@tanstack/react-query';
-import { Card } from '@/components/ui/card';
 import { queryKeys } from '@/lib/query/keys';
 import { getProduct } from '@/lib/api/products';
 import type { Product } from '@/types/product';

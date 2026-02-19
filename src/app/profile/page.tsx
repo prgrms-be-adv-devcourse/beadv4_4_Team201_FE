@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { AppShell } from '@/components/layout/AppShell';
 import { Footer } from '@/components/layout/Footer';
@@ -31,7 +30,6 @@ const DISCOVER_MENU = [
 ];
 
 export default function ProfilePage() {
-    const router = useRouter();
     const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
     const { data: member, isLoading: isProfileLoading, error, refetch } = useProfile();
     const { data: wallet } = useWallet();

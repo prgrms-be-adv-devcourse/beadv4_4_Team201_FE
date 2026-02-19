@@ -2,16 +2,11 @@ import { http, HttpResponse, passthrough } from 'msw';
 import {
   currentUser,
   members,
-  friends,
-  type Member,
-  type MemberPublic,
 } from './data/members';
 import {
   products,
   productDetails,
   popularProducts,
-  type Product,
-  type ProductDetail,
 } from './data/products';
 import {
   fundings,
@@ -20,16 +15,12 @@ import {
   myParticipatedFundings,
   myReceivedFundings,
   type Funding,
-  type FundingParticipant,
 } from './data/fundings';
 import {
   myWishlist,
   friendsWishlists,
   wishlists,
-  type Wishlist,
 } from './data/wishlists';
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
 // Mock wallet data
 let walletBalance = 1000000;
@@ -233,10 +224,9 @@ export const handlers = [
 
   http.post('**/api/v2/wallet/withdraw', async ({ request }) => {
     const body = await request.json();
-    const { amount, bankCode, accountNumber } = body as {
+    const { amount, bankCode } = body as {
       amount: number;
       bankCode: string;
-      accountNumber: string;
     };
 
     if (amount > walletBalance) {

@@ -2,11 +2,6 @@
 
 import Link from 'next/link';
 
-interface FooterLink {
-    label: string;
-    href: string;
-}
-
 const FOOTER_LINKS = {
     aboutUs: [
         { label: '회사소개', href: '/about' },

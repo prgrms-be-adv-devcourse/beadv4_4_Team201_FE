@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import {
     ChevronLeft,
     Search,
@@ -11,14 +11,12 @@ import {
     User,
     Heart,
     LogOut,
-    Menu,
     Wallet,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { LoginButton } from '@/features/auth/components/LoginButton';
 import { SignupButton } from '@/features/auth/components/SignupButton';
-import { UserMenu } from '@/features/auth/components/UserMenu';
 import { SearchOverlay } from '@/components/common/SearchOverlay';
 import { useCart } from '@/features/cart/hooks/useCart';
 import { useWallet } from '@/features/wallet/hooks/useWallet';

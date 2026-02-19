@@ -1,7 +1,6 @@
 'use client';
 
 import Image from 'next/image';
-import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Trash2 } from 'lucide-react';
