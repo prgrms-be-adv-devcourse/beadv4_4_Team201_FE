@@ -11,15 +11,25 @@ import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useCart } from '@/features/cart/hooks/useCart';
 import { useUpdateCartItem, useRemoveCartItems, useToggleCartSelection } from '@/features/cart/hooks/useCartMutations';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 import { Skeleton } from '@/components/ui/skeleton';
 import { InlineError } from '@/components/common/InlineError';
-import { Gift } from 'lucide-react';
+import { Gift, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatPrice } from '@/lib/format';
 
 export default function CartPage() {
     const router = useRouter();
-    const { data: cart, isLoading, isError, error, refetch } = useCart();
+    const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
+    const { data: cart, isLoading: isCartLoading, isError, error, refetch } = useCart();
+
+    // Redirect to login if not authenticated
+    if (!isAuthLoading && !isAuthenticated) {
+        window.location.href = '/auth/login';
+        return null;
+    }
+
+    const isLoading = isAuthLoading || isCartLoading;
     const updateCartItem = useUpdateCartItem();
     const removeCartItems = useRemoveCartItems();
     const toggleSelection = useToggleCartSelection();

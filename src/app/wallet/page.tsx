@@ -8,6 +8,7 @@ import { TransactionHistory } from '@/features/wallet/components/TransactionHist
 import { ChargeModal } from '@/features/wallet/components/ChargeModal';
 import { WithdrawModal } from '@/features/wallet/components/WithdrawModal';
 import { useWallet, useWalletHistory } from '@/features/wallet/hooks/useWallet';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 import { Skeleton } from '@/components/ui/skeleton';
 import { InlineError } from '@/components/common/InlineError';
 import type { TransactionType } from '@/types/wallet';
@@ -18,10 +19,19 @@ export default function WalletPage() {
     const [filterType, setFilterType] = useState<TransactionType | undefined>(undefined);
     const [isRefreshing, setIsRefreshing] = useState(false);
 
+    const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
     const { data: wallet, isLoading: isLoadingWallet, error: walletError, refetch: refetchWallet } = useWallet();
     const { data: historyData, isLoading: isLoadingHistory, error: historyError, refetch: refetchHistory } = useWalletHistory({
         type: filterType
     });
+
+    // Redirect to login if not authenticated
+    if (!isAuthLoading && !isAuthenticated) {
+        window.location.href = '/auth/login';
+        return null;
+    }
+
+    const isLoading = isAuthLoading || isLoadingWallet || isLoadingHistory;
 
     const handleRefresh = useCallback(async () => {
         setIsRefreshing(true);
@@ -32,7 +42,7 @@ export default function WalletPage() {
         }
     }, [refetchWallet, refetchHistory]);
 
-    if (isLoadingWallet || isLoadingHistory) {
+    if (isLoading) {
         return (
             <AppShell
                 headerTitle="내 지갑"
