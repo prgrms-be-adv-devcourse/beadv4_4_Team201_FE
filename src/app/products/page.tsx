@@ -104,27 +104,8 @@ function ProductSearchContent() {
   return (
     <AppShell headerVariant="main">
       <div className="max-w-screen-2xl mx-auto px-8">
-        {/* Curated Header Section */}
-        {!searchQuery && (
-          <div className="py-12 border-b border-gray-100 mb-8">
-            <h1 className="text-4xl font-black tracking-tighter mb-4 uppercase">Product Curation</h1>
-            <p className="text-sm text-gray-500 max-w-lg leading-relaxed">
-              취향을 담은 특별한 발견. 기프티파이가 제안하는 테마별 상품들을 탐색하고 
-              당신만의 위시리스트를 완성해보세요.
-            </p>
-            
-            {/* Theme Tags */}
-            <div className="flex gap-3 mt-8 overflow-x-auto no-scrollbar pb-2">
-              {['NEW', 'BEST', 'GIFT GUIDE', 'OFFICE', 'TECH', 'HOME'].map(tag => (
-                <button key={tag} className="px-5 py-2 border border-black text-[10px] font-bold hover:bg-black hover:text-white transition-colors">
-                  {tag}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
 
-        <div className="flex min-h-screen gap-12">
+        <div className="flex min-h-screen gap-12 pt-8">
           {/* Sidebar - Desktop */}
           <aside className="hidden lg:block w-40 flex-shrink-0 pt-4 sticky top-40 h-[calc(100vh-10rem)] overflow-y-auto no-scrollbar">
             {/* Categories */}
