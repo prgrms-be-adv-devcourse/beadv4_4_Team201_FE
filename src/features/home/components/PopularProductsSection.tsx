@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { handleImageError } from '@/lib/image';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -66,6 +67,7 @@ export function PopularProductsSection({
                                     fill
                                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                                     sizes="(max-width: 768px) 50vw, 15vw"
+                                    onError={handleImageError}
                                 />
                                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
                             </div>

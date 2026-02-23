@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { AppShell } from '@/components/layout/AppShell';
 import { Footer } from '@/components/layout/Footer';
@@ -16,6 +15,7 @@ import { formatPrice } from '@/lib/format';
 
 const MY_GIFT_MENU = [
     { label: '위시리스트', href: '/wishlist' },
+    { label: '친구 관리', href: '/friends' },
     { label: '참여한 펀딩', href: '/fundings/participated' },
     { label: '받은 선물', href: '/fundings/received' },
 ];
@@ -31,7 +31,6 @@ const DISCOVER_MENU = [
 ];
 
 export default function ProfilePage() {
-    const router = useRouter();
     const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
     const { data: member, isLoading: isProfileLoading, error, refetch } = useProfile();
     const { data: wallet } = useWallet();

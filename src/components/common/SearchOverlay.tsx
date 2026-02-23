@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface SearchOverlayProps {
     isOpen: boolean;
@@ -115,7 +114,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                         인기 검색어
                     </h3>
                     <ul className="space-y-3">
-                        {POPULAR_KEYWORDS.map((keyword, index) => (
+                        {POPULAR_KEYWORDS.map((keyword) => (
                             <li key={keyword}>
                                 <button
                                     onClick={() => handleKeywordClick(keyword)}

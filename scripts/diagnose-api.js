@@ -1,4 +1,3 @@
-const { DefaultAzureCredential } = require('@azure/identity');
 const fetch = require('node-fetch');
 
 // Environment variables - load from .env.local or set before running

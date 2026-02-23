@@ -1,4 +1,4 @@
-import { members, friends } from './members';
+import { members } from './members';
 import { products } from './products';
 
 export type FundingStatus =

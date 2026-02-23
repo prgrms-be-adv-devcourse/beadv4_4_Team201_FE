@@ -1,5 +1,3 @@
-import { toast } from 'sonner';
-
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 const BASE_URL = typeof window === 'undefined' ? API_URL : '/api/proxy';
 
@@ -20,14 +18,6 @@ export class ApiError extends Error {
 interface RequestConfig extends RequestInit {
     token?: string;
     idempotencyKey?: string;
-}
-
-// Backend CommonResponse wrapper type
-interface CommonResponse<T> {
-    success: boolean;
-    data: T;
-    message?: string;
-    errors?: unknown[];
 }
 
 async function request<T>(endpoint: string, config: RequestConfig = {}): Promise<T> {

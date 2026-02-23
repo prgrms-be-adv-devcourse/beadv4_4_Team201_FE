@@ -1,4 +1,5 @@
 import { apiClient } from './client';
+import { resolveImageUrl } from '@/lib/image';
 import type {
   Cart,
   CartItem,
@@ -50,17 +51,17 @@ function mapBackendCart(backend: BackendCartResponse): Cart {
   return {
     id: backend.cartId.toString(),
     memberId: backend.memberId.toString(),
-    items: backend.items.map((item, index) => mapBackendCartItem(item, backend.cartId, index)),
+    items: backend.items.map((item) => mapBackendCartItem(item, backend.cartId)),
     selectedCount: backend.items.length, // 백엔드에서 selected 필드 미제공, 전체 선택으로 간주
     totalAmount: backend.totalAmount,
   };
 }
 
-function mapBackendCartItem(item: BackendCartItemResponse, cartId: number, index: number): CartItem {
+function mapBackendCartItem(item: BackendCartItemResponse, cartId: number): CartItem {
   const isNewFunding = item.targetType === 'FUNDING_PENDING';
 
   return {
-    id: `${cartId}-${item.targetType}-${item.targetId}`, // 복합 키 생성
+    id: `${cartId}::${item.targetType}::${item.targetId}`, // 복합 키 생성
     cartId: cartId.toString(),
     fundingId: item.targetType === 'FUNDING' ? item.targetId.toString() : '',
     funding: {
@@ -70,7 +71,7 @@ function mapBackendCartItem(item: BackendCartItemResponse, cartId: number, index
         id: '',
         name: item.productName,
         price: item.productPrice,
-        imageUrl: '/images/placeholder-product.svg',
+        imageUrl: resolveImageUrl(undefined),
         status: 'ON_SALE',
         brandName: '',
       },
@@ -95,9 +96,9 @@ function mapBackendCartItem(item: BackendCartItemResponse, cartId: number, index
 // --- Helpers ---
 
 export function parseCartItemId(itemId: string): { targetType: BackendTargetType; targetId: number } {
-  const parts = itemId.split('-');
-  const targetId = parseInt(parts[parts.length - 1], 10);
-  const targetType = parts.slice(1, -1).join('-') as BackendTargetType;
+  const parts = itemId.split('::');
+  const targetId = parseInt(parts[2], 10);
+  const targetType = parts[1] as BackendTargetType;
   return { targetType, targetId };
 }
 
@@ -189,13 +190,6 @@ export async function toggleCartItemSelection(_itemId: string, _selected: boolea
   return Promise.resolve();
 }
 
-/**
- * 장바구니 비우기
- * @note 백엔드에 해당 API 없음
- * @todo 백엔드에 DELETE /api/v2/carts/{cartId} 추가 요청
- */
 export async function clearCart(): Promise<void> {
-  throw new Error(
-    '장바구니 비우기 API가 백엔드에 없습니다.'
-  );
+  await apiClient.delete('/api/v2/carts');
 }

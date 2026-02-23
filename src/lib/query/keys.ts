@@ -31,12 +31,18 @@ export const queryKeys = {
 
   // Products
   products: Object.assign(
-    (params?: any) => ['products', params] as const,
-    {
-      popular: () => ['products', 'popular'] as const,
-    }
+
+      (params?: object) => ['products', params] as const,
+      {
+          popular: () => ['products', 'popular'] as const,
+      }
+
   ),
   product: (id: string) => ['products', id] as const,
+
+  // Friends
+  friends: ['friends'] as const,
+  friendRequests: ['friends', 'requests'] as const,
 
   // Members
   member: (id: string) => ['members', id] as const,

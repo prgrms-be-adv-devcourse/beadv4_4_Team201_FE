@@ -1,4 +1,5 @@
 import { apiClient } from './client';
+import { resolveImageUrl } from '@/lib/image';
 import type {
   Product,
   ProductDetail,
@@ -29,6 +30,7 @@ interface BackendProduct {
   name: string;
   description: string;
   price: number;
+  imageKey?: string;
   createdAt: string;
 }
 
@@ -38,7 +40,7 @@ function mapBackendProduct(product: BackendProduct): Product {
     id: product.id.toString(),
     name: product.name,
     price: product.price,
-    imageUrl: '/images/placeholder-product.svg', // 백엔드에 이미지 없음
+    imageUrl: resolveImageUrl(product.imageKey),
     status: 'ON_SALE',
     brandName: product.sellerNickName,
   };
@@ -98,7 +100,7 @@ export async function getProduct(productId: string): Promise<ProductDetail> {
     id: product.id.toString(),
     name: product.name,
     price: product.price,
-    imageUrl: '/images/placeholder-product.svg',
+    imageUrl: resolveImageUrl(product.imageKey),
     status: 'ON_SALE',
     brandName: product.sellerNickName,
     sellerId: '', // 백엔드에서 제공하지 않음

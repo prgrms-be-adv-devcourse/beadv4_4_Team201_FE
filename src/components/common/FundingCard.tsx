@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { handleImageError } from '@/lib/image';
 import { differenceInDays, parseISO } from 'date-fns';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { FundingProgress } from './FundingProgress';
@@ -72,6 +73,7 @@ export function FundingCard({
                         alt={funding.product.name}
                         fill
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        onError={handleImageError}
                     />
                     <div className="absolute top-3 left-3">
                         {getStatusLabel()}
@@ -127,6 +129,7 @@ export function FundingCard({
                     alt={funding.product.name}
                     fill
                     className="object-cover"
+                    onError={handleImageError}
                 />
             </div>
 

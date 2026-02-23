@@ -1,6 +1,5 @@
-import { render, screen, waitFor } from '@/test/test-utils';
-import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen } from '@/test/test-utils';
+import { describe, it, expect, vi } from 'vitest';
 import CartPage from '@/app/cart/page';
 import type { Cart } from '@/types/cart';
 

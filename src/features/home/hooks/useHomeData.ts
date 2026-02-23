@@ -6,7 +6,7 @@ import type { HomeData } from '@/types/home';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 
 export function useHomeData() {
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   const results = useQueries({
     queries: [

@@ -1,4 +1,5 @@
 import { apiClient } from "./client";
+import { resolveImageUrl } from "@/lib/image";
 import type { PageParams } from "@/types/api";
 import type {
   Funding,
@@ -33,6 +34,7 @@ interface BackendFundingResponse {
   productId: number;
   productName: string;
   productPrice: number;
+  imageKey?: string;
   achievementRate: number; // 달성률 (%)
   daysRemaining: number; // 남은 일수
 }
@@ -141,7 +143,7 @@ function mapBackendFunding(backend: BackendFundingResponse): Funding {
       id: backend.productId.toString(),
       name: backend.productName,
       price: backend.productPrice,
-      imageUrl: "/images/placeholder-product.svg", // 백엔드에서 제공하지 않음
+      imageUrl: resolveImageUrl(backend.imageKey),
       status: "ON_SALE",
       brandName: "",
     },
@@ -174,7 +176,7 @@ function mapBackendMyFundingSummary(backend: BackendMyFundingSummary): Funding {
       id: "",
       name: "",
       price: backend.targetAmount, // 상품 가격 = 목표 금액
-      imageUrl: "/images/placeholder-product.svg",
+      imageUrl: resolveImageUrl(undefined),
       status: "ON_SALE",
       brandName: "",
     },

@@ -10,6 +10,7 @@ import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Search, Gift, Users, ArrowRight } from 'lucide-react';
 import { usePublicWishlistSearch } from '@/features/wishlist/hooks/useWishlist';
+import { AddFriendButton } from '@/features/friend/components/AddFriendButton';
 
 export default function DiscoverPage() {
     const router = useRouter();
@@ -105,10 +106,16 @@ export default function DiscoverPage() {
                                                     </p>
                                                 </div>
                                             </div>
-                                            <Button className="border-2 border-black bg-transparent text-black hover:bg-black hover:text-white rounded-none font-bold py-6 px-10 transition-all">
-                                                보러가기
-                                                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" strokeWidth={1.5} />
-                                            </Button>
+                                            <div className="flex items-center gap-3">
+                                                <AddFriendButton
+                                                    targetUserId={member.memberId}
+                                                    targetNickname={member.nickname}
+                                                />
+                                                <Button className="border-2 border-black bg-transparent text-black hover:bg-black hover:text-white rounded-none font-bold py-6 px-10 transition-all">
+                                                    보러가기
+                                                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" strokeWidth={1.5} />
+                                                </Button>
+                                            </div>
                                         </div>
                                     </Card>
                                 ))}
@@ -143,7 +150,6 @@ export default function DiscoverPage() {
                             publicMembers.map((member) => (
                                 <MemberCard
                                     key={member.memberId}
-                                    memberId={member.memberId}
                                     nickname={member.nickname}
                                     onClick={() => handleViewWishlist(member.memberId)}
                                 />
@@ -201,8 +207,7 @@ export default function DiscoverPage() {
     );
 }
 
-function MemberCard({ memberId, nickname, onClick }: {
-    memberId: string;
+function MemberCard({ nickname, onClick }: {
     nickname: string;
     onClick: () => void;
 }) {

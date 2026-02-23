@@ -39,7 +39,7 @@ export function useWishlistItem(productId: string) {
         await addMutation.mutateAsync({ productId });
         toast.success('찜 목록에 추가했습니다');
       }
-    } catch (error) {
+    } catch {
       toast.error('처리 중 오류가 발생했습니다');
     }
   }, [user, isInWishlist, wishlistItem?.id, productId, addMutation, removeMutation]);

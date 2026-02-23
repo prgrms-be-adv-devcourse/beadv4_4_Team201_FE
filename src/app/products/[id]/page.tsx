@@ -1,10 +1,9 @@
 'use client';
 
 import { use, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, Heart, Share2, Minus, Plus, ShoppingBag, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Heart, Share2, ShoppingBag, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
@@ -12,19 +11,15 @@ import { AppShell } from '@/components/layout/AppShell';
 import { Footer } from '@/components/layout/Footer';
 import { useProductDetail } from '@/features/product/hooks/useProductDetail';
 import { useWishlistItem } from '@/features/wishlist/hooks/useWishlistItem';
-import { useCart } from '@/features/cart/hooks/useCart';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { formatCurrency } from '@/lib/utils/format';
 
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const router = useRouter();
   const { data: product, isLoading, error } = useProductDetail(id);
   const { isInWishlist, toggleWishlist, isLoading: wishlistLoading } = useWishlistItem(id);
-  const { addToCart, isLoading: cartLoading } = useCart();
-  
-  const [quantity, setQuantity] = useState(1);
+
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const handleShare = async () => {
@@ -44,24 +39,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     }
   };
 
-  const handleAddToCart = async () => {
-    try {
-      await addToCart({ productId: id, quantity });
-      toast.success('장바구니에 담았습니다');
-    } catch {
-      toast.error('장바구니 담기에 실패했습니다');
-    }
-  };
-
-  const handleBuyNow = async () => {
-    try {
-      await addToCart({ productId: id, quantity });
-      router.push('/checkout');
-    } catch {
-      toast.error('주문 처리 중 오류가 발생했습니다');
-    }
-  };
-
   if (error) {
     return (
       <AppShell headerVariant="detail">
@@ -69,9 +46,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           <div className="text-6xl mb-6">😢</div>
           <h2 className="text-xl font-medium mb-2">상품을 찾을 수 없습니다</h2>
           <p className="text-muted-foreground mb-6">요청하신 상품이 존재하지 않거나 삭제되었습니다.</p>
-          <Button variant="outline" onClick={() => router.push('/products')}>
-            상품 목록으로 돌아가기
-          </Button>
+          <Link href="/products">
+            <Button variant="outline">상품 목록으로 돌아가기</Button>
+          </Link>
         </div>
         <Footer />
       </AppShell>
@@ -218,31 +195,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
             <Separator />
 
-            {/* Quantity Selector */}
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">수량</span>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
-                  disabled={quantity <= 1}
-                  className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <Minus className="w-4 h-4" strokeWidth={1.5} />
-                </button>
-                <span className="w-8 text-center font-medium tabular-nums">{quantity}</span>
-                <button
-                  onClick={() => setQuantity(prev => prev + 1)}
-                  className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-gray-50"
-                >
-                  <Plus className="w-4 h-4" strokeWidth={1.5} />
-                </button>
-              </div>
-            </div>
-
-            {/* Total Price */}
+            {/* Price */}
             <div className="flex items-center justify-between py-4 border-t border-b">
-              <span className="font-medium">총 상품금액</span>
-              <span className="text-2xl font-bold">{formatCurrency(product.price * quantity)}</span>
+              <span className="font-medium">상품금액</span>
+              <span className="text-2xl font-bold">{formatCurrency(product.price)}</span>
             </div>
 
             {/* Action Buttons */}
@@ -268,27 +224,27 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 <Share2 className="w-5 h-5" strokeWidth={1.5} />
               </Button>
 
-              {/* Add to Cart Button */}
+              {/* Add to Cart Button — 일반 상품 장바구니는 백엔드 미지원 (GENERAL_PRODUCT) */}
               <Button
                 variant="outline"
                 size="lg"
                 className="flex-1 font-medium"
-                onClick={handleAddToCart}
-                disabled={cartLoading}
+                onClick={() => toast.info('준비중인 기능입니다')}
+                disabled
               >
                 <ShoppingBag className="w-5 h-5 mr-2" strokeWidth={1.5} />
-                장바구니 담기
+                준비중인 기능입니다
               </Button>
             </div>
 
-            {/* Buy Now Button */}
+            {/* Buy Now Button — 일반 상품 구매는 백엔드 미지원 */}
             <Button
               size="lg"
-              className="w-full bg-black hover:bg-gray-800 text-white font-bold text-lg h-14"
-              onClick={handleBuyNow}
-              disabled={cartLoading}
+              className="w-full font-bold text-lg h-14"
+              onClick={() => toast.info('준비중인 기능입니다')}
+              disabled
             >
-              바로 구매하기
+              준비중인 기능입니다
             </Button>
           </div>
         </div>

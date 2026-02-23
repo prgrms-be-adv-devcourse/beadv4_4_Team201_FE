@@ -1,9 +1,8 @@
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Heart, Share2 } from 'lucide-react';
+import { Share2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { AddFriendButton } from '@/features/friend/components/AddFriendButton';
 
 interface UserPublicProfile {
     id: string;
@@ -12,7 +11,6 @@ interface UserPublicProfile {
     avatarUrl?: string;
     coverImageUrl?: string;
     followerCount: number;
-    isFollowing?: boolean;
 }
 
 interface UserHomeHeroProps {
@@ -21,7 +19,6 @@ interface UserHomeHeroProps {
 }
 
 export function UserHomeHero({ user, isMe = false }: UserHomeHeroProps) {
-    const [isFollowing, setIsFollowing] = useState(user.isFollowing);
 
     return (
         <div className="relative mb-12">
@@ -54,20 +51,10 @@ export function UserHomeHero({ user, isMe = false }: UserHomeHeroProps) {
 
                     <div className="mt-6 flex items-center justify-center gap-3 h-10">
                         {!isMe && (
-                            <>
-                                <Button
-                                    className={cn(
-                                        "min-w-[100px] rounded-full transition-all",
-                                        isFollowing ? "bg-secondary text-foreground hover:bg-secondary/80" : ""
-                                    )}
-                                    onClick={() => setIsFollowing(!isFollowing)}
-                                >
-                                    {isFollowing ? 'Following' : 'Follow'}
-                                </Button>
-                                <Button variant="outline" size="icon" className="rounded-full">
-                                    <Heart className={cn("w-5 h-5", isFollowing && "fill-current text-red-500 border-red-500")} />
-                                </Button>
-                            </>
+                            <AddFriendButton
+                                targetUserId={user.id}
+                                targetNickname={user.nickname}
+                            />
                         )}
                         <Button variant="outline" size="icon" className="rounded-full">
                             <Share2 className="w-5 h-5" />
