@@ -1,6 +1,11 @@
 import { Funding } from './funding';
 
 /**
+ * Cart item availability status
+ */
+export type ItemStatus = 'AVAILABLE' | 'SOLD_OUT' | 'DISCONTINUED';
+
+/**
  * Shopping cart containing funding participation items
  */
 export interface Cart {
@@ -23,6 +28,8 @@ export interface CartItem {
     selected: boolean;
     isNewFunding: boolean;
     createdAt: string;
+    status: ItemStatus;
+    statusMessage?: string | null;
 }
 
 /**

@@ -4,7 +4,8 @@ import type {
   Cart,
   CartItem,
   CartItemCreateRequest,
-  CartItemUpdateRequest
+  CartItemUpdateRequest,
+  ItemStatus,
 } from '@/types/cart';
 
 // --- Backend V2 API Types ---
@@ -30,9 +31,11 @@ interface BackendCartItemRequest {
 interface BackendCartItemResponse {
   targetType: BackendTargetType;
   targetId: number;
-  productName: string;
+  productName: string | null;
   productPrice: number;
   contributionAmount: number;
+  status: string; // ItemStatus enum (AVAILABLE, SOLD_OUT, DISCONTINUED)
+  statusMessage: string | null;
 }
 
 /**
@@ -69,7 +72,7 @@ function mapBackendCartItem(item: BackendCartItemResponse, cartId: number): Cart
       wishItemId: item.targetType === 'FUNDING_PENDING' ? item.targetId.toString() : '',
       product: {
         id: '',
-        name: item.productName,
+        name: item.productName || '',
         price: item.productPrice,
         imageUrl: resolveImageUrl(undefined),
         status: 'ON_SALE',
@@ -87,9 +90,11 @@ function mapBackendCartItem(item: BackendCartItemResponse, cartId: number): Cart
       createdAt: '',
     },
     amount: item.contributionAmount,
-    selected: true, // 백엔드에서 미제공, 기본값 true
+    selected: item.status === 'AVAILABLE', // unavailable 아이템은 비선택
     isNewFunding,
     createdAt: new Date().toISOString(),
+    status: (item.status as ItemStatus) || 'AVAILABLE',
+    statusMessage: item.statusMessage,
   };
 }
 

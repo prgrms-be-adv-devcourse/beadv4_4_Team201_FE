@@ -4,9 +4,10 @@ import Image from 'next/image';
 import { handleImageError } from '@/lib/image';
 import { Progress } from '@/components/ui/progress';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Trash2 } from 'lucide-react';
+import { Trash2, AlertCircle } from 'lucide-react';
 import type { CartItem as CartItemType } from '@/types/cart';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { cn } from '@/lib/utils';
 
 interface CartItemProps {
     item: CartItemType;
@@ -20,8 +21,11 @@ interface CartItemProps {
  * Clean layout with minimal borders
  */
 export function CartItem({ item, onUpdateAmount, onToggleSelect, onRemove }: CartItemProps) {
-    const { funding, amount, selected, isNewFunding } = item;
-    const progressPercent = (funding.currentAmount / funding.targetAmount) * 100;
+    const { funding, amount, selected, isNewFunding, status, statusMessage } = item;
+    const isAvailable = status === 'AVAILABLE';
+    const progressPercent = funding.targetAmount > 0
+        ? (funding.currentAmount / funding.targetAmount) * 100
+        : 0;
 
     // Calculate D-day
     const today = new Date();
@@ -29,6 +33,7 @@ export function CartItem({ item, onUpdateAmount, onToggleSelect, onRemove }: Car
     const daysLeft = Math.ceil((expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
     const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!isAvailable) return;
         const value = parseInt(e.target.value.replace(/,/g, '')) || 0;
         if (value >= 0) {
             onUpdateAmount(item.id, value);
@@ -36,12 +41,16 @@ export function CartItem({ item, onUpdateAmount, onToggleSelect, onRemove }: Car
     };
 
     return (
-        <div className="flex gap-4 py-4 border-b border-border last:border-0">
+        <div className={cn(
+            "flex gap-4 py-4 border-b border-border last:border-0",
+            !isAvailable && "opacity-60"
+        )}>
             <Checkbox
                 checked={selected}
                 onCheckedChange={(checked) => onToggleSelect(item.id, checked === true)}
                 aria-label="펀딩 선택"
                 className="mt-1"
+                disabled={!isAvailable}
             />
 
             <div className="relative aspect-square h-24 w-24 shrink-0 bg-secondary overflow-hidden">
@@ -49,7 +58,7 @@ export function CartItem({ item, onUpdateAmount, onToggleSelect, onRemove }: Car
                     src={funding.product.imageUrl}
                     alt={funding.product.name}
                     fill
-                    className="object-cover"
+                    className={cn("object-cover", !isAvailable && "grayscale")}
                     onError={handleImageError}
                 />
             </div>
@@ -72,8 +81,11 @@ export function CartItem({ item, onUpdateAmount, onToggleSelect, onRemove }: Car
                                 <span className="text-xs text-muted-foreground">· 새 펀딩</span>
                             )}
                         </div>
-                        <h3 className="text-sm font-medium line-clamp-2">
-                            {funding.product.name}
+                        <h3 className={cn(
+                            "text-sm font-medium line-clamp-2",
+                            !isAvailable && "text-muted-foreground"
+                        )}>
+                            {funding.product?.name}
                         </h3>
                     </div>
                     <button
@@ -85,14 +97,24 @@ export function CartItem({ item, onUpdateAmount, onToggleSelect, onRemove }: Car
                     </button>
                 </div>
 
-                {/* Progress */}
-                <div className="space-y-1">
-                    <Progress value={progressPercent} className="h-1" />
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                        <span>{Math.round(progressPercent)}% 달성</span>
-                        <span>D-{daysLeft}</span>
+                {/* Unavailable message */}
+                {!isAvailable && statusMessage && (
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <AlertCircle className="h-3 w-3 shrink-0" />
+                        <span>{statusMessage}</span>
                     </div>
-                </div>
+                )}
+
+                {/* Progress (only for available items) */}
+                {isAvailable && (
+                    <div className="space-y-1">
+                        <Progress value={progressPercent} className="h-1" />
+                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <span>{Math.round(progressPercent)}% 달성</span>
+                            <span>D-{daysLeft}</span>
+                        </div>
+                    </div>
+                )}
 
                 {/* Amount Input */}
                 <div className="flex items-center gap-2 mt-1">
@@ -102,7 +124,11 @@ export function CartItem({ item, onUpdateAmount, onToggleSelect, onRemove }: Car
                             type="text"
                             value={amount.toLocaleString()}
                             onChange={handleAmountChange}
-                            className="flex-1 text-sm font-medium text-right bg-transparent border-b border-border focus:border-foreground focus:outline-none py-1"
+                            disabled={!isAvailable}
+                            className={cn(
+                                "flex-1 text-sm font-medium text-right bg-transparent border-b border-border focus:border-foreground focus:outline-none py-1",
+                                !isAvailable && "text-muted-foreground cursor-not-allowed"
+                            )}
                             placeholder="0"
                         />
                         <span className="text-sm ml-1">원</span>

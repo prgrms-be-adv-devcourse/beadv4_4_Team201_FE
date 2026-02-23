@@ -98,7 +98,7 @@ function FundingList({ data, isLoading, isError, onRetry }: {
     return (
         <div className="space-y-4">
             {data.items.map((funding: any) => (
-                <Link key={funding.id} href={`/fundings/${funding.id}`} className="block">
+                <Link key={funding.id} href={`/fundings/participated/${funding.id}`} className="block">
                     <FundingCard funding={funding} variant="list" />
                 </Link>
             ))}
