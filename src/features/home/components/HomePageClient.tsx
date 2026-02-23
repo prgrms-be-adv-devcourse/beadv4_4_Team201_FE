@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { SAMPLE_HERO_IMAGES } from '@/lib/images/sample-images';
 import { AppShell } from '@/components/layout/AppShell';
 import { Footer } from '@/components/layout/Footer';
 import { WelcomeSection } from '@/features/home/components/WelcomeSection';
@@ -98,7 +99,7 @@ export function HomePageClient() {
                         {/* 1. Curation */}
                         <Link href="/curation/birthday-men" className="group relative aspect-[4/3] md:aspect-auto md:h-80 overflow-hidden bg-black">
                             <Image
-                                src="https://images.unsplash.com/photo-1513201099705-a9746e1e201f?q=80&w=1200"
+                                src={SAMPLE_HERO_IMAGES.CURATION}
                                 alt="Curation"
                                 fill
                                 className="object-cover opacity-70 transition-transform duration-700 group-hover:scale-105"
@@ -112,7 +113,7 @@ export function HomePageClient() {
                         {/* 2. Review Snap */}
                         <Link href="/products" className="group relative aspect-[4/3] md:aspect-auto md:h-80 overflow-hidden bg-black">
                             <Image
-                                src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1200"
+                                src={SAMPLE_HERO_IMAGES.GIFT}
                                 alt="Reviews"
                                 fill
                                 className="object-cover opacity-70 transition-transform duration-700 group-hover:scale-105"
@@ -126,7 +127,7 @@ export function HomePageClient() {
                         {/* 3. User Home (Example) */}
                         <Link href="/u/user-1" className="group relative aspect-[4/3] md:aspect-auto md:h-80 overflow-hidden bg-black">
                             <Image
-                                src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1200"
+                                src={SAMPLE_HERO_IMAGES.LIFESTYLE}
                                 alt="User Home"
                                 fill
                                 className="object-cover opacity-70 transition-transform duration-700 group-hover:scale-105"
