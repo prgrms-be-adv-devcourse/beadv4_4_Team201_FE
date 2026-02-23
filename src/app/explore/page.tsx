@@ -169,8 +169,7 @@ export default function DiscoverPage() {
                             <h3 className="text-2xl font-black mb-2">My Wishlist</h3>
                             <p className="text-gray-400 text-sm mb-6">내가 받고 싶은 선물을 등록해보세요.</p>
                             <Button
-                                variant="outline"
-                                className="border-white text-white hover:bg-white hover:text-black rounded-none font-bold"
+                                className="bg-white text-black hover:bg-gray-200 rounded-none font-bold"
                                 onClick={() => router.push('/wishlist')}
                             >
                                 GO TO WISH
