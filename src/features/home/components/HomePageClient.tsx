@@ -110,7 +110,7 @@ export function HomePageClient() {
                         </Link>
 
                         {/* 2. Review Snap */}
-                        <Link href="/reviews" className="group relative aspect-[4/3] md:aspect-auto md:h-80 overflow-hidden bg-black">
+                        <Link href="/products" className="group relative aspect-[4/3] md:aspect-auto md:h-80 overflow-hidden bg-black">
                             <Image
                                 src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1200"
                                 alt="Reviews"

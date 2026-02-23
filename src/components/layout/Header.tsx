@@ -246,9 +246,6 @@ function DesktopMainNav() {
             <Link href="/explore" className="text-4xl font-extrabold tracking-tight hover:text-gray-600 transition-colors">
                 DISCOVER
             </Link>
-            <Link href="/reviews" className="text-4xl font-extrabold tracking-tight hover:text-gray-600 transition-colors">
-                STORY
-            </Link>
         </nav>
     );
 }
