@@ -73,11 +73,11 @@ export function HomePageSkeleton() {
             <Skeleton className="h-6 w-24" />
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-4 gap-y-12">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 border-t border-l border-border">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="space-y-4">
+              <div key={i} className="bg-white border-r border-b border-border">
                 <Skeleton className="aspect-[4/5] w-full rounded-none" />
-                <div className="space-y-2">
+                <div className="p-3 space-y-2">
                   <Skeleton className="h-4 w-full" />
                   <Skeleton className="h-4 w-2/3" />
                 </div>

@@ -49,14 +49,13 @@ export function PopularProductsSection({
                     </Link>
                 </div>
 
-                {/* Product Grid - Editorial Style */}
-                <div className="px-8 flex flex-col gap-px">
-                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-px bg-border">
+                <div className="px-8 flex flex-col">
+                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 border-t border-l border-border">
                     {displayProducts.map((product) => (
                         <Link
                             key={product.id}
                             href={`/products/${product.id}`}
-                            className="group bg-white"
+                            className="group bg-white border-r border-b border-border"
                             onMouseEnter={() => handlePrefetch(product.id)}
                         >
                             {/* Image */}
