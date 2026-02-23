@@ -45,14 +45,20 @@ export function FundingCard({
     const recipientNickname = funding.recipient.nickname || '알 수 없음';
 
     const getStatusLabel = () => {
-        if (funding.status === 'ACHIEVED' || funding.status === 'ACCEPTED') {
+        if (funding.status === 'ACHIEVED') {
             return <span className="text-xs font-medium text-foreground">달성</span>;
+        }
+        if (funding.status === 'ACCEPTED') {
+            return <span className="text-xs font-medium text-foreground">수락</span>;
+        }
+        if (funding.status === 'REFUSED') {
+            return <span className="text-xs text-muted-foreground">거절</span>;
+        }
+        if (funding.status === 'CLOSED') {
+            return <span className="text-xs text-muted-foreground">종료</span>;
         }
         if (funding.status === 'EXPIRED' || Number.isNaN(daysLeft) || daysLeft < 0) {
             return <span className="text-xs text-muted-foreground">만료</span>;
-        }
-        if (funding.status === 'REFUSED' || funding.status === 'CLOSED') {
-            return <span className="text-xs text-muted-foreground">종료</span>;
         }
         if (daysLeft === 0) {
             return <span className="text-xs font-medium text-foreground">D-Day</span>;
