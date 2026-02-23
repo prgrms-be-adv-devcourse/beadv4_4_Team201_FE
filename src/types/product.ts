@@ -24,6 +24,8 @@ export interface Product {
     imageUrl: string;
     status: ProductStatus;
     brandName?: string;
+    isSoldout?: boolean;
+    isActive?: boolean;
 }
 
 /**

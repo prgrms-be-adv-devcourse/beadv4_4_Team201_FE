@@ -32,6 +32,10 @@ interface BackendProduct {
   price: number;
   category: string;
   imageKey?: string;
+  isSoldout?: boolean;
+  soldout?: boolean;
+  isActive?: boolean;
+  active?: boolean;
   createdAt: string;
 }
 
@@ -44,11 +48,15 @@ function mapBackendProduct(product: BackendProduct): Product {
     imageUrl: resolveImageUrl(product.imageKey),
     status: 'ON_SALE',
     brandName: product.sellerNickName,
+    isSoldout: product.isSoldout ?? product.soldout,
+    isActive: product.isActive ?? product.active,
   };
 }
 
 function mapBackendResponse(response: BackendProductResponse): ProductListResponse {
-  const mappedProducts = response.content.map(mapBackendProduct);
+  const mappedProducts = response.content
+    .filter(product => (product.isActive ?? product.active) !== false)
+    .map(mapBackendProduct);
   return {
     content: mappedProducts,
     items: mappedProducts,
@@ -106,10 +114,12 @@ export async function getProduct(productId: string): Promise<ProductDetail> {
     imageUrl: resolveImageUrl(product.imageKey),
     status: 'ON_SALE',
     brandName: product.sellerNickName,
-    sellerId: '', // 백엔드에서 제공하지 않음
+    isSoldout: product.isSoldout ?? product.soldout,
+    isActive: product.isActive ?? product.active,
+    sellerId: '',
     description: product.description,
     images: [],
-    stock: 100, // 백엔드에서 제공하지 않음
+    stock: 100,
     category: product.category,
     rating: 0,
     reviewCount: 0,

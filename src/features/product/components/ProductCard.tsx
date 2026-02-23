@@ -56,9 +56,19 @@ export function ProductCard({ product, onClick, className }: ProductCardProps) {
         <h3 className="text-xs font-medium text-gray-900 line-clamp-2 leading-tight group-hover:opacity-60 transition-opacity">
           {product.name}
         </h3>
-        <p className="text-sm font-black tracking-tighter tabular-nums mt-1">
-          {product.price.toLocaleString()}원
-        </p>
+        <div className="flex items-center gap-2 mt-1">
+          <p className={cn(
+            "text-sm font-black tracking-tighter tabular-nums",
+            product.isSoldout && "text-gray-400"
+          )}>
+            {product.price.toLocaleString()}원
+          </p>
+          {product.isSoldout && (
+            <span className="text-[10px] font-bold text-white bg-black px-1.5 py-0.5">
+              품절
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );

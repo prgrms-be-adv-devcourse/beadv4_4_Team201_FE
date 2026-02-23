@@ -119,7 +119,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           {/* Image Gallery */}
           <div className="space-y-4">
             {/* Main Image */}
-            <div className="relative aspect-square bg-gray-50 overflow-hidden">
+            <div className="relative aspect-square bg-gray-50 overflow-hidden max-w-[90%]">
               <Image
                 src={images[currentImageIndex]}
                 alt={product.name}
@@ -176,98 +176,99 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           </div>
 
           {/* Product Info */}
-          <div className="lg:sticky lg:top-24 lg:self-start space-y-6">
-            {/* Brand & Name */}
-            <div>
-              {product.brandName && (
-                <p className="text-sm text-muted-foreground uppercase tracking-wider mb-1">
-                  {product.brandName}
-                </p>
-              )}
-              <h1 className="text-2xl md:text-3xl font-bold leading-tight">
-                {product.name}
-              </h1>
-            </div>
-
-            {/* Price */}
-            <div className="text-3xl md:text-4xl font-bold">
-              {formatCurrency(product.price)}
-            </div>
-
-            <Separator />
-
-            {/* Description */}
-            {product.description && (
-              <div className="text-sm text-muted-foreground leading-relaxed">
-                {product.description}
+          <div className="flex flex-col">
+            {/* Top: 상품 정보 */}
+            <div className="space-y-6">
+              {/* Brand & Name */}
+              <div>
+                {product.brandName && (
+                  <p className="text-sm text-muted-foreground uppercase tracking-wider mb-1">
+                    {product.brandName}
+                  </p>
+                )}
+                <h1 className="text-2xl md:text-3xl font-bold leading-tight">
+                  {product.name}
+                </h1>
               </div>
-            )}
 
-            {/* Delivery Info */}
-            <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">배송비</span>
-                <span className="font-medium">무료배송</span>
+              {/* Price */}
+              <div className="text-3xl md:text-4xl font-bold">
+                {formatCurrency(product.price)}
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">배송예정</span>
-                <span className="font-medium">내일 도착 예정</span>
+
+              <Separator />
+
+              {/* Delivery Info */}
+              <div className="!my-4 bg-gray-50 p-4 rounded-lg space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">배송비</span>
+                  <span className="font-medium">무료배송</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">배송예정</span>
+                  <span className="font-medium">내일 도착 예정</span>
+                </div>
               </div>
+
+              <Separator />
             </div>
 
-            <Separator />
+            {/* Spacer */}
+            <div className="flex-1" />
 
-            {/* Price */}
-            <div className="flex items-center justify-between py-4 border-t border-b">
-              <span className="font-medium">상품금액</span>
-              <span className="text-2xl font-bold">{formatCurrency(product.price)}</span>
-            </div>
+            {/* Bottom: 가격 + 버튼 */}
+            <div className="space-y-4 mt-6">
+              {/* Price */}
+              <div className="flex items-center justify-between py-4 border-b">
+                <span className="font-medium">상품금액</span>
+                <span className="text-2xl font-bold">{formatCurrency(product.price)}</span>
+              </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-3">
-              {/* Wishlist Button */}
+              {/* Action Buttons */}
+              <div className="flex gap-3">
+                {/* Wishlist Button */}
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-14 flex-shrink-0"
+                  onClick={() => toggleWishlist()}
+                  disabled={wishlistLoading}
+                >
+                  <Heart className={cn("w-5 h-5", isInWishlist && "fill-red-500 text-red-500")} strokeWidth={1.5} />
+                </Button>
+
+                {/* Share Button */}
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-14 flex-shrink-0"
+                  onClick={handleShare}
+                >
+                  <Share2 className="w-5 h-5" strokeWidth={1.5} />
+                </Button>
+
+                {/* Add to Cart Button */}
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="flex-1 font-medium"
+                  onClick={() => toast.info('준비중인 기능입니다')}
+                  disabled
+                >
+                  <ShoppingBag className="w-5 h-5 mr-2" strokeWidth={1.5} />
+                  {product.isSoldout ? '품절' : '준비중인 기능입니다'}
+                </Button>
+              </div>
+
+              {/* Buy Now Button */}
               <Button
-                variant="outline"
                 size="lg"
-                className="w-14 flex-shrink-0"
-                onClick={() => toggleWishlist()}
-                disabled={wishlistLoading}
-              >
-                <Heart className={cn("w-5 h-5", isInWishlist && "fill-red-500 text-red-500")} strokeWidth={1.5} />
-              </Button>
-
-              {/* Share Button */}
-              <Button
-                variant="outline"
-                size="lg"
-                className="w-14 flex-shrink-0"
-                onClick={handleShare}
-              >
-                <Share2 className="w-5 h-5" strokeWidth={1.5} />
-              </Button>
-
-              {/* Add to Cart Button — 일반 상품 장바구니는 백엔드 미지원 (GENERAL_PRODUCT) */}
-              <Button
-                variant="outline"
-                size="lg"
-                className="flex-1 font-medium"
-                onClick={() => toast.info('준비중인 기능입니다')}
+                className="w-full font-bold text-lg h-14"
                 disabled
               >
-                <ShoppingBag className="w-5 h-5 mr-2" strokeWidth={1.5} />
-                준비중인 기능입니다
+                {product.isSoldout ? '품절' : '준비중인 기능입니다'}
               </Button>
             </div>
-
-            {/* Buy Now Button — 일반 상품 구매는 백엔드 미지원 */}
-            <Button
-              size="lg"
-              className="w-full font-bold text-lg h-14"
-              onClick={() => toast.info('준비중인 기능입니다')}
-              disabled
-            >
-              준비중인 기능입니다
-            </Button>
           </div>
         </div>
 
