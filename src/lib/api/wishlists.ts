@@ -1,4 +1,5 @@
 import { apiClient } from './client';
+import { resolveImageUrl } from '@/lib/image';
 import type {
   Wishlist,
   WishItem,
@@ -13,13 +14,27 @@ export interface WishlistVisibilityUpdateRequest {
   visibility: WishlistVisibility;
 }
 
-// Backend response types
-interface BackendWishlistItemResponse {
+// Backend v2 response types
+interface BackendV2WishlistItemResponse {
   id: number;
   wishlistId: number;
   productId: number;
+  productName: string | null;
+  price: number;
+  imageKey: string | null;
+  isSoldout: boolean;
+  isActive: boolean;
   status: string;
   addedAt: string;
+}
+
+interface BackendV2WishlistResponse {
+  id: number;
+  memberId: number;
+  nickname: string | null;
+  visibility: string;
+  createdAt: string;
+  items: BackendV2WishlistItemResponse[];
 }
 
 function mapWishlistItemStatus(status: string): 'AVAILABLE' | 'IN_FUNDING' | 'FUNDED' {
@@ -33,67 +48,58 @@ function mapWishlistItemStatus(status: string): 'AVAILABLE' | 'IN_FUNDING' | 'FU
   }
 }
 
-export async function getMyWishlist(): Promise<Wishlist> {
-  // Backend has separate endpoints for wishlist info and items
-  // Fetch both and combine
-  const [wishlistInfo, backendItems] = await Promise.all([
-    apiClient.get<{ id: number; memberId: number; visibility: string }>('/api/wishlist/me'),
-    apiClient.get<BackendWishlistItemResponse[]>('/api/wishlist/items/me'),
-  ]);
-
-  // Transform backend items to frontend format
-  // Note: Backend only returns productId, so we create a minimal product placeholder
-  // The full product info should be fetched separately if needed
-  const items: WishItem[] = (backendItems || []).map((item) => ({
+function mapBackendItem(item: BackendV2WishlistItemResponse): WishItem {
+  return {
     id: item.id.toString(),
     wishlistId: item.wishlistId.toString(),
     productId: item.productId.toString(),
     product: {
       id: item.productId.toString(),
-      name: `Product ${item.productId}`,
-      price: 0,
-      imageUrl: '',
-      status: 'ON_SALE' as const,
+      name: item.productName || '',
+      price: item.price,
+      imageUrl: resolveImageUrl(item.imageKey),
+      status: item.isActive ? 'ON_SALE' as const : 'DISCONTINUED' as const,
       brandName: '',
     },
     status: mapWishlistItemStatus(item.status),
     fundingId: null,
     createdAt: item.addedAt || '',
-  }));
+  };
+}
+
+export async function getMyWishlist(): Promise<Wishlist> {
+  const response = await apiClient.get<BackendV2WishlistResponse>('/api/v2/wishlists/me');
+
+  const items = (response.items || []).map(mapBackendItem);
 
   return {
-    id: wishlistInfo.id.toString(),
-    memberId: wishlistInfo.memberId.toString(),
+    id: response.id.toString(),
+    memberId: response.memberId.toString(),
     member: {
-      id: wishlistInfo.memberId.toString(),
-      nickname: '',
+      id: response.memberId.toString(),
+      nickname: response.nickname || '',
       avatarUrl: null,
     },
-    visibility: wishlistInfo.visibility as WishlistVisibility,
+    visibility: response.visibility as WishlistVisibility,
     items,
     itemCount: items.length,
   };
 }
 
 export async function getWishlist(memberId: string): Promise<Wishlist> {
-  // Fetch full wishlist including items from standard endpoint
-  // Backend uses singular '/api/wishlist/items/{memberId}'
-  return apiClient.get<Wishlist>(`/api/wishlist/items/${memberId}`);
+  return apiClient.get<Wishlist>(`/api/v2/wishlists/${memberId}`);
 }
 
 export async function addWishlistItem(data: WishItemCreateRequest): Promise<WishItem> {
-  // Backend uses query param: POST /api/wishlist/items/add?productId={id}
-  return apiClient.post<WishItem>(`/api/wishlist/items/add?productId=${data.productId}`, {});
+  return apiClient.post<WishItem>(`/api/v2/wishlists/me/items/add?productId=${data.productId}`, {});
 }
 
 export async function removeWishlistItem(productId: string): Promise<void> {
-  // Backend uses query param: DELETE /api/wishlist/items/remove?productId={id}
-  return apiClient.delete<void>(`/api/wishlist/items/remove?productId=${productId}`);
+  return apiClient.delete<void>(`/api/v2/wishlists/me/items/remove?productId=${productId}`);
 }
 
 export async function updateWishlistVisibility(data: WishlistVisibilityUpdateRequest): Promise<Wishlist> {
-  // Backend: PATCH /api/wishlist/me/settings
-  return apiClient.patch<Wishlist>('/api/wishlist/me/settings', data);
+  return apiClient.patch<Wishlist>('/api/v2/wishlists/me/settings', data);
 }
 
 export async function getFriendsWishlists(limit?: number): Promise<FriendWishlistListResponse> {
