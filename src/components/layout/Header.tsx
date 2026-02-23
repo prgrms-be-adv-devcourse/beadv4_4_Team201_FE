@@ -251,16 +251,15 @@ function DesktopMainNav() {
 }
 
 const GIFT_CATEGORIES_DATA = [
-    { label: 'BIRTHDAY', subCategories: ['For Him', 'For Her', 'Friends', 'Parents', 'Kids'] },
-    { label: 'ANNIVERSARY', subCategories: ['Couple Items', 'Flowers', 'Dining', 'Small Gifts'] },
-    { label: 'WEDDING', subCategories: ['Tableware', 'Home Decor', 'Appliances', 'Bedding'] },
-    { label: 'BABY', subCategories: ['Clothing', 'Toys', 'Tude', 'Maternity'] },
-    { label: 'HOUSEWARMING', subCategories: ['Diffusers', 'Towels', 'Plants', 'Kitchenware'] },
-    { label: 'LUXURY', subCategories: ['Bags', 'Wallets', 'Jewelry', 'Watches'] },
-    { label: 'TECH', subCategories: ['Audio', 'Mobile', 'Gaming', 'Cameras'] },
-    { label: 'LIVING', subCategories: ['Furniture', 'Lighting', 'Fabric', 'Organization'] },
-    { label: 'BEAUTY', subCategories: ['Skincare', 'Makeup', 'Perfume', 'Body & Hair'] },
-    { label: 'GOURMET', subCategories: ['Coffee & Tea', 'Bakery', 'Fresh Food', 'Wine'] },
+    { label: 'ELECTRONICS', value: 'ELECTRONICS', subCategories: ['Audio', 'Mobile', 'Gaming', 'Cameras', 'Appliances'] },
+    { label: 'BEAUTY', value: 'BEAUTY', subCategories: ['Skincare', 'Makeup', 'Perfume', 'Body & Hair', 'Grooming'] },
+    { label: 'FASHION', value: 'FASHION', subCategories: ['Clothing', 'Bags', 'Wallets', 'Shoes', 'Jewelry'] },
+    { label: 'LIVING', value: 'LIVING', subCategories: ['Furniture', 'Lighting', 'Fabric', 'Home Decor', 'Candles'] },
+    { label: 'FOODS', value: 'FOODS', subCategories: ['Coffee & Tea', 'Bakery', 'Fresh Food', 'Wine & Spirits', 'Snacks'] },
+    { label: 'TOYS', value: 'TOYS', subCategories: ['Figures', 'Board Games', 'Plushies', 'DIY Kits', 'Stationery'] },
+    { label: 'OUTDOOR', value: 'OUTDOOR', subCategories: ['Camping', 'Hiking', 'Golf', 'Biking', 'Sports'] },
+    { label: 'PET', value: 'PET', subCategories: ['Dogs', 'Cats', 'Food', 'Toys', 'Accessories'] },
+    { label: 'KITCHEN', value: 'KITCHEN', subCategories: ['Tableware', 'Cookware', 'Kitchen Tools', 'Storage', 'Appliance'] },
 ];
 
 function DesktopCategoryNav() {

@@ -19,15 +19,15 @@ import type { PublicWishlistItem } from '@/types/wishlist';
 // Categories for sidebar filter (same as products page for consistency)
 const CATEGORIES = [
   { label: '전체', value: '' },
-  { label: '가방', value: 'BAG' },
-  { label: '지갑', value: 'WALLET' },
-  { label: '악세서리', value: 'ACCESSORY' },
-  { label: '의류', value: 'CLOTHING' },
-  { label: '신발', value: 'SHOES' },
+  { label: '전자기기', value: 'ELECTRONICS' },
   { label: '뷰티', value: 'BEAUTY' },
-  { label: '테크', value: 'TECH' },
-  { label: '홈/리빙', value: 'HOME' },
-  { label: '푸드', value: 'FOOD' },
+  { label: '패션/액세서리', value: 'FASHION' },
+  { label: '리빙/생활', value: 'LIVING' },
+  { label: '식품/음료', value: 'FOODS' },
+  { label: '완구/취미', value: 'TOYS' },
+  { label: '아웃도어', value: 'OUTDOOR' },
+  { label: '반려동물', value: 'PET' },
+  { label: '주방', value: 'KITCHEN' },
 ];
 
 interface FriendWishlistPageProps {
