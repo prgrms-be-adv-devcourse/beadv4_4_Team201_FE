@@ -86,7 +86,7 @@ export function FundingCard({
                 {/* Content */}
                 <div className="py-4">
                     <h3 className="text-sm font-medium line-clamp-1 group-hover:opacity-60 transition-opacity">
-                        {funding.product.name}
+                        {funding.product?.name}
                     </h3>
 
                     <div className="mt-3 space-y-2">
@@ -138,7 +138,7 @@ export function FundingCard({
 
             <div className="flex flex-1 flex-col justify-between pl-4">
                 <div>
-                    <h3 className="text-sm font-medium line-clamp-1">{funding.product.name}</h3>
+                    <h3 className="text-sm font-medium line-clamp-1">{funding.product?.name}</h3>
                     <p className="mt-0.5 text-xs text-muted-foreground">
                         {funding.targetAmount.toLocaleString()}원 목표
                     </p>

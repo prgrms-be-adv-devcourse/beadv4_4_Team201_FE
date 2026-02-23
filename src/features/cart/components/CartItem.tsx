@@ -46,8 +46,8 @@ export function CartItem({ item, onUpdateAmount, onToggleSelect, onRemove }: Car
 
             <div className="relative aspect-square h-24 w-24 shrink-0 bg-secondary overflow-hidden">
                 <Image
-                    src={funding.product.imageUrl}
-                    alt={funding.product.name}
+                    src={funding.product?.imageUrl || "/images/placeholder-product.svg"}
+                    alt={funding.product?.name || "상품 이미지"}
                     fill
                     className="object-cover"
                     onError={handleImageError}
@@ -73,7 +73,7 @@ export function CartItem({ item, onUpdateAmount, onToggleSelect, onRemove }: Car
                             )}
                         </div>
                         <h3 className="text-sm font-medium line-clamp-2">
-                            {funding.product.name}
+                            {funding.product?.name}
                         </h3>
                     </div>
                     <button
