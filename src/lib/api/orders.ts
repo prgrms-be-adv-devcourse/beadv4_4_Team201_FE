@@ -30,6 +30,7 @@ interface BackendOrderSummary {
   status: string;
   paymentMethod: string;
   createdAt: string;
+  paidAt: string | null;
   confirmedAt: string | null;
   cancelledAt: string | null;
 }
@@ -95,6 +96,7 @@ function mapBackendOrder(backend: BackendOrderSummary): Order {
     status: backend.status as Order['status'],
     paymentMethod: backend.paymentMethod as PaymentMethod,
     createdAt: backend.createdAt,
+    paidAt: backend.paidAt,
     confirmedAt: backend.confirmedAt,
     cancelledAt: backend.cancelledAt,
   };
