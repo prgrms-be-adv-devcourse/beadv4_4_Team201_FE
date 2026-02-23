@@ -100,7 +100,7 @@ export function FundingCard({
 
                     <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
                         <Avatar className="h-5 w-5">
-                            <AvatarImage src={funding.recipient.avatarUrl || undefined} />
+                            <AvatarImage src={funding.recipient.avatarUrl || undefined} alt={recipientNickname} />
                             <AvatarFallback className="text-[10px]">{recipientNickname[0]}</AvatarFallback>
                         </Avatar>
                         <span className="text-xs text-muted-foreground">
