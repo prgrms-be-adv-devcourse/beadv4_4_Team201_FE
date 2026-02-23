@@ -48,7 +48,10 @@ export function FundingCard({
         if (funding.status === 'ACHIEVED' || funding.status === 'ACCEPTED') {
             return <span className="text-xs font-medium text-foreground">달성</span>;
         }
-        if (daysLeft < 0) {
+        if (funding.status === 'EXPIRED' || Number.isNaN(daysLeft) || daysLeft < 0) {
+            return <span className="text-xs text-muted-foreground">만료</span>;
+        }
+        if (funding.status === 'REFUSED' || funding.status === 'CLOSED') {
             return <span className="text-xs text-muted-foreground">종료</span>;
         }
         if (daysLeft === 0) {
