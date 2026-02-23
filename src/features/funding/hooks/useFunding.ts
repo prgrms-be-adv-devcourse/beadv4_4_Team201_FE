@@ -43,8 +43,27 @@ export function useMyFunding(fundingId: string) {
 export function useMyParticipatedFundings(params?: FundingQueryParams) {
   const { user } = useAuth();
   return useQuery({
-    queryKey: queryKeys.myParticipatedFundings,
-    queryFn: () => getMyParticipatedFundings(params),
+    queryKey: [...queryKeys.myParticipatedFundings, params],
+    queryFn: async () => {
+      if (params?.status === 'ACCEPTED') {
+        const [acceptedRes, expiredRes] = await Promise.all([
+          getMyParticipatedFundings({ ...params, status: 'ACCEPTED' }),
+          getMyParticipatedFundings({ ...params, status: 'EXPIRED' }),
+        ]);
+
+        const combinedItems = [...acceptedRes.items, ...expiredRes.items];
+
+        return {
+          content: combinedItems,
+          items: combinedItems,
+          page: {
+            ...acceptedRes.page,
+            totalElements: acceptedRes.page.totalElements + expiredRes.page.totalElements,
+          },
+        };
+      }
+      return getMyParticipatedFundings(params);
+    },
     enabled: !!user,
   });
 }
@@ -56,8 +75,29 @@ export function useMyParticipatedFundings(params?: FundingQueryParams) {
 export function useMyReceivedFundings(params?: FundingQueryParams) {
   const { user } = useAuth();
   return useQuery({
-    queryKey: queryKeys.myReceivedFundings,
-    queryFn: () => getMyReceivedFundings(params),
+    queryKey: [...queryKeys.myReceivedFundings, params],
+    queryFn: async () => {
+      if (params?.status === 'ACCEPTED') {
+        const [acceptedRes, expiredRes] = await Promise.all([
+          getMyReceivedFundings({ ...params, status: 'ACCEPTED' }),
+          getMyReceivedFundings({ ...params, status: 'EXPIRED' }),
+        ]);
+
+        // Merge items and sort them (e.g., by createdAt or id, but here we just concat)
+        const combinedItems = [...acceptedRes.items, ...expiredRes.items];
+
+        // Creating a combined response (Pagination metadata might be inaccurate if there are many pages)
+        return {
+          content: combinedItems,
+          items: combinedItems,
+          page: {
+            ...acceptedRes.page,
+            totalElements: acceptedRes.page.totalElements + expiredRes.page.totalElements,
+          },
+        };
+      }
+      return getMyReceivedFundings(params);
+    },
     enabled: !!user,
   });
 }

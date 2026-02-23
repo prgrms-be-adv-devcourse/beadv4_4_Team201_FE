@@ -83,6 +83,7 @@ export function useAcceptFunding() {
     mutationFn: (fundingId: string) => acceptFunding(fundingId),
     onSuccess: (_, fundingId) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.funding(fundingId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.myFunding(fundingId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.myReceivedFundings });
     },
   });
@@ -101,6 +102,7 @@ export function useRefuseFunding() {
       refuseFunding(fundingId, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.funding(variables.fundingId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.myFunding(variables.fundingId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.myReceivedFundings });
     },
   });

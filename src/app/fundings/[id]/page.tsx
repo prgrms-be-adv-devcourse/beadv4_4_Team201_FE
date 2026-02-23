@@ -81,8 +81,8 @@ export default function FundingDetailPage() {
                 {/* Product Image */}
                 <div className="relative aspect-square w-full bg-secondary md:aspect-video">
                     <Image
-                        src={funding.product.imageUrl}
-                        alt={funding.product.name}
+                        src={funding.product?.imageUrl || "/images/placeholder-product.svg"}
+                        alt={funding.product?.name || "상품 이미지"}
                         fill
                         className="object-cover"
                     />
@@ -104,8 +104,8 @@ export default function FundingDetailPage() {
 
                     <div className="rounded-lg bg-secondary/30 p-4">
                         <p className="text-xs text-muted-foreground mb-1">상품 정보</p>
-                        <p className="font-medium text-sm">{funding.product.name}</p>
-                        <p className="font-bold">₩{funding.product.price.toLocaleString()}</p>
+                        <p className="font-medium text-sm">{funding.product?.name}</p>
+                        <p className="font-bold">₩{funding.product?.price?.toLocaleString() || 0}</p>
                     </div>
 
                     <Separator />

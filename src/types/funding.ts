@@ -88,3 +88,13 @@ export interface FundingQueryParams {
     page?: number;
     size?: number;
 }
+
+/**
+ * Response for accepting or refusing a funding
+ */
+export interface FundingCompleteResponse {
+    fundingId: number;
+    wishlistItemId: number;
+    status: FundingStatus;
+    closeAt: string;
+}
