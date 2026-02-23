@@ -11,6 +11,7 @@ import { useMyFunding } from '@/features/funding/hooks/useFunding';
 import { InlineError } from '@/components/common/InlineError';
 import { Users, Clock, Target } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { RecipientActionButtons } from '@/features/funding/components/RecipientActionButtons';
 
 export default function MyFundingDetailPage() {
     const params = useParams();
@@ -173,6 +174,13 @@ export default function MyFundingDetailPage() {
                         )}
                     </div>
                 </div>
+            </div>
+
+            {/* Sticky Action Box */}
+            <div className="fixed bottom-0 left-0 right-0 bg-background z-20 md:static">
+                {funding.status === 'ACHIEVED' && (
+                    <RecipientActionButtons fundingId={funding.id} />
+                )}
             </div>
         </AppShell>
     );
