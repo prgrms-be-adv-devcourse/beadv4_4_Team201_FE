@@ -136,13 +136,13 @@ function mapBackendFunding(backend: BackendFundingResponse): Funding {
     organizerId: "", // 백엔드에서 제공하지 않음
     organizer: {
       id: "",
-      nickname: backend.receiverNickname || "Organizer",
+      nickname: backend.receiverNickname || null,
       avatarUrl: null,
     },
     recipientId: "", // 백엔드에서 제공하지 않음
     recipient: {
       id: "",
-      nickname: backend.receiverNickname || "Recipient",
+      nickname: backend.receiverNickname || null,
       avatarUrl: null,
     },
     targetAmount: backend.targetAmount,
@@ -176,10 +176,10 @@ function mapBackendMyFundingSummary(backend: BackendMyFundingSummary): Funding {
       nickname: "Organizer",
       avatarUrl: null,
     },
-    recipientId: "",
+    recipientId: '',
     recipient: {
-      id: "",
-      nickname: "Recipient",
+      id: '',
+      nickname: null, // 백엔드 미제공 (본인의 펀딩)
       avatarUrl: null,
     },
     targetAmount: backend.targetAmount,
@@ -212,13 +212,13 @@ function mapBackendMyFunding(backend: BackendMyFundingResponse): FundingDetail {
     organizerId: "", // 백엔드 미제공 (본인)
     organizer: {
       id: "",
-      nickname: "Me",
+      nickname: null, // 백엔드 미제공 (본인)
       avatarUrl: null,
     },
     recipientId: "", // 백엔드 미제공 (본인)
     recipient: {
       id: "",
-      nickname: "Me",
+      nickname: null, // 백엔드 미제공 (본인)
       avatarUrl: null,
     },
     targetAmount: backend.targetAmount,

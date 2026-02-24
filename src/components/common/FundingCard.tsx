@@ -109,15 +109,17 @@ export function FundingCard({
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
-                        <Avatar className="h-5 w-5">
-                            <AvatarImage src={funding.recipient.avatarUrl || undefined} alt={recipientNickname} />
-                            <AvatarFallback className="text-[10px]">{recipientNickname[0]}</AvatarFallback>
-                        </Avatar>
-                        <span className="text-xs text-muted-foreground">
-                            @{recipientNickname} · {funding.participantCount}명
-                        </span>
-                    </div>
+                    {funding.recipient.nickname && (
+                        <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
+                            <Avatar className="h-5 w-5">
+                                <AvatarImage src={funding.recipient.avatarUrl || undefined} alt={recipientNickname} />
+                                <AvatarFallback className="text-[10px]">{recipientNickname[0]}</AvatarFallback>
+                            </Avatar>
+                            <span className="text-xs text-muted-foreground">
+                                @{recipientNickname} · {funding.participantCount}명
+                            </span>
+                        </div>
+                    )}
                 </div>
             </div>
         );
@@ -144,9 +146,11 @@ export function FundingCard({
 
             <div className="flex flex-1 flex-col justify-between pl-4">
                 <div>
-                    <p className="mt-0.5 text-xs text-muted-foreground">
-                        {recipientNickname}님을 위한 펀딩
-                    </p>
+                    {funding.recipient.nickname && (
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                            {funding.recipient.nickname}님을 위한 펀딩
+                        </p>
+                    )}
                     <h3 className="text-sm font-medium line-clamp-1">{funding.product?.name}</h3>
                     <p className="mt-0.5 text-xs text-muted-foreground">
                         {funding.targetAmount.toLocaleString()}원 목표
