@@ -3,6 +3,7 @@
 import { Suspense } from 'react';
 import { useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { AppShell } from '@/components/layout/AppShell';
 import { Footer } from '@/components/layout/Footer';
 import { ProductList } from '@/features/product/components/ProductList';
@@ -226,9 +227,30 @@ function ProductSearchContent() {
             {/* Toolbar Area */}
             <div className="flex items-center justify-between mb-8 pt-4">
               <div className="flex items-center gap-4">
-                <span className="text-[10px] font-black tracking-widest">
-                  {totalElements.toLocaleString()} ITEMS
-                </span>
+                <div className="flex flex-col gap-2">
+                  <nav className="text-sm text-muted-foreground">
+                    <ol className="flex items-center gap-2">
+                      <li><Link href="/" className="hover:text-foreground">홈</Link></li>
+                      <li>/</li>
+                      <li>
+                        <Link href="/products" className={cn("hover:text-foreground", !category && "text-foreground font-medium")}>
+                          상품
+                        </Link>
+                      </li>
+                      {category && (
+                        <>
+                          <li>/</li>
+                          <li className="text-foreground font-medium">
+                            {CATEGORIES.find(c => c.value === category.toLowerCase())?.label || category}
+                          </li>
+                        </>
+                      )}
+                    </ol>
+                  </nav>
+                  <span className="text-[12px] font-black tracking-widest text-black/50 uppercase">
+                    {totalElements.toLocaleString()} ITEMS
+                  </span>
+                </div>
                 {searchQuery && (
                   <div className="flex items-center gap-2 bg-black text-white px-3 py-1 text-[10px] font-bold">
                     <span>"{searchQuery}"</span>

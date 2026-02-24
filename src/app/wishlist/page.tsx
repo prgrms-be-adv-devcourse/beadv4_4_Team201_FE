@@ -90,16 +90,16 @@ export default function MyWishlistPage() {
     const handleVisibilityChange = async (visibility: WishlistVisibility) => {
         try {
             await updateVisibility.mutateAsync({ visibility });
-            toast.success('공개 설정이 변경되었습니다');
+            toast.success('공개 설정이 변경되었습니다.');
         } catch {
-            toast.error('공개 설정 변경에 실패했습니다');
+            toast.error('공개 설정 변경에 실패했습니다.');
         }
     };
 
     const handleDeleteItem = async (itemId: string) => {
         try {
             await removeItem.mutateAsync(itemId);
-            toast.success('위시 아이템이 삭제되었습니다');
+            toast.success('위시 아이템이 삭제되었습니다.');
         } catch (error) {
             if (error instanceof ApiError && error.code === 'W204') {
                 toast.error('진행 중인 펀딩이 있어 삭제가 불가합니다.');
@@ -204,8 +204,8 @@ export default function MyWishlistPage() {
                                 {wishlist?.visibility && (
                                     <VisibilityBadge visibility={wishlist.visibility} />
                                 )}
-                                <span className="text-[13px] text-muted-foreground">
-                                    총 <strong className="text-foreground">{absoluteTotalItems.toLocaleString()}</strong>개 상품
+                                <span className="text-[15px] text-muted-foreground">
+                                    총 <strong className="text-foreground font-black">{absoluteTotalItems.toLocaleString()}</strong>개 상품
                                 </span>
                             </div>
                         </div>
@@ -220,7 +220,7 @@ export default function MyWishlistPage() {
                                 <Settings2 className="h-4 w-4" />
                                 공개 설정 변경
                             </Button>
-                            <p className="text-[13px] text-muted-foreground">
+                            <p className="text-[15px] text-muted-foreground">
                                 현재: <span className="font-medium text-foreground">{visibilityLabel}</span>
                             </p>
                         </div>
