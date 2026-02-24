@@ -10,6 +10,7 @@ import { VisibilitySheet } from '@/features/wishlist/components/VisibilitySheet'
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Heart, ExternalLink, Globe, Users, Lock, Settings2 } from 'lucide-react';
+import { ApiError } from '@/lib/api/client';
 import { InlineError } from '@/components/common/InlineError';
 import { useMyWishlist } from '@/features/wishlist/hooks/useWishlist';
 import { useUpdateVisibility, useRemoveWishlistItem } from '@/features/wishlist/hooks/useWishlistMutations';
@@ -110,8 +111,12 @@ export default function MyWishlistPage() {
         try {
             await removeItem.mutateAsync(itemId);
             toast.success('위시 아이템이 삭제되었습니다');
-        } catch {
-            toast.error('삭제에 실패했습니다');
+        } catch (error) {
+            if (error instanceof ApiError && error.code === 'W204') {
+                toast.error('진행 중인 펀딩이 있어 삭제가 불가합니다.');
+            } else {
+                toast.error('삭제에 실패했습니다');
+            }
         }
     };
 
@@ -459,10 +464,10 @@ function WishItemCard({
             {/* 하트 버튼 */}
             <button
                 onClick={onDelete}
-                className="absolute top-3 right-3 p-1.5 bg-background/80 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-background"
+                className="absolute top-3 right-3 p-1.5 bg-white/90 rounded-full shadow-sm hover:scale-110 transition-transform"
                 aria-label="위시리스트에서 제거"
             >
-                <Heart className="h-4 w-4 fill-foreground text-foreground" strokeWidth={1.5} />
+                <Heart className="h-4 w-4 fill-red-500 text-red-500" strokeWidth={1.5} />
             </button>
 
             {/* 상품 정보 */}

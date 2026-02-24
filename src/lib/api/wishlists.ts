@@ -11,7 +11,7 @@ import type {
   WishlistQueryParams,
 } from '@/types/wishlist';
 
-export interface WishlistVisibilityUpdateRequest {
+export interface UpdateWishlistSettingsRequest {
   visibility: WishlistVisibility;
 }
 
@@ -92,8 +92,9 @@ export async function removeWishlistItem(itemId: string): Promise<void> {
   return apiClient.delete<void>(`/api/v2/wishlists/items/${itemId}`);
 }
 
-export async function updateWishlistVisibility(data: WishlistVisibilityUpdateRequest): Promise<Wishlist> {
-  return apiClient.patch<Wishlist>('/api/v2/wishlists/visibility', data);
+export async function updateWishlistVisibility(data: UpdateWishlistSettingsRequest): Promise<Wishlist> {
+  const response = await apiClient.patch<any>('/api/v2/wishlists/me/settings', data);
+  return transformWishlist(response);
 }
 
 export async function getFriendsWishlists(limit?: number): Promise<FriendWishlistListResponse> {
