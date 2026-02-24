@@ -3,6 +3,7 @@
 import Image, { ImageProps } from 'next/image';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { PLACEHOLDER_IMAGE } from '@/lib/image';
 
 interface OptimizedImageProps extends Omit<ImageProps, 'onLoad' | 'onError'> {
     fallback?: string;
@@ -19,7 +20,7 @@ interface OptimizedImageProps extends Omit<ImageProps, 'onLoad' | 'onError'> {
 export function OptimizedImage({
     src,
     alt,
-    fallback = '/placeholder-image.png',
+    fallback = PLACEHOLDER_IMAGE,
     className,
     wrapperClassName,
     ...props
@@ -107,7 +108,7 @@ export function AvatarImage({
             alt={alt}
             width={dimensions[size]}
             height={dimensions[size]}
-            fallback="/default-avatar.png"
+            fallback={PLACEHOLDER_IMAGE}
             className={cn('object-cover rounded-full', className)}
             {...props}
         />

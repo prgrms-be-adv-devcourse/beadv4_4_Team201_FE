@@ -43,26 +43,29 @@ describe('Header Component', () => {
         expect(screen.getByRole('link', { name: /STORY/i })).toBeInTheDocument();
     });
 
-    it('renders category navigation', () => {
+    it('shows categories on PRODUCT hover', async () => {
         renderWithProviders(<Header variant="main" />);
 
-        expect(screen.getByText('BIRTHDAY')).toBeInTheDocument();
-        expect(screen.getByText('LUXURY')).toBeInTheDocument();
-    });
+        const productLink = screen.getByRole('link', { name: /PRODUCT/i });
+        fireEvent.mouseEnter(productLink.parentElement!);
 
-    it('shows mega menu on hover', async () => {
-        renderWithProviders(<Header variant="main" />);
-
-        const birthdayLink = screen.getByText('BIRTHDAY');
-
-        // Use fireEvent to simulate hover
-        fireEvent.mouseEnter(birthdayLink);
-
-        // Wait for sub-category to appear (state update)
         await waitFor(() => {
-            expect(screen.getByText('For Him')).toBeInTheDocument();
+            expect(screen.getByText('전자기기')).toBeInTheDocument();
         });
 
-        expect(screen.getByText('For Her')).toBeInTheDocument();
+        expect(screen.getByText('뷰티')).toBeInTheDocument();
+    });
+
+    it('shows Event and Trend on STORY hover', async () => {
+        renderWithProviders(<Header variant="main" />);
+
+        const storyLink = screen.getByRole('link', { name: /STORY/i });
+        fireEvent.mouseEnter(storyLink.parentElement!);
+
+        await waitFor(() => {
+            expect(screen.getByText('Event')).toBeInTheDocument();
+        });
+
+        expect(screen.getByText('Trend')).toBeInTheDocument();
     });
 });

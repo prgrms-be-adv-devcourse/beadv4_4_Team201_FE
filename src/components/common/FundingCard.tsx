@@ -45,11 +45,20 @@ export function FundingCard({
     const recipientNickname = funding.recipient.nickname || '알 수 없음';
 
     const getStatusLabel = () => {
-        if (funding.status === 'ACHIEVED' || funding.status === 'ACCEPTED') {
+        if (funding.status === 'ACHIEVED') {
             return <span className="text-xs font-medium text-foreground">달성</span>;
         }
-        if (daysLeft < 0) {
+        if (funding.status === 'ACCEPTED') {
+            return <span className="text-xs font-medium text-foreground">수락</span>;
+        }
+        if (funding.status === 'REFUSED') {
+            return <span className="text-xs text-muted-foreground">거절</span>;
+        }
+        if (funding.status === 'CLOSED') {
             return <span className="text-xs text-muted-foreground">종료</span>;
+        }
+        if (funding.status === 'EXPIRED' || Number.isNaN(daysLeft) || daysLeft < 0) {
+            return <span className="text-xs text-muted-foreground">만료</span>;
         }
         if (daysLeft === 0) {
             return <span className="text-xs font-medium text-foreground">D-Day</span>;
@@ -83,7 +92,7 @@ export function FundingCard({
                 {/* Content */}
                 <div className="py-4">
                     <h3 className="text-sm font-medium line-clamp-1 group-hover:opacity-60 transition-opacity">
-                        {funding.product.name}
+                        {funding.product?.name}
                     </h3>
 
                     <div className="mt-3 space-y-2">
@@ -102,7 +111,7 @@ export function FundingCard({
 
                     <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
                         <Avatar className="h-5 w-5">
-                            <AvatarImage src={funding.recipient.avatarUrl || undefined} />
+                            <AvatarImage src={funding.recipient.avatarUrl || undefined} alt={recipientNickname} />
                             <AvatarFallback className="text-[10px]">{recipientNickname[0]}</AvatarFallback>
                         </Avatar>
                         <span className="text-xs text-muted-foreground">
@@ -135,7 +144,7 @@ export function FundingCard({
 
             <div className="flex flex-1 flex-col justify-between pl-4">
                 <div>
-                    <h3 className="text-sm font-medium line-clamp-1">{funding.product.name}</h3>
+                    <h3 className="text-sm font-medium line-clamp-1">{funding.product?.name}</h3>
                     <p className="mt-0.5 text-xs text-muted-foreground">
                         {funding.targetAmount.toLocaleString()}원 목표
                     </p>

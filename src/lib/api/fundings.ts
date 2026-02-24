@@ -9,6 +9,7 @@ import type {
   FundingListResponse,
   ParticipantListResponse,
   FundingQueryParams,
+  FundingCompleteResponse,
 } from "@/types/funding";
 
 // Alias for backward compatibility
@@ -505,8 +506,8 @@ export async function participateFunding(
  * 펀딩 수락 (수령자)
  * @endpoint POST /api/v2/fundings/{id}/accept
  */
-export async function acceptFunding(fundingId: string): Promise<void> {
-  return apiClient.post<void>(`/api/v2/fundings/${fundingId}/accept`, {});
+export async function acceptFunding(fundingId: string): Promise<FundingCompleteResponse> {
+  return apiClient.post<FundingCompleteResponse>(`/api/v2/fundings/${fundingId}/accept`, {});
 }
 
 /**
@@ -516,8 +517,8 @@ export async function acceptFunding(fundingId: string): Promise<void> {
 export async function refuseFunding(
   fundingId: string,
   data?: RefuseFundingRequest,
-): Promise<void> {
-  return apiClient.post<void>(
+): Promise<FundingCompleteResponse> {
+  return apiClient.post<FundingCompleteResponse>(
     `/api/v2/fundings/${fundingId}/refuse`,
     data || {},
   );

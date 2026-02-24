@@ -15,6 +15,18 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { formatCurrency } from '@/lib/utils/format';
 
+const CATEGORY_LABEL: Record<string, string> = {
+  ELECTRONICS: '전자기기',
+  BEAUTY: '뷰티',
+  FASHION: '패션',
+  LIVING: '리빙',
+  FOODS: '식품',
+  TOYS: '완구',
+  OUTDOOR: '아웃도어',
+  PET: '반려동물',
+  KITCHEN: '주방',
+};
+
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const { data: product, isLoading, error } = useProductDetail(id);
@@ -41,7 +53,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
   if (error) {
     return (
-      <AppShell headerVariant="detail">
+      <AppShell headerVariant="main">
         <div className="flex flex-col items-center justify-center min-h-[60vh] p-4">
           <div className="text-6xl mb-6">😢</div>
           <h2 className="text-xl font-medium mb-2">상품을 찾을 수 없습니다</h2>
@@ -57,7 +69,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
   if (isLoading || !product) {
     return (
-      <AppShell headerVariant="detail">
+      <AppShell headerVariant="main">
         <div className="max-w-screen-xl mx-auto px-4 md:px-8 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
             <Skeleton className="aspect-square w-full" />
@@ -79,7 +91,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     : [product.imageUrl || '/images/placeholder-product.svg'];
 
   return (
-    <AppShell headerVariant="detail">
+    <AppShell headerVariant="main">
       <div className="max-w-screen-xl mx-auto px-4 md:px-8">
         {/* Breadcrumb */}
         <nav className="py-4 text-sm text-muted-foreground">
@@ -87,6 +99,16 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             <li><Link href="/" className="hover:text-foreground">홈</Link></li>
             <li>/</li>
             <li><Link href="/products" className="hover:text-foreground">상품</Link></li>
+            {product.category && (
+              <>
+                <li>/</li>
+                <li>
+                  <Link href={`/products?category=${product.category.toLowerCase()}`} className="hover:text-foreground">
+                    {CATEGORY_LABEL[product.category] || product.category}
+                  </Link>
+                </li>
+              </>
+            )}
             <li>/</li>
             <li className="text-foreground truncate max-w-[200px]">{product.name}</li>
           </ol>
@@ -97,7 +119,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           {/* Image Gallery */}
           <div className="space-y-4">
             {/* Main Image */}
-            <div className="relative aspect-square bg-gray-50 overflow-hidden">
+            <div className="relative aspect-square bg-gray-50 overflow-hidden max-w-[90%]">
               <Image
                 src={images[currentImageIndex]}
                 alt={product.name}
@@ -154,98 +176,99 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           </div>
 
           {/* Product Info */}
-          <div className="lg:sticky lg:top-24 lg:self-start space-y-6">
-            {/* Brand & Name */}
-            <div>
-              {product.brandName && (
-                <p className="text-sm text-muted-foreground uppercase tracking-wider mb-1">
-                  {product.brandName}
-                </p>
-              )}
-              <h1 className="text-2xl md:text-3xl font-bold leading-tight">
-                {product.name}
-              </h1>
-            </div>
-
-            {/* Price */}
-            <div className="text-3xl md:text-4xl font-bold">
-              {formatCurrency(product.price)}
-            </div>
-
-            <Separator />
-
-            {/* Description */}
-            {product.description && (
-              <div className="text-sm text-muted-foreground leading-relaxed">
-                {product.description}
+          <div className="flex flex-col">
+            {/* Top: 상품 정보 */}
+            <div className="space-y-6">
+              {/* Brand & Name */}
+              <div>
+                {product.brandName && (
+                  <p className="text-sm text-muted-foreground uppercase tracking-wider mb-1">
+                    {product.brandName}
+                  </p>
+                )}
+                <h1 className="text-2xl md:text-3xl font-bold leading-tight">
+                  {product.name}
+                </h1>
               </div>
-            )}
 
-            {/* Delivery Info */}
-            <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">배송비</span>
-                <span className="font-medium">무료배송</span>
+              {/* Price */}
+              <div className="text-3xl md:text-4xl font-bold">
+                {formatCurrency(product.price)}
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">배송예정</span>
-                <span className="font-medium">내일 도착 예정</span>
+
+              <Separator />
+
+              {/* Delivery Info */}
+              <div className="!my-4 bg-gray-50 p-4 rounded-lg space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">배송비</span>
+                  <span className="font-medium">무료배송</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">배송예정</span>
+                  <span className="font-medium">내일 도착 예정</span>
+                </div>
               </div>
+
+              <Separator />
             </div>
 
-            <Separator />
+            {/* Spacer */}
+            <div className="flex-1" />
 
-            {/* Price */}
-            <div className="flex items-center justify-between py-4 border-t border-b">
-              <span className="font-medium">상품금액</span>
-              <span className="text-2xl font-bold">{formatCurrency(product.price)}</span>
-            </div>
+            {/* Bottom: 가격 + 버튼 */}
+            <div className="space-y-4 mt-6">
+              {/* Price */}
+              <div className="flex items-center justify-between py-4 border-b">
+                <span className="font-medium">상품금액</span>
+                <span className="text-2xl font-bold">{formatCurrency(product.price)}</span>
+              </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-3">
-              {/* Wishlist Button */}
+              {/* Action Buttons */}
+              <div className="flex gap-3">
+                {/* Wishlist Button */}
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-14 flex-shrink-0"
+                  onClick={() => toggleWishlist()}
+                  disabled={wishlistLoading}
+                >
+                  <Heart className={cn("w-5 h-5", isInWishlist && "fill-red-500 text-red-500")} strokeWidth={1.5} />
+                </Button>
+
+                {/* Share Button */}
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-14 flex-shrink-0"
+                  onClick={handleShare}
+                >
+                  <Share2 className="w-5 h-5" strokeWidth={1.5} />
+                </Button>
+
+                {/* Add to Cart Button */}
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="flex-1 font-medium"
+                  onClick={() => toast.info('준비중인 기능입니다')}
+                  disabled
+                >
+                  <ShoppingBag className="w-5 h-5 mr-2" strokeWidth={1.5} />
+                  {product.isSoldout ? '품절' : '준비중인 기능입니다'}
+                </Button>
+              </div>
+
+              {/* Buy Now Button */}
               <Button
-                variant="outline"
                 size="lg"
-                className="w-14 flex-shrink-0"
-                onClick={() => toggleWishlist()}
-                disabled={wishlistLoading}
-              >
-                <Heart className={cn("w-5 h-5", isInWishlist && "fill-red-500 text-red-500")} strokeWidth={1.5} />
-              </Button>
-
-              {/* Share Button */}
-              <Button
-                variant="outline"
-                size="lg"
-                className="w-14 flex-shrink-0"
-                onClick={handleShare}
-              >
-                <Share2 className="w-5 h-5" strokeWidth={1.5} />
-              </Button>
-
-              {/* Add to Cart Button — 일반 상품 장바구니는 백엔드 미지원 (GENERAL_PRODUCT) */}
-              <Button
-                variant="outline"
-                size="lg"
-                className="flex-1 font-medium"
-                onClick={() => toast.info('준비중인 기능입니다')}
+                className="w-full font-bold text-lg h-14"
                 disabled
               >
-                <ShoppingBag className="w-5 h-5 mr-2" strokeWidth={1.5} />
-                준비중인 기능입니다
+                {product.isSoldout ? '품절' : '준비중인 기능입니다'}
               </Button>
             </div>
-
-            {/* Buy Now Button — 일반 상품 구매는 백엔드 미지원 */}
-            <Button
-              size="lg"
-              className="w-full font-bold text-lg h-14"
-              onClick={() => toast.info('준비중인 기능입니다')}
-              disabled
-            >
-              준비중인 기능입니다
-            </Button>
           </div>
         </div>
 

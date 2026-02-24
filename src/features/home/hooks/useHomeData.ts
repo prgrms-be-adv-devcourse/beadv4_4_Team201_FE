@@ -25,7 +25,7 @@ export function useHomeData() {
       },
       {
         queryKey: ['products', 'hot'],
-        queryFn: () => getProducts({ size: 4, sort: 'price_desc' }),
+        queryFn: () => getProducts({ size: 4, sort: 'PRICE_DESC' }),
       },
     ],
   });

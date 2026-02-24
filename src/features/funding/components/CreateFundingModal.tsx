@@ -105,7 +105,7 @@ export function CreateFundingModal({
                         <div className="flex gap-3">
                             <div className="relative w-16 h-16 rounded-md overflow-hidden flex-shrink-0">
                                 <Image
-                                    src={wishItem.product.imageUrl || '/images/placeholder-product.png'}
+                                    src={wishItem.product.imageUrl || '/images/placeholder-product.svg'}
                                     alt={wishItem.product.name}
                                     fill
                                     className="object-cover"

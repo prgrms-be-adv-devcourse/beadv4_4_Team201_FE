@@ -28,7 +28,7 @@ export function UserHomeContent({ userId }: { userId: string }) {
             id: profile.id.toString(),
             nickname: profile.nickname || 'Unknown',
             description: "안녕하세요. 취향을 공유하는 펀딩을 만듭니다.",
-            avatarUrl: auth0User?.picture || profile.avatarUrl || '/images/default-avatar.png',
+            avatarUrl: auth0User?.picture || profile.avatarUrl || '/images/placeholder-product.svg',
             coverImageUrl: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1600&q=80',
             followerCount: 0,
         };

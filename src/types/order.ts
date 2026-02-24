@@ -28,19 +28,20 @@ export type OrderItemType = 'NORMAL_ORDER' | 'FUNDING_GIFT' | 'NORMAL_GIFT';
  * @see OrderStatus.java
  */
 export type OrderStatus =
-    | 'PAYMENT_PENDING'
+    | 'CREATED'
     | 'PAID'
+    | 'PARTIAL_CONFIRMED'
     | 'CONFIRMED'
-    | 'CANCELED'
-    | 'FAILED'
+    | 'PARTIAL_CANCELING'
+    | 'CANCELING'
     | 'PARTIAL_CANCELED'
-    | 'REFUNDED';
+    | 'CANCELED';
 
 /**
  * 주문 아이템 상태
  * @see OrderItemStatus.java
  */
-export type OrderItemStatus = 'CREATED' | 'PAID' | 'CANCELLED';
+export type OrderItemStatus = 'CREATED' | 'PAID' | 'CANCELING' | 'CANCELED' | 'CONFIRMED';
 
 /**
  * Order summary for list views
@@ -54,6 +55,7 @@ export interface Order {
     status: OrderStatus;
     paymentMethod: PaymentMethod;
     createdAt: string;
+    paidAt: string | null;
     confirmedAt: string | null;
     cancelledAt: string | null;
 }
