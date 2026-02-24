@@ -144,6 +144,9 @@ export function FundingCard({
 
             <div className="flex flex-1 flex-col justify-between pl-4">
                 <div>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                        {recipientNickname}님을 위한 펀딩
+                    </p>
                     <h3 className="text-sm font-medium line-clamp-1">{funding.product?.name}</h3>
                     <p className="mt-0.5 text-xs text-muted-foreground">
                         {funding.targetAmount.toLocaleString()}원 목표
