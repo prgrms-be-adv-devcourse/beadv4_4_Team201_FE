@@ -80,7 +80,6 @@ export default function MyWishlistPage() {
     const { data: wishlist, isLoading, error, refetch } = useMyWishlist({
         page: currentPage,
         size: PAGE_SIZE,
-        category: activeCategory,
     });
 
     const updateVisibility = useUpdateVisibility();
@@ -120,11 +119,17 @@ export default function MyWishlistPage() {
         document.getElementById('wishlist-items-section')?.scrollIntoView({ behavior: 'smooth' });
     };
 
-    const totalPages = wishlist?.page?.totalPages || 0;
-    const totalItems = wishlist?.page?.totalElements || wishlist?.itemCount || 0;
+    // Filter items - exclude items without valid product data AND apply client-side category filter
+    const wishlistItems = (wishlist?.items || []).filter(item => {
+        if (!item?.product?.id) return false;
+        if (!activeCategory) return true;
 
-    // Filter items - exclude items without valid product data
-    const wishlistItems = (wishlist?.items || []).filter(item => item?.product?.id);
+        const itemCategory = (item.product.category || '').toLowerCase();
+        return itemCategory === activeCategory.toLowerCase();
+    });
+
+    const totalItems = activeCategory ? wishlistItems.length : (wishlist?.page?.totalElements || wishlist?.itemCount || 0);
+    const totalPages = activeCategory ? Math.ceil(wishlistItems.length / PAGE_SIZE) : (wishlist?.page?.totalPages || 0);
 
     // Loading state
     if (isLoading) {
@@ -476,14 +481,13 @@ function WishItemCard({
                     )}>
                         {formatPrice(item.product.price)}
                     </p>
-                    {item.product.isSoldout && (
-                        <span className="text-[10px] font-bold text-white bg-black px-1.5 py-0.5">
-                            품절
-                        </span>
-                    )}
-                    {item.product.isActive === false && (
+                    {item.product.isActive === false ? (
                         <span className="text-[10px] font-bold text-white bg-red-600 px-1.5 py-0.5">
                             판매 중단
+                        </span>
+                    ) : item.product.isSoldout && (
+                        <span className="text-[10px] font-bold text-white bg-black px-1.5 py-0.5">
+                            품절
                         </span>
                     )}
                 </div>
