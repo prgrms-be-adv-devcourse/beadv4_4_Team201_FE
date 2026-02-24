@@ -32,10 +32,10 @@ export const queryKeys = {
   // Products
   products: Object.assign(
 
-      (params?: object) => ['products', params] as const,
-      {
-          popular: () => ['products', 'popular'] as const,
-      }
+    (params?: object) => ['products', params] as const,
+    {
+      popular: () => ['products', 'popular'] as const,
+    }
 
   ),
   product: (id: string) => ['products', id] as const,
@@ -54,6 +54,11 @@ export const queryKeys = {
 
   // Auth
   me: ['auth', 'me'] as const,
+
+  // Seller - prefix만 있으면 invalidation 시 모든 filter 결과 무효화
+  sellerProductsPrefix: ['products', 'seller'] as const,
+  sellerProducts: (params?: object) => ['products', 'seller', params] as const,
+  stockHistory: (productId: string) => ['products', productId, 'stock'] as const,
 } as const;
 
 /**

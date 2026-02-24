@@ -425,6 +425,93 @@ export const handlers = [
   }),
 
   // ============================================
+  // SELLER PRODUCTS & STOCK
+  // ============================================
+  http.get('**/api/v2/products/my', ({ request }) => {
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get('page') || '0');
+    const size = parseInt(url.searchParams.get('size') || '10');
+    const status = url.searchParams.get('status');
+
+    let sellerProducts = products.map((p, i) => ({
+      id: Number(p.id.replace('product-', '')),
+      name: p.name,
+      description: `판매자용 상품 설명 ${i + 1}`,
+      price: p.price,
+      stock: 10 + i,
+      category: 'CLOTHING',
+      imageKey: `image-key-${i}`,
+      status: status || (i % 3 === 0 ? 'DRAFT' : 'ACTIVE'),
+      createdAt: new Date().toISOString(),
+    }));
+
+    const start = page * size;
+    const end = start + size;
+    const content = sellerProducts.slice(start, end);
+
+    return HttpResponse.json({
+      content,
+      totalElements: sellerProducts.length,
+      totalPages: Math.ceil(sellerProducts.length / size),
+      size,
+      number: page,
+    });
+  }),
+
+  http.get('**/api/v2/products/my/:productId', ({ params }) => {
+    const { productId } = params;
+    // Mock single product for seller
+    return HttpResponse.json({
+      id: Number(productId),
+      name: `Mock Product ${productId}`,
+      description: '판매자 전용 상품 상세 설명',
+      price: 50000,
+      stock: 100,
+      category: 'ELECTRONICS',
+      imageKey: 'mock-image-key',
+      status: 'ACTIVE',
+      createdAt: new Date().toISOString(),
+    });
+  }),
+
+  http.patch('**/api/v2/products/my/:productId', async ({ params, request }) => {
+    const body = await request.json();
+    return HttpResponse.json({
+      id: Number(params.productId),
+      ...body,
+    });
+  }),
+
+  http.get('**/api/v2/products/my/stock-histories', ({ request }) => {
+    const url = new URL(request.url);
+    const productId = url.searchParams.get('productId');
+    const page = parseInt(url.searchParams.get('page') || '0');
+    const size = parseInt(url.searchParams.get('size') || '10');
+
+    const histories = Array.from({ length: 20 }, (_, i) => ({
+      id: i + 1,
+      productId: Number(productId) || (i % 5) + 1,
+      changeType: i % 2 === 0 ? 'ORDER_DEDUCT' : 'MANUAL_ADJUST',
+      delta: i % 2 === 0 ? -1 : 5,
+      beforeStock: 100,
+      afterStock: i % 2 === 0 ? 99 : 105,
+      createdAt: new Date(Date.now() - i * 3600000).toISOString(),
+    }));
+
+    const start = page * size;
+    const end = start + size;
+    const content = histories.slice(start, end);
+
+    return HttpResponse.json({
+      content,
+      totalElements: histories.length,
+      totalPages: Math.ceil(histories.length / size),
+      size,
+      number: page,
+    });
+  }),
+
+  // ============================================
   // FUNDINGS
   // ============================================
   http.get('**/api/v2/fundings', ({ request }) => {

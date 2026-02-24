@@ -3,7 +3,7 @@ import { PaginatedResponse } from './api';
 /**
  * Member role enumeration
  */
-export type MemberRole = 'USER' | 'SELLER';
+export type MemberRole = 'USER' | 'BUYER' | 'SELLER';
 
 /**
  * Member status enumeration

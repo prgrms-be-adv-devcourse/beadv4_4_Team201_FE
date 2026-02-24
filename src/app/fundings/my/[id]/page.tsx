@@ -11,6 +11,7 @@ import { useMyFunding } from '@/features/funding/hooks/useFunding';
 import { InlineError } from '@/components/common/InlineError';
 import { Users, Clock, Target } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { RecipientActionButtons } from '@/features/funding/components/RecipientActionButtons';
 
 export default function MyFundingDetailPage() {
     const params = useParams();
@@ -146,8 +147,8 @@ export default function MyFundingDetailPage() {
                         {['ACHIEVED', 'ACCEPTED', 'REFUSED'].includes(funding.status) ? (
                             funding.participantCount > 0 ? (
                                 <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
-                                    {funding.participants.map((participant) => (
-                                        <div key={participant.id} className="flex items-center justify-between p-3 rounded-lg border bg-card">
+                                    {funding.participants.map((participant, index) => (
+                                        <div key={`${participant.id}-${index}`} className="flex items-center justify-between p-3 rounded-lg border bg-card">
                                             <div className="flex items-center gap-3">
                                                 <Avatar className="h-8 w-8">
                                                     <AvatarImage src={participant.member.avatarUrl || undefined} />
@@ -173,6 +174,13 @@ export default function MyFundingDetailPage() {
                         )}
                     </div>
                 </div>
+            </div>
+
+            {/* Sticky Action Box */}
+            <div className="fixed bottom-0 left-0 right-0 bg-background z-20 md:static">
+                {funding.status === 'ACHIEVED' && (
+                    <RecipientActionButtons fundingId={funding.id} />
+                )}
             </div>
         </AppShell>
     );

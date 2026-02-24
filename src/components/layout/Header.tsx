@@ -150,7 +150,7 @@ export function Header({
 
                     <div className="bg-white/95 backdrop-blur-sm">
                         {/* Row 2: Main Nav */}
-                        <div className="max-w-screen-2xl mx-auto px-8 pt-6 pb-4 flex items-center justify-between">
+                        <div className="max-w-screen-2xl mx-auto px-8 pt-6 pb-6 flex items-center justify-between">
                             <DesktopMainNav />
                             <button
                                 onClick={() => setIsSearchOpen(true)}
@@ -158,11 +158,6 @@ export function Header({
                             >
                                 <Search className="w-8 h-8" strokeWidth={1.5} />
                             </button>
-                        </div>
-
-                        {/* Row 3: Category Nav */}
-                        <div className="max-w-screen-2xl mx-auto px-8 pb-4">
-                            <DesktopCategoryNav />
                         </div>
                     </div>
                 </header>
@@ -237,84 +232,80 @@ function DesktopTopNav() {
     );
 }
 
-function DesktopMainNav() {
-    return (
-        <nav className="flex items-center gap-10">
-            <Link href="/products" className="text-4xl font-extrabold tracking-tight hover:text-gray-600 transition-colors">
-                PRODUCT
-            </Link>
-            <Link href="/explore" className="text-4xl font-extrabold tracking-tight hover:text-gray-600 transition-colors">
-                DISCOVER
-            </Link>
-        </nav>
-    );
-}
-
-const GIFT_CATEGORIES_DATA = [
-    { label: 'ELECTRONICS', value: 'ELECTRONICS', subCategories: ['Audio', 'Mobile', 'Gaming', 'Cameras', 'Appliances'] },
-    { label: 'BEAUTY', value: 'BEAUTY', subCategories: ['Skincare', 'Makeup', 'Perfume', 'Body & Hair', 'Grooming'] },
-    { label: 'FASHION', value: 'FASHION', subCategories: ['Clothing', 'Bags', 'Wallets', 'Shoes', 'Jewelry'] },
-    { label: 'LIVING', value: 'LIVING', subCategories: ['Furniture', 'Lighting', 'Fabric', 'Home Decor', 'Candles'] },
-    { label: 'FOODS', value: 'FOODS', subCategories: ['Coffee & Tea', 'Bakery', 'Fresh Food', 'Wine & Spirits', 'Snacks'] },
-    { label: 'TOYS', value: 'TOYS', subCategories: ['Figures', 'Board Games', 'Plushies', 'DIY Kits', 'Stationery'] },
-    { label: 'OUTDOOR', value: 'OUTDOOR', subCategories: ['Camping', 'Hiking', 'Golf', 'Biking', 'Sports'] },
-    { label: 'PET', value: 'PET', subCategories: ['Dogs', 'Cats', 'Food', 'Toys', 'Accessories'] },
-    { label: 'KITCHEN', value: 'KITCHEN', subCategories: ['Tableware', 'Cookware', 'Kitchen Tools', 'Storage', 'Appliance'] },
+const PRODUCT_CATEGORIES = [
+    { value: 'ELECTRONICS', label: '전자기기' },
+    { value: 'BEAUTY', label: '뷰티' },
+    { value: 'FASHION', label: '패션' },
+    { value: 'LIVING', label: '리빙' },
+    { value: 'FOODS', label: '식품' },
+    { value: 'TOYS', label: '완구' },
+    { value: 'OUTDOOR', label: '아웃도어' },
+    { value: 'PET', label: '반려동물' },
+    { value: 'KITCHEN', label: '주방' },
 ];
 
-function DesktopCategoryNav() {
-    const [hoveredCategory, setHoveredCategory] = React.useState<string | null>(null);
+function DesktopMainNav() {
+    const [hoveredMenu, setHoveredMenu] = React.useState<string | null>(null);
 
     return (
-        <div
-            className="flex flex-col relative"
-            onMouseLeave={() => setHoveredCategory(null)}
+        <nav
+            className="flex items-center gap-10"
+            onMouseLeave={() => setHoveredMenu(null)}
         >
-            {/* Category List */}
-            <div className="flex items-center gap-6 border-t border-black pt-4 pb-1 relative z-20 bg-white">
-                {GIFT_CATEGORIES_DATA.map(cat => (
-                    <Link
-                        key={cat.label}
-                        href={`/products?category=${cat.label.toLowerCase()}`}
-                        className={cn(
-                            "text-sm font-bold transition-all duration-200 pb-1 border-b-[3px] border-transparent",
-                            hoveredCategory === cat.label
-                                ? "border-black text-black"
-                                : "hover:text-gray-500"
-                        )}
-                        onMouseEnter={() => setHoveredCategory(cat.label)}
-                    >
-                        {cat.label}
-                    </Link>
-                ))}
-                <div className="w-px h-3 bg-gray-300 mx-2" />
-                <Link href="/events" className="text-sm font-serif italic hover:text-gray-500 transition-colors">Event</Link>
-                <Link href="/lookbook" className="text-sm font-serif italic hover:text-gray-500 transition-colors">Trend</Link>
+            {/* PRODUCT — 호버 시 카테고리 드롭다운 */}
+            <div className="relative" onMouseEnter={() => setHoveredMenu('PRODUCT')}>
+                <Link href="/products" className="text-4xl font-extrabold tracking-tight hover:text-gray-600 transition-colors">
+                    PRODUCT
+                </Link>
+                <div className={cn(
+                    "absolute top-full left-0 pt-3 transition-all duration-200 z-50",
+                    hoveredMenu === 'PRODUCT' ? "opacity-100 visible translate-y-0" : "opacity-0 invisible -translate-y-1"
+                )}>
+                    <div className="bg-white border border-gray-100 shadow-lg px-8 py-4">
+                        <div className="flex items-center gap-6">
+                            {PRODUCT_CATEGORIES.map((cat, i) => (
+                                <div key={cat.value} className="flex items-center gap-6">
+                                    <Link
+                                        href={`/products?category=${cat.value.toLowerCase()}`}
+                                        className="text-sm font-bold hover:text-gray-500 transition-colors whitespace-nowrap"
+                                    >
+                                        {cat.label}
+                                    </Link>
+                                    {i < PRODUCT_CATEGORIES.length - 1 && (
+                                        <div className="w-px h-3 bg-gray-200" />
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            {/* Mega Menu Dropdown */}
-            <div
-                className={cn(
-                    "absolute top-full left-0 w-full bg-white transition-all duration-300 ease-out overflow-hidden z-10",
-                    hoveredCategory ? "max-h-64 opacity-100 border-b border-gray-100 shadow-sm" : "max-h-0 opacity-0"
-                )}
-            >
-                {hoveredCategory && (
-                    <div className="py-6 flex flex-col flex-wrap h-48 content-start gap-x-12 gap-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
-                        {/* Find the active category data */}
-                        {GIFT_CATEGORIES_DATA.find(c => c.label === hoveredCategory)?.subCategories.map(sub => (
-                            <Link
-                                key={sub}
-                                href={`/products?category=${hoveredCategory.toLowerCase()}&sub=${sub.toLowerCase()}`}
-                                className="text-sm text-gray-500 hover:text-black hover:underline underline-offset-4"
-                            >
-                                {sub}
-                            </Link>
-                        ))}
-                    </div>
-                )}
+            {/* DISCOVER */}
+            <div onMouseEnter={() => setHoveredMenu(null)}>
+                <Link href="/explore" className="text-4xl font-extrabold tracking-tight hover:text-gray-600 transition-colors">
+                    DISCOVER
+                </Link>
             </div>
-        </div>
+
+            {/* STORY — 호버 시 Event/Trend 드롭다운 */}
+            <div className="relative" onMouseEnter={() => setHoveredMenu('STORY')}>
+                <Link href="/reviews" className="text-4xl font-extrabold tracking-tight hover:text-gray-600 transition-colors">
+                    STORY
+                </Link>
+                <div className={cn(
+                    "absolute top-full left-0 pt-3 transition-all duration-200 z-50",
+                    hoveredMenu === 'STORY' ? "opacity-100 visible translate-y-0" : "opacity-0 invisible -translate-y-1"
+                )}>
+                    <div className="bg-white border border-gray-100 shadow-lg p-4 min-w-[120px]">
+                        <div className="flex flex-col gap-3">
+                            <Link href="/events" className="text-sm font-serif italic hover:text-gray-500 transition-colors whitespace-nowrap">Event</Link>
+                            <Link href="/lookbook" className="text-sm font-serif italic hover:text-gray-500 transition-colors whitespace-nowrap">Trend</Link>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
     );
 }
 

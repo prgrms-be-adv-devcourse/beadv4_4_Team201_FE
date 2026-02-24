@@ -4,7 +4,7 @@ export interface Member {
   nickname: string | null;
   email: string;
   avatarUrl: string | null;
-  role: 'USER' | 'SELLER';
+  role: 'USER' | 'BUYER' | 'SELLER';
   status: 'ACTIVE' | 'SUSPENDED' | 'WITHDRAWN';
   birthday?: string;
   address?: string;
@@ -24,7 +24,7 @@ export const currentUser: Member = {
   nickname: 'TestUser',
   email: 'developer@giftify.app',
   avatarUrl: 'https://i.pravatar.cc/150?u=dev',
-  role: 'USER',
+  role: 'SELLER',
   status: 'ACTIVE',
   createdAt: new Date().toISOString(),
 };
