@@ -224,7 +224,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 <Share2 className="w-5 h-5" strokeWidth={1.5} />
               </Button>
 
-              {/* Add to Cart Button — 일반 상품 장바구니는 백엔드 미지원 (GENERAL_PRODUCT) */}
+              {/* Add to Cart Button */}
               <Button
                 variant="outline"
                 size="lg"
