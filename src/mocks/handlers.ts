@@ -356,13 +356,19 @@ export const handlers = [
     });
   }),
 
-  http.post('**/api/v2/wishlists/items', async ({ request }) => {
-    const body = await request.json();
-    const { productId } = body as { productId: string };
-    const product = products.find((p) => p.id === productId);
+  http.post('**/api/v2/wishlists/me/items/add', async ({ request }) => {
+    const url = new URL(request.url);
+    const productId = url.searchParams.get('productId');
+
+    if (!productId) {
+      return new HttpResponse(null, { status: 400 });
+    }
+
+    const product = products.find((p) => p.id === productId || p.id === `product-${productId}`);
     if (!product) {
       return new HttpResponse(null, { status: 404 });
     }
+
     const newItem = {
       id: `wish-item-${Date.now()}`,
       wishlistId: myWishlist.id,
@@ -377,7 +383,7 @@ export const handlers = [
     myWishlist.items.unshift(newItem);
     myWishlist.itemCount++;
 
-    return HttpResponse.json(newItem, { status: 201 });
+    return new HttpResponse(null, { status: 204 });
   }),
 
   http.delete('**/api/v2/wishlists/items/:itemId', () => {

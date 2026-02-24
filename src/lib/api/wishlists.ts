@@ -44,7 +44,11 @@ function transformWishlist(data: any): Wishlist {
   if (!data) return data;
 
   // Handle case where items might be missing or already in correct format
-  const items = (data.items || []).map((item: any) => {
+  const rawItems = Array.isArray(data.items)
+    ? data.items
+    : (data.items?.content || []);
+
+  const items = rawItems.map((item: any) => {
     // If it's already a WishItem (nested product), return as is
     if (item.product && item.product.id) {
       return {
@@ -84,8 +88,14 @@ function transformWishlist(data: any): Wishlist {
   };
 }
 
-export async function addWishlistItem(data: WishItemCreateRequest): Promise<WishItem> {
-  return apiClient.post<WishItem>('/api/v2/wishlists/items', data);
+export async function checkWishlistItemExistence(productId: string): Promise<boolean> {
+  const id = productId.replace('product-', '');
+  return apiClient.get<boolean>(`/api/v2/wishlists/me/items/check?productId=${id}`);
+}
+
+export async function addWishlistItem(data: WishItemCreateRequest): Promise<void> {
+  const id = 'productId' in data ? data.productId : (data as any).id;
+  return apiClient.post<void>(`/api/v2/wishlists/me/items/add?productId=${id}`, {});
 }
 
 export async function removeWishlistItem(itemId: string): Promise<void> {

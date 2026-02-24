@@ -69,6 +69,10 @@ async function proxyRequest(req: NextRequest, path: string[], method: string) {
       console.error(`[Proxy] Error from upstream (${response.status}):`, data);
     }
 
+    if (response.status === 204) {
+      return new NextResponse(null, { status: 204 });
+    }
+
     try {
       const json = JSON.parse(data);
       return NextResponse.json(json, { status: response.status });
@@ -78,7 +82,7 @@ async function proxyRequest(req: NextRequest, path: string[], method: string) {
 
   } catch (error) {
     console.error('Proxy Error:', error);
-    return NextResponse.json({ 
+    return NextResponse.json({
       message: 'Internal Server Error',
       error: error instanceof Error ? error.message : String(error),
       // stack: error instanceof Error ? error.stack : undefined 
