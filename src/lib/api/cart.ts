@@ -62,12 +62,18 @@ function mapBackendCart(backend: BackendCartResponse): Cart {
 
 function mapBackendCartItem(item: BackendCartItemResponse, cartId: number): CartItem {
   const isNewFunding = item.targetType === 'FUNDING_PENDING';
+  const isFundingRelated = item.targetType === 'FUNDING' || item.targetType === 'FUNDING_PENDING';
 
   return {
     id: `${cartId}::${item.targetType}::${item.targetId}`, // 복합 키 생성
     cartId: cartId.toString(),
-    fundingId: item.targetType === 'FUNDING' ? item.targetId.toString() : '',
-    funding: {
+    targetType: item.targetType as any,
+    targetId: item.targetId.toString(),
+    productName: item.productName || '',
+    productPrice: item.productPrice,
+    contributionAmount: item.contributionAmount,
+    amount: item.contributionAmount,
+    funding: isFundingRelated ? {
       id: item.targetType === 'FUNDING' ? item.targetId.toString() : '',
       wishItemId: item.targetType === 'FUNDING_PENDING' ? item.targetId.toString() : '',
       product: {
@@ -83,13 +89,12 @@ function mapBackendCartItem(item: BackendCartItemResponse, cartId: number): Cart
       recipientId: '',
       recipient: { id: '', nickname: '', avatarUrl: null },
       targetAmount: item.productPrice,
-      currentAmount: 0,
+      currentAmount: 0, // 백엔드에서 미제공
       status: 'IN_PROGRESS',
       participantCount: 0,
       expiresAt: '',
       createdAt: '',
-    },
-    amount: item.contributionAmount,
+    } : undefined,
     selected: item.status === 'AVAILABLE', // unavailable 아이템은 비선택
     isNewFunding,
     createdAt: new Date().toISOString(),

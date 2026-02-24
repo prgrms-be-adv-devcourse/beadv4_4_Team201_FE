@@ -29,14 +29,14 @@ interface BackendFundingResponse {
   targetAmount: number;
   currentAmount: number;
   status: string; // FundingStatus enum
-  deadline: string; // LocalDateTime
+  deadline?: string; // LocalDateTime
   wishlistItemId: number;
-  productId: number;
+  productId?: number;
   productName: string;
-  productPrice: number;
   imageKey?: string;
   achievementRate: number; // 달성률 (%)
   daysRemaining: number; // 남은 일수
+  receiverNickname?: string;
 }
 
 /**
@@ -54,6 +54,8 @@ interface BackendContributeFundingResponse extends BackendFundingResponse {
 interface BackendMyFundingSummary {
   fundingId: number;
   wishlistItemId: number;
+  productName: string;
+  imageKey?: string;
   status: string;
   targetAmount: number;
   currentAmount: number;
@@ -72,6 +74,8 @@ interface BackendMyFundingResponse {
   currentAmount: number;
   status: string; // FundingStatus
   deadline: string; // LocalDateTime
+  productName: string;
+  imageKey?: string;
   participants: {
     participantId: number;
     nickName: string;
@@ -80,38 +84,19 @@ interface BackendMyFundingResponse {
   daysRemaining: number;
 }
 
-// ... (existing code)
-
-/**
- * 백엔드 MyFundingResponseDto (나의 펀딩 단건 조회)
- * @see FundingController GET /api/v2/fundings/my/{id}
- */
-interface BackendMyFundingResponse {
-  fundingId: number;
-  wishlistItemId: number;
-  targetAmount: number;
-  currentAmount: number;
-  status: string; // FundingStatus
-  deadline: string; // LocalDateTime
-  participants: {
-    participantId: number;
-    nickName: string;
-  }[] | null;
-  achievementRate: number;
-  daysRemaining: number;
-}
+// BackendMyFundingResponse is already defined above
 
 /**
  * 백엔드 PageResponse wrapper
  */
 interface BackendPageResponse<T> {
   content: T[];
-  page: number;
-  size: number;
+  pageNumber: number;
+  pageSize: number;
   totalElements: number;
   totalPages: number;
-  hasNext: boolean;
-  hasPrevious: boolean;
+  isFirst: boolean;
+  isLast: boolean;
 }
 
 // --- Mapping Functions ---
@@ -140,9 +125,9 @@ function mapBackendFunding(backend: BackendFundingResponse): Funding {
     id: backend.fundingId.toString(),
     wishItemId: backend.wishlistItemId.toString(),
     product: {
-      id: backend.productId.toString(),
+      id: backend.productId?.toString() || "",
       name: backend.productName,
-      price: backend.productPrice,
+      price: backend.targetAmount, // 목표 금액을 상품 가격으로 대략적 매핑
       imageUrl: resolveImageUrl(backend.imageKey),
       status: "ON_SALE",
       brandName: "",
@@ -150,21 +135,25 @@ function mapBackendFunding(backend: BackendFundingResponse): Funding {
     organizerId: "", // 백엔드에서 제공하지 않음
     organizer: {
       id: "",
-      nickname: "Organizer",
+      nickname: backend.receiverNickname || "Organizer",
       avatarUrl: null,
     },
     recipientId: "", // 백엔드에서 제공하지 않음
     recipient: {
       id: "",
-      nickname: "Recipient",
+      nickname: backend.receiverNickname || "Recipient",
       avatarUrl: null,
     },
     targetAmount: backend.targetAmount,
     currentAmount: backend.currentAmount,
     status: mapFundingStatus(backend.status),
     participantCount: 0, // 백엔드에서 제공하지 않음
-    expiresAt: backend.deadline,
+    expiresAt: backend.deadline || "",
     createdAt: "", // 백엔드에서 제공하지 않음
+    achievementRate: backend.achievementRate,
+    daysRemaining: backend.daysRemaining,
+    imageKey: backend.imageKey,
+    receiverNickname: backend.receiverNickname,
   };
 }
 
@@ -174,9 +163,9 @@ function mapBackendMyFundingSummary(backend: BackendMyFundingSummary): Funding {
     wishItemId: backend.wishlistItemId.toString(),
     product: {
       id: "",
-      name: "",
+      name: backend.productName,
       price: backend.targetAmount, // 상품 가격 = 목표 금액
-      imageUrl: resolveImageUrl(undefined),
+      imageUrl: resolveImageUrl(backend.imageKey),
       status: "ON_SALE",
       brandName: "",
     },
@@ -198,6 +187,9 @@ function mapBackendMyFundingSummary(backend: BackendMyFundingSummary): Funding {
     participantCount: 0,
     expiresAt: "",
     createdAt: "",
+    achievementRate: backend.achievementRate,
+    daysRemaining: backend.daysRemaining,
+    imageKey: backend.imageKey,
   };
 }
 
@@ -210,9 +202,9 @@ function mapBackendMyFunding(backend: BackendMyFundingResponse): FundingDetail {
     wishItemId: backend.wishlistItemId.toString(),
     product: {
       id: "", // 백엔드 미제공
-      name: "", // 백엔드 미제공
+      name: backend.productName,
       price: backend.targetAmount, // 목표 금액을 상품 가격으로 가정
-      imageUrl: "/images/placeholder-product.svg",
+      imageUrl: resolveImageUrl(backend.imageKey),
       status: "ON_SALE",
       brandName: "",
     },
@@ -234,6 +226,9 @@ function mapBackendMyFunding(backend: BackendMyFundingResponse): FundingDetail {
     participantCount: backend.participants?.length || 0,
     expiresAt: backend.deadline,
     createdAt: "",
+    achievementRate: backend.achievementRate,
+    daysRemaining: backend.daysRemaining,
+    imageKey: backend.imageKey,
   };
 
   // Participants 매핑
@@ -258,6 +253,7 @@ function mapBackendMyFunding(backend: BackendMyFundingResponse): FundingDetail {
   };
 }
 
+// --- Mapping Functions ---
 function mapPageResponse<T>(
   backendPage: BackendPageResponse<T>,
   mapper: (item: T) => Funding,
@@ -267,12 +263,12 @@ function mapPageResponse<T>(
     content: mapped,
     items: mapped,
     page: {
-      page: backendPage.page,
-      size: backendPage.size,
+      page: backendPage.pageNumber,
+      size: backendPage.pageSize,
       totalElements: backendPage.totalElements,
       totalPages: backendPage.totalPages,
-      hasNext: backendPage.hasNext,
-      hasPrevious: backendPage.hasPrevious,
+      hasNext: !backendPage.isLast,
+      hasPrevious: !backendPage.isFirst,
     },
   };
 }
@@ -303,6 +299,23 @@ export async function getFunding(fundingId: string): Promise<FundingDetail> {
     ...funding,
     participants: [],
     myParticipation: null,
+  };
+}
+
+/**
+ * 참여한 펀딩 단건 조회
+ * @endpoint GET /api/v2/fundings/participated/{id}
+ */
+export async function getParticipatedFunding(fundingId: string): Promise<FundingDetail> {
+  const backend = await apiClient.get<BackendContributeFundingResponse>(
+    `/api/v2/fundings/participated/${fundingId}`,
+  );
+  const funding = mapBackendFunding(backend);
+  return {
+    ...funding,
+    participants: [],
+    myParticipation: null,
+    myContribution: backend.myContribution,
   };
 }
 
@@ -353,7 +366,28 @@ export async function getMyParticipatedFundings(
     await apiClient.get<BackendPageResponse<BackendContributeFundingResponse>>(
       endpoint,
     );
-  return mapPageResponse(response, mapBackendFunding);
+
+  // 참여한 펀딩 목록의 각 아이템에는 myContribution이 포함되어 있음
+  const mappedContent = response.content.map(item => {
+    const funding = mapBackendFunding(item);
+    return {
+      ...funding,
+      myContribution: item.myContribution
+    } as any; // FundingListResponse는 Funding[]을 가지는데, 여기서는 myContribution이 포함된 특수 케이스
+  });
+
+  return {
+    content: mappedContent,
+    items: mappedContent,
+    page: {
+      page: response.pageNumber,
+      size: response.pageSize,
+      totalElements: response.totalElements,
+      totalPages: response.totalPages,
+      hasNext: !response.isLast,
+      hasPrevious: !response.isFirst,
+    },
+  };
 }
 
 /**
@@ -378,6 +412,63 @@ export async function getMyReceivedFundings(
   const response =
     await apiClient.get<BackendPageResponse<BackendMyFundingSummary>>(endpoint);
   return mapPageResponse(response, mapBackendMyFundingSummary);
+}
+
+/**
+ * 친구들 진행 중인 펀딩 리스트 조회
+ * @endpoint GET /api/v2/fundings/friends/list
+ */
+export async function getFriendsFundings(
+  params?: PageParams,
+): Promise<FundingListResponse> {
+  const queryParams = new URLSearchParams();
+  if (params?.page !== undefined) queryParams.append("page", params.page.toString());
+  if (params?.size !== undefined) queryParams.append("size", params.size.toString());
+
+  const queryString = queryParams.toString();
+  const endpoint = queryString
+    ? `/api/v2/fundings/friends/list?${queryString}`
+    : "/api/v2/fundings/friends/list";
+
+  const response = await apiClient.get<BackendPageResponse<BackendFundingResponse>>(endpoint);
+  return mapPageResponse(response, mapBackendFunding);
+}
+
+/**
+ * 친구의 진행 중인 펀딩 단건 조회
+ * @endpoint GET /api/v2/fundings/friends/{id}
+ */
+export async function getFriendFunding(fundingId: string): Promise<FundingDetail> {
+  const backend = await apiClient.get<BackendFundingResponse>(
+    `/api/v2/fundings/friends/${fundingId}`
+  );
+  const funding = mapBackendFunding(backend);
+  return {
+    ...funding,
+    participants: [],
+    myParticipation: null,
+  };
+}
+
+/**
+ * 친구의 진행 중인 펀딩 목록 조회
+ * @endpoint GET /api/v2/fundings/friends/{friendId}/list
+ */
+export async function getFriendFriendFundings(
+  friendId: string,
+  params?: PageParams,
+): Promise<FundingListResponse> {
+  const queryParams = new URLSearchParams();
+  if (params?.page !== undefined) queryParams.append("page", params.page.toString());
+  if (params?.size !== undefined) queryParams.append("size", params.size.toString());
+
+  const queryString = queryParams.toString();
+  const endpoint = queryString
+    ? `/api/v2/fundings/friends/${friendId}/list?${queryString}`
+    : `/api/v2/fundings/friends/${friendId}/list`;
+
+  const response = await apiClient.get<BackendPageResponse<BackendFundingResponse>>(endpoint);
+  return mapPageResponse(response, mapBackendFunding);
 }
 
 

@@ -20,11 +20,15 @@ export interface Cart {
  * Cart item representing a funding participation
  */
 export interface CartItem {
-    id: string;
+    id: string; // Composite key: cartId::targetType::targetId
     cartId: string;
-    fundingId: string;
-    funding: Funding;
-    amount: number;
+    targetType: 'FUNDING' | 'FUNDING_PENDING' | 'GENERAL_PRODUCT';
+    targetId: string;
+    productName: string;
+    productPrice: number;
+    contributionAmount: number;
+    amount: number; // For backward compatibility / UI consistency
+    funding?: Funding; // Populated only for FUNDING/FUNDING_PENDING types
     selected: boolean;
     isNewFunding: boolean;
     createdAt: string;

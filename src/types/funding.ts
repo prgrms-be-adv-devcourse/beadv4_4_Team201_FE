@@ -38,6 +38,11 @@ export interface Funding {
     participantCount: number;
     expiresAt: string;
     createdAt: string;
+    // New fields from Backend V2
+    achievementRate?: number;
+    daysRemaining?: number;
+    imageKey?: string;
+    receiverNickname?: string;
 }
 
 /**
@@ -59,6 +64,7 @@ export interface FundingParticipant {
 export interface FundingDetail extends Funding {
     participants: FundingParticipant[];
     myParticipation: FundingParticipant | null;
+    myContribution?: number;
 }
 
 /**
