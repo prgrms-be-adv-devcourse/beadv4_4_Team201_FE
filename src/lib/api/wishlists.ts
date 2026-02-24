@@ -1,4 +1,5 @@
 import { apiClient } from './client';
+import type { PageParams } from '@/types/api';
 import type {
   Wishlist,
   WishItem,
@@ -7,93 +8,92 @@ import type {
   FriendWishlistListResponse,
   PublicWishlistSummary,
   PublicWishlist,
+  WishlistQueryParams,
 } from '@/types/wishlist';
 
 export interface WishlistVisibilityUpdateRequest {
   visibility: WishlistVisibility;
 }
 
-// Backend response types
-interface BackendWishlistItemResponse {
-  id: number;
-  wishlistId: number;
-  productId: number;
-  status: string;
-  addedAt: string;
-}
+// Backend response types are handled by the Wishlist interface from @/types/wishlist
 
-function mapWishlistItemStatus(status: string): 'AVAILABLE' | 'IN_FUNDING' | 'FUNDED' {
-  switch (status) {
-    case 'FUNDING_IN_PROGRESS':
-      return 'IN_FUNDING';
-    case 'FUNDING_COMPLETED':
-      return 'FUNDED';
-    default:
-      return 'AVAILABLE';
-  }
-}
+export async function getMyWishlist(params?: WishlistQueryParams): Promise<Wishlist> {
+  const queryParams = new URLSearchParams();
+  if (params?.page !== undefined) queryParams.append('page', params.page.toString());
+  if (params?.size !== undefined) queryParams.append('size', params.size.toString());
+  if (params?.category) queryParams.append('category', params.category);
+  if (params?.status) queryParams.append('status', params.status);
 
-export async function getMyWishlist(): Promise<Wishlist> {
-  // Backend has separate endpoints for wishlist info and items
-  // Fetch both and combine
-  const [wishlistInfo, backendItems] = await Promise.all([
-    apiClient.get<{ id: number; memberId: number; visibility: string }>('/api/wishlist/me'),
-    apiClient.get<BackendWishlistItemResponse[]>('/api/wishlist/items/me'),
-  ]);
+  const queryString = queryParams.toString();
+  const endpoint = queryString ? `/api/v2/wishlists/me?${queryString}` : '/api/v2/wishlists/me';
 
-  // Transform backend items to frontend format
-  // Note: Backend only returns productId, so we create a minimal product placeholder
-  // The full product info should be fetched separately if needed
-  const items: WishItem[] = (backendItems || []).map((item) => ({
-    id: item.id.toString(),
-    wishlistId: item.wishlistId.toString(),
-    productId: item.productId.toString(),
-    product: {
-      id: item.productId.toString(),
-      name: `Product ${item.productId}`,
-      price: 0,
-      imageUrl: '',
-      status: 'ON_SALE' as const,
-      brandName: '',
-    },
-    status: mapWishlistItemStatus(item.status),
-    fundingId: null,
-    createdAt: item.addedAt || '',
-  }));
-
-  return {
-    id: wishlistInfo.id.toString(),
-    memberId: wishlistInfo.memberId.toString(),
-    member: {
-      id: wishlistInfo.memberId.toString(),
-      nickname: '',
-      avatarUrl: null,
-    },
-    visibility: wishlistInfo.visibility as WishlistVisibility,
-    items,
-    itemCount: items.length,
-  };
+  const response = await apiClient.get<any>(endpoint);
+  return transformWishlist(response);
 }
 
 export async function getWishlist(memberId: string): Promise<Wishlist> {
-  // Fetch full wishlist including items from standard endpoint
-  // Backend uses singular '/api/wishlist/items/{memberId}'
-  return apiClient.get<Wishlist>(`/api/wishlist/items/${memberId}`);
+  const response = await apiClient.get<any>(`/api/v2/wishlists/${memberId}`);
+  return transformWishlist(response);
+}
+
+/**
+ * Transforms backend v2 wishlist response to frontend format.
+ * Handles both flat (v2) and nested (v1/mock) item structures.
+ */
+function transformWishlist(data: any): Wishlist {
+  if (!data) return data;
+
+  // Handle case where items might be missing or already in correct format
+  const items = (data.items || []).map((item: any) => {
+    // If it's already a WishItem (nested product), return as is
+    if (item.product && item.product.id) {
+      return {
+        ...item,
+        id: item.id.toString(),
+        productId: item.productId.toString(),
+      };
+    }
+
+    // Otherwise, it's a flat PublicWishlistItem style, transform it
+    return {
+      id: (item.wishlistItemId || item.id).toString(),
+      wishlistId: (item.wishlistId || data.id || '').toString(),
+      productId: item.productId.toString(),
+      product: {
+        id: item.productId.toString(),
+        name: item.productName || '',
+        price: item.price || 0,
+        imageUrl: item.imageUrl || '',
+        status: 'ON_SALE' as const,
+        brandName: item.brandName || '',
+        sellerNickname: item.sellerNickname || '',
+      },
+      status: item.status || 'AVAILABLE',
+      fundingId: item.fundingId || null,
+      createdAt: item.addedAt || item.createdAt || '',
+    };
+  });
+
+  return {
+    ...data,
+    id: data.id.toString(),
+    memberId: data.memberId.toString(),
+    items,
+    itemCount: data.itemCount || items.length,
+    page: data.page,
+  };
 }
 
 export async function addWishlistItem(data: WishItemCreateRequest): Promise<WishItem> {
-  // Backend uses query param: POST /api/wishlist/items/add?productId={id}
-  return apiClient.post<WishItem>(`/api/wishlist/items/add?productId=${data.productId}`, {});
+  return apiClient.post<WishItem>('/api/v2/wishlists/items', data);
 }
 
-export async function removeWishlistItem(productId: string): Promise<void> {
-  // Backend uses query param: DELETE /api/wishlist/items/remove?productId={id}
-  return apiClient.delete<void>(`/api/wishlist/items/remove?productId=${productId}`);
+export async function removeWishlistItem(itemId: string): Promise<void> {
+  return apiClient.delete<void>(`/api/v2/wishlists/items/${itemId}`);
 }
 
 export async function updateWishlistVisibility(data: WishlistVisibilityUpdateRequest): Promise<Wishlist> {
-  // Backend: PATCH /api/wishlist/me/settings
-  return apiClient.patch<Wishlist>('/api/wishlist/me/settings', data);
+  return apiClient.patch<Wishlist>('/api/v2/wishlists/visibility', data);
 }
 
 export async function getFriendsWishlists(limit?: number): Promise<FriendWishlistListResponse> {

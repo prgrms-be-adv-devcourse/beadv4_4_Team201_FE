@@ -14,8 +14,8 @@ import {
 
   myParticipatedFundings,
   myReceivedFundings,
-  type Funding,
 } from './data/fundings';
+import { Funding } from '@/types/funding';
 import {
   myWishlist,
   friendsWishlists,
@@ -268,8 +268,39 @@ export const handlers = [
   // ============================================
   // WISHLISTS
   // ============================================
-  http.get('**/api/v2/wishlists/me', () => {
-    return HttpResponse.json(myWishlist);
+  http.get('**/api/v2/wishlists/me', ({ request }) => {
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get('page') || '0');
+    const size = parseInt(url.searchParams.get('size') || '20');
+    const category = url.searchParams.get('category');
+    const status = url.searchParams.get('status');
+
+    let filteredItems = [...myWishlist.items];
+
+    if (category) {
+      filteredItems = filteredItems.filter(item => item.product.category === category);
+    }
+    if (status) {
+      filteredItems = filteredItems.filter(item => item.status === status);
+    }
+
+    const start = page * size;
+    const end = start + size;
+    const paginatedItems = filteredItems.slice(start, end);
+
+    return HttpResponse.json({
+      ...myWishlist,
+      items: paginatedItems,
+      itemCount: filteredItems.length,
+      page: {
+        page,
+        size,
+        totalElements: filteredItems.length,
+        totalPages: Math.ceil(filteredItems.length / size),
+        hasNext: end < filteredItems.length,
+        hasPrevious: page > 0,
+      },
+    });
   }),
 
   http.get('**/api/v2/wishlists/search', ({ request }) => {
@@ -474,13 +505,6 @@ export const handlers = [
     });
   }),
 
-  http.patch('**/api/v2/products/my/:productId', async ({ params, request }) => {
-    const body = await request.json();
-    return HttpResponse.json({
-      id: Number(params.productId),
-      ...body,
-    });
-  }),
 
   http.get('**/api/v2/products/my/stock-histories', ({ request }) => {
     const url = new URL(request.url);

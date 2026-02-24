@@ -3,15 +3,16 @@ import { queryKeys } from '@/lib/query/keys';
 import { getMyWishlist, getWishlist, searchPublicWishlists, getPublicWishlist } from '@/lib/api/wishlists';
 
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import { WishlistQueryParams } from '@/types/wishlist';
 
 /**
  * Hook to fetch the current user's wishlist
  */
-export function useMyWishlist() {
+export function useMyWishlist(params: WishlistQueryParams = { page: 0, size: 20 }) {
   const { user } = useAuth();
   return useQuery({
-    queryKey: queryKeys.myWishlist,
-    queryFn: getMyWishlist,
+    queryKey: [...queryKeys.myWishlist, params],
+    queryFn: () => getMyWishlist(params),
     enabled: !!user,
   });
 }

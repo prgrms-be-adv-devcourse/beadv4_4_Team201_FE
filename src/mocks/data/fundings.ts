@@ -1,58 +1,12 @@
 import { members } from './members';
 import { products } from './products';
+import { Funding, FundingParticipant, FundingStatus } from '@/types/funding';
+import { Product } from '@/types/product';
+import { MemberPublic } from '@/types/member';
 
-export type FundingStatus =
-  | 'PENDING'
-  | 'IN_PROGRESS'
-  | 'ACHIEVED'
-  | 'ACCEPTED'
-  | 'REFUSED'
-  | 'EXPIRED'
-  | 'CLOSED';
+export type { FundingStatus };
 
-export interface Funding {
-  id: string;
-  wishItemId: string;
-  product: {
-    id: string;
-    name: string;
-    price: number;
-    imageUrl: string;
-    status: 'PENDING' | 'ON_SALE' | 'REJECTED' | 'DISCONTINUED';
-  };
-  organizerId: string;
-  organizer: {
-    id: string;
-    nickname: string | null;
-    avatarUrl: string | null;
-  };
-  recipientId: string;
-  recipient: {
-    id: string;
-    nickname: string | null;
-    avatarUrl: string | null;
-  };
-  targetAmount: number;
-  currentAmount: number;
-  status: FundingStatus;
-  participantCount: number;
-  expiresAt: string;
-  createdAt: string;
-}
-
-export interface FundingParticipant {
-  id: string;
-  fundingId: string;
-  memberId: string;
-  member: {
-    id: string;
-    nickname: string | null;
-    avatarUrl: string | null;
-  };
-  amount: number;
-  isOrganizer: boolean;
-  participatedAt: string;
-}
+// Interfaces are now imported from @/types/funding
 
 const now = new Date();
 const futureDate = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);

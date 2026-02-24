@@ -9,7 +9,7 @@ import { Footer } from '@/components/layout/Footer';
 import { VisibilitySheet } from '@/features/wishlist/components/VisibilitySheet';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Heart, ExternalLink, ChevronDown } from 'lucide-react';
+import { Heart, ExternalLink, Globe, Users, Lock, Settings2 } from 'lucide-react';
 import { InlineError } from '@/components/common/InlineError';
 import { useMyWishlist } from '@/features/wishlist/hooks/useWishlist';
 import { useUpdateVisibility, useRemoveWishlistItem } from '@/features/wishlist/hooks/useWishlistMutations';
@@ -18,25 +18,23 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { formatPrice } from '@/lib/format';
 
-// Main tabs - 29cm style
-const MAIN_TABS = [
-    { label: '상품', value: 'product' },
-    { label: '브랜드', value: 'brand' },
-    { label: '마이셀렉션', value: 'myselection' },
-    { label: '콘텐츠', value: 'content' },
-];
+const PAGE_SIZE = 20;
 
-// Category filters - 29cm style
-const CATEGORY_FILTERS = [
+// Category filters
+const CATEGORIES = [
     { label: '전체', value: '' },
-    { label: '여성', value: 'women' },
-    { label: '남성', value: 'men' },
-    { label: '라이프스타일', value: 'lifestyle' },
+    { label: '전자기기', value: 'electronics' },
     { label: '뷰티', value: 'beauty' },
-    { label: '디지털', value: 'digital' },
+    { label: '패션', value: 'fashion' },
+    { label: '리빙', value: 'living' },
+    { label: '식품', value: 'foods' },
+    { label: '완구', value: 'toys' },
+    { label: '아웃도어', value: 'outdoor' },
+    { label: '반려동물', value: 'pet' },
+    { label: '주방', value: 'kitchen' },
 ];
 
-// Status filters for Giftify
+// Status filters
 const STATUS_FILTERS = [
     { label: '전체', value: '' },
     { label: '펀딩 가능', value: 'AVAILABLE' },
@@ -44,27 +42,60 @@ const STATUS_FILTERS = [
     { label: '펀딩 완료', value: 'FUNDED' },
 ];
 
-// Price range filters
-const PRICE_FILTERS = [
-    { label: '전체', value: '' },
-    { label: '~5만원', value: '0-50000' },
-    { label: '5~10만원', value: '50000-100000' },
-    { label: '10~30만원', value: '100000-300000' },
-    { label: '30만원~', value: '300000-' },
-];
+function getPageNumbers(current: number, total: number): (number | '...')[] {
+    if (total <= 7) return Array.from({ length: total }, (_, i) => i);
+    const pages: (number | '...')[] = [0];
+    const lo = Math.max(1, current - 2);
+    const hi = Math.min(total - 2, current + 2);
+    if (lo > 1) pages.push('...');
+    for (let i = lo; i <= hi; i++) pages.push(i);
+    if (hi < total - 2) pages.push('...');
+    pages.push(total - 1);
+    return pages;
+}
+
+function VisibilityBadge({ visibility }: { visibility: WishlistVisibility }) {
+    if (visibility === 'PUBLIC') {
+        return (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium border border-emerald-200">
+                <Globe className="h-3 w-3" />
+                전체 공개
+            </span>
+        );
+    }
+    if (visibility === 'FRIENDS_ONLY') {
+        return (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-medium border border-blue-200">
+                <Users className="h-3 w-3" />
+                친구 공개
+            </span>
+        );
+    }
+    return (
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-medium border border-gray-200">
+            <Lock className="h-3 w-3" />
+            비공개
+        </span>
+    );
+}
 
 export default function MyWishlistPage() {
     const router = useRouter();
-    const { data: wishlist, isLoading, error, refetch } = useMyWishlist();
+    const [currentPage, setCurrentPage] = useState(0);
+    const [activeStatus, setActiveStatus] = useState<string | ''>('');
+    const [activeCategory, setActiveCategory] = useState('');
+
+    const { data: wishlist, isLoading, error, refetch } = useMyWishlist({
+        page: currentPage,
+        size: PAGE_SIZE,
+        status: activeStatus as any,
+        category: activeCategory,
+    });
+
     const updateVisibility = useUpdateVisibility();
     const removeItem = useRemoveWishlistItem();
 
-    const [activeTab, setActiveTab] = useState('product');
-    const [activeCategory, setActiveCategory] = useState('');
-    const [activeStatus, setActiveStatus] = useState('');
-    const [activePriceRange, setActivePriceRange] = useState('');
     const [visibilitySheetOpen, setVisibilitySheetOpen] = useState(false);
-    const [expandedFilter, setExpandedFilter] = useState<string | null>(null);
 
     const handleVisibilityChange = async (visibility: WishlistVisibility) => {
         try {
@@ -88,57 +119,44 @@ export default function MyWishlistPage() {
         router.push(`/fundings/${fundingId}`);
     };
 
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+        // 아이템 섹션 상단으로 스크롤
+        document.getElementById('wishlist-items-section')?.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    const totalPages = wishlist?.page?.totalPages || 0;
+    const totalItems = wishlist?.page?.totalElements || wishlist?.itemCount || 0;
+
     // Filter items - exclude items without valid product data
     const wishlistItems = (wishlist?.items || []).filter(item => item?.product?.id);
-    const filteredItems = wishlistItems.filter(item => {
-        // Status filter
-        if (activeStatus && item.status !== activeStatus) return false;
-
-        // Price range filter
-        if (activePriceRange) {
-            const [min, max] = activePriceRange.split('-').map(v => v ? parseInt(v) : null);
-            const price = item.product.price;
-            if (min !== null && price < min) return false;
-            if (max !== null && price > max) return false;
-        }
-
-        return true;
-    });
-
-    // Count by status (using validated wishlistItems)
-    const countByStatus = {
-        '': wishlistItems.length,
-        'AVAILABLE': wishlistItems.filter(i => i.status === 'AVAILABLE').length,
-        'IN_FUNDING': wishlistItems.filter(i => i.status === 'IN_FUNDING').length,
-        'FUNDED': wishlistItems.filter(i => i.status === 'FUNDED').length,
-    };
 
     // Loading state
     if (isLoading) {
         return (
             <AppShell headerVariant="main">
-                <div className="flex min-h-screen">
-                    <aside className="hidden lg:block w-52 border-r border-border p-6">
-                        <Skeleton className="h-6 w-16 mb-4" />
-                        <div className="space-y-2">
-                            {[1, 2, 3, 4].map(i => (
-                                <Skeleton key={i} className="h-4 w-20" />
-                            ))}
+                <div className="max-w-screen-xl mx-auto px-6 py-10">
+                    <div className="bg-card border border-border rounded-xl p-8 mb-10">
+                        <Skeleton className="h-8 w-48 mb-4" />
+                        <Skeleton className="h-5 w-72 mb-6" />
+                    </div>
+                    <div className="flex gap-10">
+                        <div className="w-48 shrink-0 space-y-8">
+                            <Skeleton className="h-40 w-full" />
+                            <Skeleton className="h-40 w-full" />
                         </div>
-                    </aside>
-                    <main className="flex-1 p-8">
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        <div className="flex-1 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                             {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
                                 <div key={i}>
                                     <Skeleton className="aspect-[3/4]" />
-                                    <Skeleton className="h-3 w-16 mt-3" />
                                     <Skeleton className="h-4 w-full mt-2" />
                                     <Skeleton className="h-4 w-20 mt-2" />
                                 </div>
                             ))}
                         </div>
-                    </main>
+                    </div>
                 </div>
+                <Footer />
             </AppShell>
         );
     }
@@ -158,205 +176,166 @@ export default function MyWishlistPage() {
         );
     }
 
+    const visibilityLabel =
+        wishlist?.visibility === 'PUBLIC' ? '전체 공개' :
+            wishlist?.visibility === 'FRIENDS_ONLY' ? '친구 공개' : '비공개';
+
     return (
         <AppShell headerVariant="main">
-            <div className="flex min-h-screen">
-                {/* Sidebar - 29cm Style */}
-                <aside className="hidden lg:block w-52 flex-shrink-0 border-r border-border sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto">
-                    <div className="p-6">
-                        {/* Title */}
-                        <h2 className="text-lg font-semibold tracking-tight mb-1">LIKE</h2>
-                        <button
-                            onClick={() => setVisibilitySheetOpen(true)}
-                            className="text-[11px] text-muted-foreground hover:text-foreground mb-6 transition-colors flex items-center gap-1"
-                        >
-                            ♡ 마음에드는 상품 모음
-                        </button>
+            <div className="max-w-screen-xl mx-auto px-6 py-10">
 
-                        {/* Main Tabs */}
-                        <nav className="space-y-2 mb-8">
-                            {MAIN_TABS.map((tab) => (
-                                <button
-                                    key={tab.value}
-                                    onClick={() => setActiveTab(tab.value)}
-                                    className={cn(
-                                        'block text-sm transition-all w-full text-left py-0.5',
-                                        activeTab === tab.value
-                                            ? 'font-medium text-foreground'
-                                            : 'text-muted-foreground hover:text-foreground'
-                                    )}
-                                >
-                                    {tab.label}
-                                </button>
-                            ))}
-                        </nav>
+                {/* ─── 상단: 위시리스트 정보 ─────────────────────────────── */}
+                <section className="bg-card border border-border rounded-xl p-8 mb-10">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6">
+                        <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-3">
+                                <Heart className="h-5 w-5 fill-foreground text-foreground" strokeWidth={1.5} />
+                                <h1 className="text-2xl font-semibold tracking-tight">내 위시리스트</h1>
+                            </div>
 
-                        {/* Category Filter - 29cm Style */}
-                        <div className="border-t border-border pt-6 mb-6">
-                            <button
-                                onClick={() => setExpandedFilter(expandedFilter === 'category' ? null : 'category')}
-                                className="flex items-center justify-between w-full text-xs text-muted-foreground mb-3"
-                            >
-                                <span>카테고리</span>
-                                <ChevronDown className={cn(
-                                    "h-3 w-3 transition-transform",
-                                    expandedFilter === 'category' && "rotate-180"
-                                )} />
-                            </button>
-                            {expandedFilter === 'category' && (
-                                <nav className="space-y-2">
-                                    {CATEGORY_FILTERS.map((cat) => (
-                                        <button
-                                            key={cat.value}
-                                            onClick={() => setActiveCategory(cat.value)}
-                                            className={cn(
-                                                'block text-sm transition-all w-full text-left py-0.5',
-                                                activeCategory === cat.value
-                                                    ? 'font-medium text-foreground'
-                                                    : 'text-muted-foreground hover:text-foreground'
-                                            )}
-                                        >
-                                            {cat.label}
-                                        </button>
-                                    ))}
-                                </nav>
+                            {wishlist?.member?.nickname && (
+                                <p className="text-sm text-muted-foreground mb-4">
+                                    {wishlist.member.nickname}의 위시리스트
+                                </p>
                             )}
-                        </div>
 
-                        {/* Status Filter */}
-                        <div className="border-t border-border pt-6 mb-6">
-                            <p className="text-xs text-muted-foreground mb-3">펀딩 상태</p>
-                            <nav className="space-y-2">
-                                {STATUS_FILTERS.map((status) => (
-                                    <button
-                                        key={status.value}
-                                        onClick={() => setActiveStatus(status.value)}
-                                        className={cn(
-                                            'block text-sm transition-all w-full text-left py-0.5',
-                                            activeStatus === status.value
-                                                ? 'font-medium text-foreground'
-                                                : 'text-muted-foreground hover:text-foreground'
-                                        )}
-                                    >
-                                        {status.label}
-                                        <span className="ml-1 text-[11px] text-muted-foreground">
-                                            {countByStatus[status.value as keyof typeof countByStatus]}
-                                        </span>
-                                    </button>
-                                ))}
-                            </nav>
-                        </div>
-
-                        {/* Price Filter */}
-                        <div className="border-t border-border pt-6 mb-6">
-                            <button
-                                onClick={() => setExpandedFilter(expandedFilter === 'price' ? null : 'price')}
-                                className="flex items-center justify-between w-full text-xs text-muted-foreground mb-3"
-                            >
-                                <span>가격대</span>
-                                <ChevronDown className={cn(
-                                    "h-3 w-3 transition-transform",
-                                    expandedFilter === 'price' && "rotate-180"
-                                )} />
-                            </button>
-                            {expandedFilter === 'price' && (
-                                <nav className="space-y-2">
-                                    {PRICE_FILTERS.map((price) => (
-                                        <button
-                                            key={price.value}
-                                            onClick={() => setActivePriceRange(price.value)}
-                                            className={cn(
-                                                'block text-sm transition-all w-full text-left py-0.5',
-                                                activePriceRange === price.value
-                                                    ? 'font-medium text-foreground'
-                                                    : 'text-muted-foreground hover:text-foreground'
-                                            )}
-                                        >
-                                            {price.label}
-                                        </button>
-                                    ))}
-                                </nav>
-                            )}
-                        </div>
-
-                        {/* Visibility Setting */}
-                        <div className="border-t border-border pt-6">
-                            <p className="text-xs text-muted-foreground mb-3">공개설정</p>
-                            <button
-                                onClick={() => setVisibilitySheetOpen(true)}
-                                className="px-3 py-2 border border-border text-xs w-full text-left hover:bg-secondary transition-colors"
-                            >
-                                {wishlist?.visibility === 'PUBLIC' ? '전체 공개' :
-                                    wishlist?.visibility === 'FRIENDS_ONLY' ? '친구 공개' : '비공개'}
-                            </button>
-                        </div>
-                    </div>
-                </aside>
-
-                {/* Main Content */}
-                <main className="flex-1 min-w-0 flex flex-col">
-                    {/* Mobile Header */}
-                    <div className="lg:hidden border-b border-border">
-                        <div className="px-4 py-4">
-                            <div className="flex items-center justify-between">
-                                <h1 className="text-lg font-semibold">LIKE</h1>
-                                <span className="text-sm text-muted-foreground">
-                                    {wishlistItems.length}개
+                            <div className="flex items-center gap-3 flex-wrap">
+                                {wishlist?.visibility && (
+                                    <VisibilityBadge visibility={wishlist.visibility} />
+                                )}
+                                <span className="text-xs text-muted-foreground">
+                                    총 <strong className="text-foreground">{totalItems.toLocaleString()}</strong>개 상품
                                 </span>
                             </div>
                         </div>
 
-                        {/* Mobile Tabs */}
-                        <div className="flex border-b border-border">
-                            {MAIN_TABS.map((tab) => (
-                                <button
-                                    key={tab.value}
-                                    onClick={() => setActiveTab(tab.value)}
-                                    className={cn(
-                                        'flex-1 py-3 text-sm text-center transition-all border-b-2 -mb-px',
-                                        activeTab === tab.value
-                                            ? 'font-medium border-foreground'
-                                            : 'text-muted-foreground border-transparent'
-                                    )}
-                                >
-                                    {tab.label}
-                                </button>
-                            ))}
-                        </div>
-
-                        {/* Mobile Status Filter */}
-                        <div className="flex gap-4 px-4 py-3 overflow-x-auto scrollbar-hide">
-                            {STATUS_FILTERS.map((status) => (
-                                <button
-                                    key={status.value}
-                                    onClick={() => setActiveStatus(status.value)}
-                                    className={cn(
-                                        'text-sm whitespace-nowrap transition-all',
-                                        activeStatus === status.value ? 'font-medium' : 'text-muted-foreground'
-                                    )}
-                                >
-                                    {status.label}
-                                </button>
-                            ))}
+                        <div className="flex flex-col items-start sm:items-end gap-3">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setVisibilitySheetOpen(true)}
+                                className="flex items-center gap-2 text-sm"
+                            >
+                                <Settings2 className="h-4 w-4" />
+                                공개 설정 변경
+                            </Button>
+                            <p className="text-[11px] text-muted-foreground">
+                                현재: <span className="font-medium text-foreground">{visibilityLabel}</span>
+                            </p>
                         </div>
                     </div>
 
-                    {/* Product Grid */}
-                    <div className="flex-1 p-4 lg:p-8">
-                        {filteredItems.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-20">
-                                <Heart className="h-12 w-12 text-muted-foreground/50 mb-4" strokeWidth={1} />
-                                <p className="text-muted-foreground mb-6">
-                                    {activeStatus ? '해당 상태의 아이템이 없습니다' : '위시리스트가 비어있습니다'}
+                    <div className="border-t border-border mt-6 pt-5">
+                        <div className="grid grid-cols-3 gap-4 text-center">
+                            <div>
+                                <p className="text-xl font-bold">{totalItems.toLocaleString()}</p>
+                                <p className="text-[11px] text-muted-foreground mt-0.5">전체</p>
+                            </div>
+                            <div>
+                                <p className="text-xl font-bold">
+                                    {wishlist?.visibility === 'PUBLIC' ? '전체 공개' :
+                                        wishlist?.visibility === 'FRIENDS_ONLY' ? '친구 공개' : '비공개'}
+                                </p>
+                                <p className="text-[11px] text-muted-foreground mt-0.5">공개 범위</p>
+                            </div>
+                            <div>
+                                <p className="text-xl font-bold">{totalPages > 0 ? totalPages : 1}</p>
+                                <p className="text-[11px] text-muted-foreground mt-0.5">페이지</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <div className="flex flex-col md:flex-row gap-10">
+                    {/* ─── 왼쪽: 세로 메뉴 (카테고리 & 상태) ────────────────────── */}
+                    <aside className="w-full md:w-48 bg-card border border-border rounded-xl p-6 h-fit sticky top-24">
+                        <div className="space-y-8">
+                            {/* 카테고리 섹션 */}
+                            <div>
+                                <h3 className="text-sm font-bold mb-4 flex items-center gap-2">
+                                    카테고리
+                                </h3>
+                                <ul className="space-y-1">
+                                    {CATEGORIES.map(cat => (
+                                        <li key={cat.value}>
+                                            <button
+                                                onClick={() => {
+                                                    setActiveCategory(cat.value);
+                                                    setCurrentPage(0);
+                                                }}
+                                                className={cn(
+                                                    'w-full text-left px-3 py-2 rounded-md text-[13px] transition-colors',
+                                                    activeCategory === cat.value
+                                                        ? 'bg-foreground text-background font-medium'
+                                                        : 'text-muted-foreground hover:bg-muted font-medium'
+                                                )}
+                                            >
+                                                {cat.label}
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+
+                            {/* 상태 섹션 */}
+                            <div>
+                                <h3 className="text-sm font-bold mb-4 flex items-center gap-2">
+                                    펀딩 상태
+                                </h3>
+                                <ul className="space-y-1">
+                                    {STATUS_FILTERS.map(status => (
+                                        <li key={status.value}>
+                                            <button
+                                                onClick={() => {
+                                                    setActiveStatus(status.value);
+                                                    setCurrentPage(0);
+                                                }}
+                                                className={cn(
+                                                    'w-full text-left px-3 py-2 rounded-md text-[13px] transition-colors',
+                                                    activeStatus === status.value
+                                                        ? 'bg-foreground text-background font-medium'
+                                                        : 'text-muted-foreground hover:bg-muted font-medium'
+                                                )}
+                                            >
+                                                {status.label}
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+                    </aside>
+
+                    {/* ─── 오른쪽: 위시리스트 아이템 ─────────────────────────────── */}
+                    <section id="wishlist-items-section" className="flex-1">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-lg font-bold">
+                                {activeCategory ? CATEGORIES.find(c => c.value === activeCategory)?.label : '전체 상품'}
+                                <span className="ml-2 text-sm text-muted-foreground font-normal">
+                                    {totalItems}개
+                                </span>
+                            </h2>
+                            {totalPages > 1 && (
+                                <span className="text-[11px] text-muted-foreground">
+                                    {currentPage + 1} / {totalPages} 페이지
+                                </span>
+                            )}
+                        </div>
+
+                        {wishlistItems.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center py-24 border border-dashed border-border rounded-xl bg-card/50">
+                                <Heart className="h-12 w-12 text-muted-foreground/30 mb-4" strokeWidth={1} />
+                                <p className="text-muted-foreground mb-6 text-sm">
+                                    해당 조건의 아이템이 없습니다
                                 </p>
                                 <Link href="/products">
-                                    <Button variant="outline">상품 둘러보기</Button>
+                                    <Button variant="outline" size="sm">상품 둘러보기</Button>
                                 </Link>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
-                                {filteredItems.map((item) => (
-                                    <WishItemCard29cm
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-5">
+                                {wishlistItems.map((item) => (
+                                    <WishItemCard
                                         key={item.id}
                                         item={item}
                                         onDelete={() => handleDeleteItem(item.id)}
@@ -365,29 +344,78 @@ export default function MyWishlistPage() {
                                 ))}
                             </div>
                         )}
-                    </div>
 
-                    {/* Footer */}
-                    <Footer />
-                </main>
+                        {/* 페이지네이션 */}
+                        {!isLoading && totalPages > 1 && (
+                            <div className="flex items-center justify-center gap-1 py-16">
+                                <button
+                                    disabled={currentPage === 0}
+                                    onClick={() => handlePageChange(0)}
+                                    className="px-3 py-1.5 text-[11px] font-medium border border-border rounded hover:border-foreground transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                >
+                                    처음
+                                </button>
+                                <button
+                                    disabled={currentPage === 0}
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    className="px-3 py-1.5 text-[11px] font-medium border border-border rounded hover:border-foreground transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                >
+                                    이전
+                                </button>
+
+                                {getPageNumbers(currentPage, totalPages).map((p, i) =>
+                                    p === '...'
+                                        ? <span key={`ellipsis-${i}`} className="px-2 text-[11px] text-muted-foreground">···</span>
+                                        : <button
+                                            key={p}
+                                            onClick={() => handlePageChange(p as number)}
+                                            className={cn(
+                                                'px-3 py-1.5 text-[11px] font-medium border rounded transition-colors',
+                                                p === currentPage
+                                                    ? 'border-foreground bg-foreground text-background'
+                                                    : 'border-border hover:border-foreground'
+                                            )}
+                                        >
+                                            {(p as number) + 1}
+                                        </button>
+                                )}
+
+                                <button
+                                    disabled={currentPage >= totalPages - 1}
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    className="px-3 py-1.5 text-[11px] font-medium border border-border rounded hover:border-foreground transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                >
+                                    다음
+                                </button>
+                                <button
+                                    disabled={currentPage >= totalPages - 1}
+                                    onClick={() => handlePageChange(totalPages - 1)}
+                                    className="px-3 py-1.5 text-[11px] font-medium border border-border rounded hover:border-foreground transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                >
+                                    끝
+                                </button>
+                            </div>
+                        )}
+                    </section>
+                </div>
             </div>
 
-            {/* Modals */}
+            <Footer />
+
             <VisibilitySheet
                 open={visibilitySheetOpen}
                 onOpenChange={setVisibilitySheetOpen}
                 currentVisibility={wishlist?.visibility || 'PUBLIC'}
                 onVisibilityChange={handleVisibilityChange}
             />
-
         </AppShell>
     );
 }
 
 /**
- * 29cm Style Wish Item Card
+ * Wish Item Card
  */
-function WishItemCard29cm({
+function WishItemCard({
     item,
     onDelete,
     onViewFunding,
@@ -398,9 +426,9 @@ function WishItemCard29cm({
 }) {
     return (
         <div className="group relative">
-            {/* Image */}
+            {/* 이미지 */}
             <Link href={`/products/${item.product.id}`}>
-                <div className="relative aspect-[3/4] bg-secondary overflow-hidden">
+                <div className="relative aspect-[3/4] bg-secondary overflow-hidden rounded-lg">
                     {item.product.imageUrl ? (
                         <Image
                             src={item.product.imageUrl}
@@ -410,53 +438,56 @@ function WishItemCard29cm({
                         />
                     ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                            <span className="text-muted-foreground/50 text-xs">No Image</span>
+                            <span className="text-muted-foreground/40 text-xs">No Image</span>
+                        </div>
+                    )}
+
+                    {/* 상태 뱃지 */}
+                    {item.status === 'IN_FUNDING' && (
+                        <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-blue-600 text-white text-[9px] font-bold rounded">
+                            펀딩중
+                        </div>
+                    )}
+                    {item.status === 'FUNDED' && (
+                        <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-gray-600 text-white text-[9px] font-bold rounded">
+                            완료
                         </div>
                     )}
                 </div>
             </Link>
 
-            {/* Heart Icon - Always visible */}
+            {/* 하트 버튼 */}
             <button
                 onClick={onDelete}
-                className="absolute top-3 right-3 transition-opacity"
-                aria-label="Remove from wishlist"
+                className="absolute top-3 right-3 p-1.5 bg-background/80 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-background"
+                aria-label="위시리스트에서 제거"
             >
-                <Heart className="h-5 w-5 fill-foreground text-foreground" strokeWidth={1.5} />
+                <Heart className="h-4 w-4 fill-foreground text-foreground" strokeWidth={1.5} />
             </button>
 
-            {/* Product Info - 29cm Style */}
-            <div className="mt-3 space-y-1">
-                <p className="text-[11px] text-muted-foreground uppercase tracking-wide">
-                    {item.product.brandName || 'Brand'}
+            {/* 상품 정보 */}
+            <div className="mt-3 space-y-0.5">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wide">
+                    {item.product.sellerNickname || item.product.brandName || 'Seller'}
                 </p>
                 <Link href={`/products/${item.product.id}`}>
-                    <p className="text-sm line-clamp-2 hover:underline transition-all leading-relaxed">
+                    <p className="text-xs line-clamp-2 hover:underline transition-all leading-relaxed">
                         {item.product.name}
                     </p>
                 </Link>
-                <div className="flex items-baseline gap-2 pt-1">
-                    <span className="text-sm font-medium">{formatPrice(item.product.price)}</span>
-                </div>
+                <p className="text-sm font-semibold pt-1">{formatPrice(item.product.price)}</p>
             </div>
 
-            {/* Status Badge & Action Buttons - 29cm Style */}
-            <div className="mt-3 space-y-2">
-                {item.status === 'IN_FUNDING' && (
-                    <button
-                        onClick={onViewFunding}
-                        className="w-full py-2 border border-border text-xs hover:bg-secondary transition-colors flex items-center justify-center gap-1"
-                    >
-                        <ExternalLink className="h-3 w-3" strokeWidth={1.5} />
-                        펀딩 보기
-                    </button>
-                )}
-                {item.status === 'FUNDED' && (
-                    <div className="w-full py-2 bg-secondary text-center text-xs text-muted-foreground">
-                        펀딩 완료
-                    </div>
-                )}
-            </div>
+            {/* 액션 버튼 */}
+            {item.status === 'IN_FUNDING' && (
+                <button
+                    onClick={onViewFunding}
+                    className="mt-2 w-full py-1.5 border border-border rounded text-[10px] font-medium hover:bg-secondary transition-colors flex items-center justify-center gap-1"
+                >
+                    <ExternalLink className="h-3 w-3" strokeWidth={1.5} />
+                    펀딩 보기
+                </button>
+            )}
         </div>
     );
 }
