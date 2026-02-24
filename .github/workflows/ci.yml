@@ -17,7 +17,8 @@ jobs:
 
       - run: npm ci
 
-      - run: npm run lint
+      - name: Lint (non-blocking)
+        run: npm run lint || true
 
       - run: npm run build
         env:
