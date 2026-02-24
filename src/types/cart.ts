@@ -22,13 +22,13 @@ export interface Cart {
 export interface CartItem {
     id: string; // Composite key: cartId::targetType::targetId
     cartId: string;
-    targetType: 'FUNDING' | 'FUNDING_PENDING' | 'GENERAL_PRODUCT';
+    targetType: 'FUNDING' | 'FUNDING_PENDING';
     targetId: string;
     productName: string;
     productPrice: number;
     contributionAmount: number;
     amount: number; // For backward compatibility / UI consistency
-    funding?: Funding; // Populated only for FUNDING/FUNDING_PENDING types
+    funding: Funding; // Always present for funding types
     selected: boolean;
     isNewFunding: boolean;
     createdAt: string;
@@ -45,10 +45,7 @@ export interface CartItemCreateRequest {
     // Funding related
     fundingId?: string;
     wishItemId?: string;
-    amount?: number;
-    // Product related
-    productId?: string;
-    quantity?: number;
+    amount: number;
 }
 
 /**

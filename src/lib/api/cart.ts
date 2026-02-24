@@ -13,7 +13,7 @@ import type {
 /**
  * 백엔드 TargetType enum
  */
-type BackendTargetType = 'FUNDING_PENDING' | 'FUNDING' | 'GENERAL_PRODUCT';
+type BackendTargetType = 'FUNDING_PENDING' | 'FUNDING';
 
 /**
  * 백엔드 CartItemRequest
@@ -62,7 +62,6 @@ function mapBackendCart(backend: BackendCartResponse): Cart {
 
 function mapBackendCartItem(item: BackendCartItemResponse, cartId: number): CartItem {
   const isNewFunding = item.targetType === 'FUNDING_PENDING';
-  const isFundingRelated = item.targetType === 'FUNDING' || item.targetType === 'FUNDING_PENDING';
 
   return {
     id: `${cartId}::${item.targetType}::${item.targetId}`, // 복합 키 생성
@@ -73,7 +72,7 @@ function mapBackendCartItem(item: BackendCartItemResponse, cartId: number): Cart
     productPrice: item.productPrice,
     contributionAmount: item.contributionAmount,
     amount: item.contributionAmount,
-    funding: isFundingRelated ? {
+    funding: {
       id: item.targetType === 'FUNDING' ? item.targetId.toString() : '',
       wishItemId: item.targetType === 'FUNDING_PENDING' ? item.targetId.toString() : '',
       product: {
@@ -94,7 +93,7 @@ function mapBackendCartItem(item: BackendCartItemResponse, cartId: number): Cart
       participantCount: 0,
       expiresAt: '',
       createdAt: '',
-    } : undefined,
+    },
     selected: item.status === 'AVAILABLE', // unavailable 아이템은 비선택
     isNewFunding,
     createdAt: new Date().toISOString(),
@@ -138,19 +137,14 @@ export async function addCartItem(data: CartItemCreateRequest): Promise<void> {
     // 기존 펀딩에 참여
     targetType = 'FUNDING';
     targetId = parseInt(data.fundingId, 10);
-    amount = data.amount || 0;
+    amount = data.amount;
   } else if (data.wishItemId) {
     // 새 펀딩 개설
     targetType = 'FUNDING_PENDING';
     targetId = parseInt(data.wishItemId, 10);
-    amount = data.amount || 0;
-  } else if (data.productId) {
-    // 일반 상품 (현재 백엔드에서 미지원)
-    targetType = 'GENERAL_PRODUCT';
-    targetId = parseInt(data.productId, 10);
-    amount = data.quantity || 1;
+    amount = data.amount;
   } else {
-    throw new Error('fundingId, wishItemId, or productId is required');
+    throw new Error('fundingId or wishItemId is required');
   }
 
   const request: BackendCartItemRequest = {

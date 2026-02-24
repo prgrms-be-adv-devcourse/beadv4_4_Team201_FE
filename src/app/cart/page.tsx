@@ -227,12 +227,11 @@ export default function CartPage() {
 
                             {/* Cart Items */}
                             {cart.items.map((item) => {
-                                const { funding, targetType, productName } = item;
-                                const isFunding = targetType === 'FUNDING' || targetType === 'FUNDING_PENDING';
-                                const progressPercent = (isFunding && funding && funding.targetAmount > 0)
+                                const { funding, productName } = item;
+                                const progressPercent = (funding.targetAmount > 0)
                                     ? (funding.currentAmount / funding.targetAmount) * 100
                                     : 0;
-                                const daysLeft = (isFunding && funding) ? getDaysLeft(funding.expiresAt) : null;
+                                const daysLeft = getDaysLeft(funding.expiresAt);
 
                                 return (
                                     <div
@@ -265,38 +264,29 @@ export default function CartPage() {
                                             </div>
                                             <div className="flex flex-col justify-start min-w-0 py-1">
                                                 {/* Recipient Info */}
-                                                {isFunding && funding && (
-                                                    <div className="flex items-center gap-2 mb-2">
-                                                        <Avatar className="h-5 w-5">
-                                                            <AvatarImage src={funding.recipient.avatarUrl || ''} />
-                                                            <AvatarFallback className="text-[10px]">
-                                                                {(funding.recipient.nickname || '알')[0]}
-                                                            </AvatarFallback>
-                                                        </Avatar>
-                                                        <span className="text-xs text-muted-foreground">
-                                                            {funding.recipient.nickname || '알 수 없음'}님에게
-                                                        </span>
-                                                        {item.isNewFunding && (
-                                                            <span className="text-[10px] text-primary bg-primary/10 px-1.5 py-0.5">NEW</span>
-                                                        )}
-                                                    </div>
-                                                )}
-                                                {!isFunding && (
-                                                    <div className="flex items-center gap-2 mb-2">
-                                                        <span className="text-xs text-muted-foreground">일반 상품</span>
-                                                    </div>
-                                                )}
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <Avatar className="h-5 w-5">
+                                                        <AvatarImage src={funding.recipient.avatarUrl || ''} />
+                                                        <AvatarFallback className="text-[10px]">
+                                                            {(funding.recipient.nickname || '알')[0]}
+                                                        </AvatarFallback>
+                                                    </Avatar>
+                                                    <span className="text-xs text-muted-foreground">
+                                                        {funding.recipient.nickname || '알 수 없음'}님에게
+                                                    </span>
+                                                    {item.isNewFunding && (
+                                                        <span className="text-[10px] text-primary bg-primary/10 px-1.5 py-0.5">NEW</span>
+                                                    )}
+                                                </div>
                                                 <h3 className="text-sm font-medium hover:underline transition-all line-clamp-2 leading-relaxed">
                                                     {productName}
                                                 </h3>
                                                 <p className="text-sm font-medium mt-2">
                                                     {formatPrice(item.productPrice)}
                                                 </p>
-                                                {isFunding && funding && (
-                                                    <p className="text-xs text-muted-foreground mt-1">
-                                                        현재 {formatPrice(funding.currentAmount)} 모금됨
-                                                    </p>
-                                                )}
+                                                <p className="text-xs text-muted-foreground mt-1">
+                                                    현재 {formatPrice(funding.currentAmount)} 모금됨
+                                                </p>
                                             </div>
                                         </div>
 
@@ -315,7 +305,7 @@ export default function CartPage() {
                                                     className="w-full text-sm font-medium text-center bg-transparent border-b border-border focus:border-foreground focus:outline-none py-1"
                                                 />
                                                 <p className="text-[11px] text-muted-foreground text-center mt-1">
-                                                    {isFunding ? '원' : '개'}
+                                                    원
                                                 </p>
                                             </div>
                                             <button
@@ -328,25 +318,23 @@ export default function CartPage() {
 
                                         {/* Progress */}
                                         <div className="col-span-2 pt-1">
-                                            {isFunding && (
-                                                <div className="space-y-1">
-                                                    <Progress value={progressPercent} className="h-1.5" />
-                                                    <p className="text-xs text-muted-foreground text-center">
-                                                        {Math.round(progressPercent)}% 달성
-                                                    </p>
-                                                </div>
-                                            )}
+                                            <div className="space-y-1">
+                                                <Progress value={progressPercent} className="h-1.5" />
+                                                <p className="text-xs text-muted-foreground text-center">
+                                                    {Math.round(progressPercent)}% 달성
+                                                </p>
+                                            </div>
                                         </div>
 
                                         {/* Days Left - 29cm Style */}
                                         <div className="col-span-2 text-center pt-1">
-                                            {isFunding && daysLeft !== null && (
+                                            {daysLeft !== null && (
                                                 <>
                                                     <p className={`text-sm font-medium ${daysLeft <= 3 ? 'text-destructive' : ''}`}>
                                                         D-{daysLeft}
                                                     </p>
                                                     <p className="text-[11px] text-muted-foreground mt-1">
-                                                        {funding?.participantCount || 0}명 참여
+                                                        {funding.participantCount || 0}명 참여
                                                     </p>
                                                 </>
                                             )}
@@ -403,12 +391,11 @@ export default function CartPage() {
 
                             {/* Mobile Cart Items */}
                             {cart.items.map((item) => {
-                                const { funding, targetType, productName } = item;
-                                const isFunding = targetType === 'FUNDING' || targetType === 'FUNDING_PENDING';
-                                const progressPercent = (isFunding && funding && funding.targetAmount > 0)
+                                const { funding, productName } = item;
+                                const progressPercent = (funding.targetAmount > 0)
                                     ? (funding.currentAmount / funding.targetAmount) * 100
                                     : 0;
-                                const daysLeft = (isFunding && funding) ? getDaysLeft(funding.expiresAt) : null;
+                                const daysLeft = getDaysLeft(funding.expiresAt);
 
                                 return (
                                     <div
@@ -438,24 +425,17 @@ export default function CartPage() {
                                             <div className="flex justify-between items-start mb-1">
                                                 <div className="min-w-0">
                                                     {/* Recipient */}
-                                                    {isFunding && funding && (
-                                                        <div className="flex items-center gap-1.5 mb-1">
-                                                            <Avatar className="h-4 w-4">
-                                                                <AvatarImage src={funding.recipient.avatarUrl || ''} />
-                                                                <AvatarFallback className="text-[9px]">
-                                                                    {(funding.recipient.nickname || '알')[0]}
-                                                                </AvatarFallback>
-                                                            </Avatar>
-                                                            <span className="text-[10px] text-muted-foreground">
-                                                                {funding.recipient.nickname}님에게
-                                                            </span>
-                                                        </div>
-                                                    )}
-                                                    {!isFunding && (
-                                                        <div className="flex items-center gap-1.5 mb-1">
-                                                            <span className="text-[10px] text-muted-foreground">일반 상품</span>
-                                                        </div>
-                                                    )}
+                                                    <div className="flex items-center gap-1.5 mb-1">
+                                                        <Avatar className="h-4 w-4">
+                                                            <AvatarImage src={funding.recipient.avatarUrl || ''} />
+                                                            <AvatarFallback className="text-[9px]">
+                                                                {(funding.recipient.nickname || '알')[0]}
+                                                            </AvatarFallback>
+                                                        </Avatar>
+                                                        <span className="text-[10px] text-muted-foreground">
+                                                            {funding.recipient.nickname}님에게
+                                                        </span>
+                                                    </div>
                                                     <p className="text-sm line-clamp-2">{productName}</p>
                                                 </div>
                                                 <button
@@ -467,23 +447,21 @@ export default function CartPage() {
                                             </div>
 
                                             {/* Progress Bar */}
-                                            {isFunding && (
-                                                <div className="space-y-1 mt-2">
-                                                    <Progress value={progressPercent} className="h-1" />
-                                                    <div className="flex justify-between text-[10px] text-muted-foreground">
-                                                        <span>{Math.round(progressPercent)}% 달성</span>
-                                                        {isFunding && daysLeft !== null && (
-                                                            <span className={daysLeft <= 3 ? 'text-destructive' : ''}>
-                                                                D-{daysLeft}
-                                                            </span>
-                                                        )}
-                                                    </div>
+                                            <div className="space-y-1 mt-2">
+                                                <Progress value={progressPercent} className="h-1" />
+                                                <div className="flex justify-between text-[10px] text-muted-foreground">
+                                                    <span>{Math.round(progressPercent)}% 달성</span>
+                                                    {daysLeft !== null && (
+                                                        <span className={daysLeft <= 3 ? 'text-destructive' : ''}>
+                                                            D-{daysLeft}
+                                                        </span>
+                                                    )}
                                                 </div>
-                                            )}
+                                            </div>
 
                                             {/* Amount Input */}
                                             <div className="flex items-center justify-between mt-3">
-                                                <span className="text-xs text-muted-foreground">{isFunding ? '참여 금액' : '수량'}</span>
+                                                <span className="text-xs text-muted-foreground">참여 금액</span>
                                                 <div className="flex items-center gap-1">
                                                     <input
                                                         type="text"
@@ -496,7 +474,7 @@ export default function CartPage() {
                                                         }}
                                                         className="w-20 text-sm font-medium text-right bg-transparent border-b border-border focus:border-foreground focus:outline-none py-0.5"
                                                     />
-                                                    <span className="text-sm">{isFunding ? '원' : '개'}</span>
+                                                    <span className="text-sm">원</span>
                                                 </div>
                                             </div>
                                         </div>
