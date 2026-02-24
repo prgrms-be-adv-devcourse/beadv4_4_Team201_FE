@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import { resolveImageUrl } from '@/lib/image';
+import type { PageParams } from '@/types/api';
 import type {
   Wishlist,
   WishItem,
@@ -8,98 +8,92 @@ import type {
   FriendWishlistListResponse,
   PublicWishlistSummary,
   PublicWishlist,
+  WishlistQueryParams,
 } from '@/types/wishlist';
 
 export interface WishlistVisibilityUpdateRequest {
   visibility: WishlistVisibility;
 }
 
-// Backend v2 response types
-interface BackendV2WishlistItemResponse {
-  id: number;
-  wishlistId: number;
-  productId: number;
-  productName: string | null;
-  price: number;
-  imageKey: string | null;
-  isSoldout: boolean;
-  isActive: boolean;
-  status: string;
-  addedAt: string;
-}
+// Backend response types are handled by the Wishlist interface from @/types/wishlist
 
-interface BackendV2WishlistResponse {
-  id: number;
-  memberId: number;
-  nickname: string | null;
-  visibility: string;
-  createdAt: string;
-  items: BackendV2WishlistItemResponse[];
-}
+export async function getMyWishlist(params?: WishlistQueryParams): Promise<Wishlist> {
+  const queryParams = new URLSearchParams();
+  if (params?.page !== undefined) queryParams.append('page', params.page.toString());
+  if (params?.size !== undefined) queryParams.append('size', params.size.toString());
+  if (params?.category) queryParams.append('category', params.category);
+  if (params?.status) queryParams.append('status', params.status);
 
-function mapWishlistItemStatus(status: string): 'AVAILABLE' | 'IN_FUNDING' | 'FUNDED' {
-  switch (status) {
-    case 'FUNDING_IN_PROGRESS':
-      return 'IN_FUNDING';
-    case 'FUNDING_COMPLETED':
-      return 'FUNDED';
-    default:
-      return 'AVAILABLE';
-  }
-}
+  const queryString = queryParams.toString();
+  const endpoint = queryString ? `/api/v2/wishlists/me?${queryString}` : '/api/v2/wishlists/me';
 
-function mapBackendItem(item: BackendV2WishlistItemResponse): WishItem {
-  return {
-    id: item.id.toString(),
-    wishlistId: item.wishlistId.toString(),
-    productId: item.productId.toString(),
-    product: {
-      id: item.productId.toString(),
-      name: item.productName || '',
-      price: item.price,
-      imageUrl: resolveImageUrl(item.imageKey),
-      status: item.isActive ? 'ON_SALE' as const : 'DISCONTINUED' as const,
-      brandName: '',
-    },
-    status: mapWishlistItemStatus(item.status),
-    fundingId: null,
-    createdAt: item.addedAt || '',
-  };
-}
-
-export async function getMyWishlist(): Promise<Wishlist> {
-  const response = await apiClient.get<BackendV2WishlistResponse>('/api/v2/wishlists/me');
-
-  const items = (response.items || []).map(mapBackendItem);
-
-  return {
-    id: response.id.toString(),
-    memberId: response.memberId.toString(),
-    member: {
-      id: response.memberId.toString(),
-      nickname: response.nickname || '',
-      avatarUrl: null,
-    },
-    visibility: response.visibility as WishlistVisibility,
-    items,
-    itemCount: items.length,
-  };
+  const response = await apiClient.get<any>(endpoint);
+  return transformWishlist(response);
 }
 
 export async function getWishlist(memberId: string): Promise<Wishlist> {
-  return apiClient.get<Wishlist>(`/api/v2/wishlists/${memberId}`);
+  const response = await apiClient.get<any>(`/api/v2/wishlists/${memberId}`);
+  return transformWishlist(response);
+}
+
+/**
+ * Transforms backend v2 wishlist response to frontend format.
+ * Handles both flat (v2) and nested (v1/mock) item structures.
+ */
+function transformWishlist(data: any): Wishlist {
+  if (!data) return data;
+
+  // Handle case where items might be missing or already in correct format
+  const items = (data.items || []).map((item: any) => {
+    // If it's already a WishItem (nested product), return as is
+    if (item.product && item.product.id) {
+      return {
+        ...item,
+        id: item.id.toString(),
+        productId: item.productId.toString(),
+      };
+    }
+
+    // Otherwise, it's a flat PublicWishlistItem style, transform it
+    return {
+      id: (item.wishlistItemId || item.id).toString(),
+      wishlistId: (item.wishlistId || data.id || '').toString(),
+      productId: item.productId.toString(),
+      product: {
+        id: item.productId.toString(),
+        name: item.productName || '',
+        price: item.price || 0,
+        imageUrl: item.imageUrl || '',
+        status: 'ON_SALE' as const,
+        brandName: item.brandName || '',
+        sellerNickname: item.sellerNickname || '',
+      },
+      status: item.status || 'AVAILABLE',
+      fundingId: item.fundingId || null,
+      createdAt: item.addedAt || item.createdAt || '',
+    };
+  });
+
+  return {
+    ...data,
+    id: data.id.toString(),
+    memberId: data.memberId.toString(),
+    items,
+    itemCount: data.itemCount || items.length,
+    page: data.page,
+  };
 }
 
 export async function addWishlistItem(data: WishItemCreateRequest): Promise<WishItem> {
-  return apiClient.post<WishItem>(`/api/v2/wishlists/me/items/add?productId=${data.productId}`, {});
+  return apiClient.post<WishItem>('/api/v2/wishlists/items', data);
 }
 
-export async function removeWishlistItem(productId: string): Promise<void> {
-  return apiClient.delete<void>(`/api/v2/wishlists/me/items/remove?productId=${productId}`);
+export async function removeWishlistItem(itemId: string): Promise<void> {
+  return apiClient.delete<void>(`/api/v2/wishlists/items/${itemId}`);
 }
 
 export async function updateWishlistVisibility(data: WishlistVisibilityUpdateRequest): Promise<Wishlist> {
-  return apiClient.patch<Wishlist>('/api/v2/wishlists/me/settings', data);
+  return apiClient.patch<Wishlist>('/api/v2/wishlists/visibility', data);
 }
 
 export async function getFriendsWishlists(limit?: number): Promise<FriendWishlistListResponse> {

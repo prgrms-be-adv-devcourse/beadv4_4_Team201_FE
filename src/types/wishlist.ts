@@ -1,5 +1,6 @@
 import { MemberPublic } from './member';
 import { Product } from './product';
+import { PageInfo } from './api';
 
 /**
  * Wishlist visibility settings
@@ -40,6 +41,7 @@ export interface Wishlist {
     visibility: WishlistVisibility;
     items: WishItem[];
     itemCount: number;
+    page?: PageInfo;
 }
 
 /**
@@ -82,4 +84,14 @@ export interface PublicWishlist {
     memberId: string;
     nickname: string;
     items: PublicWishlistItem[];
+}
+
+/**
+ * Query parameters for wishlist list
+ */
+export interface WishlistQueryParams {
+    category?: string;
+    status?: WishItemStatus | '';
+    page?: number;
+    size?: number;
 }

@@ -1,12 +1,5 @@
 import { SAMPLE_PRODUCT_IMAGES, SAMPLE_PRODUCT_IMAGES_LARGE } from '@/lib/images/sample-images';
-
-export interface Product {
-  id: string;
-  name: string;
-  price: number;
-  imageUrl: string;
-  status: 'PENDING' | 'ON_SALE' | 'REJECTED' | 'DISCONTINUED';
-}
+import { Product } from '@/types/product';
 
 export interface ProductDetail extends Product {
   sellerId: string;
@@ -30,6 +23,8 @@ export const products: Product[] = [
     price: 329000,
     imageUrl: TECH[0],
     status: 'ON_SALE',
+    category: 'electronics',
+    sellerNickname: '멍청한고양이2013',
   },
   {
     id: 'product-2',
@@ -37,6 +32,8 @@ export const products: Product[] = [
     price: 359000,
     imageUrl: TECH[1],
     status: 'ON_SALE',
+    category: 'beauty',
+    sellerNickname: '멍청한고양이2013',
   },
   {
     id: 'product-3',
@@ -44,6 +41,8 @@ export const products: Product[] = [
     price: 929000,
     imageUrl: TECH[2],
     status: 'ON_SALE',
+    category: 'electronics',
+    sellerNickname: '멍청한고양이2013',
   },
   {
     id: 'product-4',
@@ -51,6 +50,8 @@ export const products: Product[] = [
     price: 449000,
     imageUrl: TECH[3],
     status: 'ON_SALE',
+    category: 'electronics',
+    sellerNickname: '멍청한고양이2013',
   },
   {
     id: 'product-5',
@@ -58,6 +59,8 @@ export const products: Product[] = [
     price: 439000,
     imageUrl: TECH[4],
     status: 'ON_SALE',
+    category: 'toys',
+    sellerNickname: '멍청한고양이2013',
   },
   {
     id: 'product-6',
@@ -65,6 +68,8 @@ export const products: Product[] = [
     price: 1690000,
     imageUrl: TECH[5],
     status: 'ON_SALE',
+    category: 'electronics',
+    sellerNickname: '멍청한고양이2013',
   },
   {
     id: 'product-7',
@@ -72,6 +77,8 @@ export const products: Product[] = [
     price: 1550000,
     imageUrl: TECH[6],
     status: 'ON_SALE',
+    category: 'electronics',
+    sellerNickname: '멍청한고양이2013',
   },
   {
     id: 'product-8',
@@ -79,6 +86,8 @@ export const products: Product[] = [
     price: 229000,
     imageUrl: TECH[7],
     status: 'ON_SALE',
+    category: 'electronics',
+    sellerNickname: '멍청한고양이2013',
   },
   {
     id: 'product-9',
@@ -86,6 +95,8 @@ export const products: Product[] = [
     price: 1890000,
     imageUrl: TECH[8],
     status: 'ON_SALE',
+    category: 'electronics',
+    sellerNickname: '멍청한고양이2013',
   },
   {
     id: 'product-10',
@@ -93,6 +104,8 @@ export const products: Product[] = [
     price: 729000,
     imageUrl: TECH[9],
     status: 'ON_SALE',
+    category: 'beauty',
+    sellerNickname: '멍청한고양이2013',
   },
 ];
 

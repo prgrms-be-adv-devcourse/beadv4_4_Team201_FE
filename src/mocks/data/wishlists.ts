@@ -1,38 +1,10 @@
 import { members } from './members';
 import { products } from './products';
+import { WishItem, Wishlist } from '@/types/wishlist';
 
 export type WishlistVisibility = 'PUBLIC' | 'FRIENDS_ONLY' | 'PRIVATE';
 
 export type WishItemStatus = 'AVAILABLE' | 'IN_FUNDING' | 'FUNDED';
-
-export interface WishItem {
-  id: string;
-  wishlistId: string;
-  productId: string;
-  product: {
-    id: string;
-    name: string;
-    price: number;
-    imageUrl: string;
-    status: 'PENDING' | 'ON_SALE' | 'REJECTED' | 'DISCONTINUED';
-  };
-  status: WishItemStatus;
-  fundingId: string | null;
-  createdAt: string;
-}
-
-export interface Wishlist {
-  id: string;
-  memberId: string;
-  member: {
-    id: string;
-    nickname: string | null;
-    avatarUrl: string | null;
-  };
-  visibility: WishlistVisibility;
-  items: WishItem[];
-  itemCount: number;
-}
 
 const now = new Date();
 
@@ -73,8 +45,17 @@ export const myWishlist: Wishlist = {
       fundingId: null,
       createdAt: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString(),
     },
+    ...Array.from({ length: 47 }, (_, i) => ({
+      id: `wish-item-extra-${i}`,
+      wishlistId: 'wishlist-1',
+      productId: products[(i % 10)].id,
+      product: products[(i % 10)],
+      status: 'AVAILABLE' as WishItemStatus,
+      fundingId: null,
+      createdAt: new Date(now.getTime() - (i + 15) * 24 * 60 * 60 * 1000).toISOString(),
+    })),
   ],
-  itemCount: 3,
+  itemCount: 50,
 };
 
 export const friendsWishlists: Wishlist[] = [
