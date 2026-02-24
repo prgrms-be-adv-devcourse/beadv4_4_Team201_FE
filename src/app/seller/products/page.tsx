@@ -193,15 +193,27 @@ export default function SellerProductsPage() {
                                 className="h-9"
                             />
                         </div>
-                        <div className="flex items-center gap-2 pb-1">
-                            <input
-                                id="inStockOnly"
-                                type="checkbox"
-                                checked={filters.inStock === true}
-                                onChange={e => setFilters(f => ({ ...f, inStock: e.target.checked ? true : undefined }))}
-                                className="h-4 w-4 rounded border-gray-300 text-foreground focus:ring-foreground"
-                            />
-                            <Label htmlFor="inStockOnly" className="text-sm cursor-pointer font-normal">재고 있는 상품만</Label>
+                        <div className="flex flex-col gap-2 pb-1">
+                            <div className="flex items-center gap-2">
+                                <input
+                                    id="inStockOnly"
+                                    type="checkbox"
+                                    checked={filters.inStock === true}
+                                    onChange={e => setFilters(f => ({ ...f, inStock: e.target.checked ? true : undefined }))}
+                                    className="h-4 w-4 rounded border-gray-300 text-foreground focus:ring-foreground"
+                                />
+                                <Label htmlFor="inStockOnly" className="text-sm cursor-pointer font-normal">재고 있는 상품만</Label>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <input
+                                    id="outOfStockOnly"
+                                    type="checkbox"
+                                    checked={filters.inStock === false}
+                                    onChange={e => setFilters(f => ({ ...f, inStock: e.target.checked ? false : undefined }))}
+                                    className="h-4 w-4 rounded border-gray-300 text-foreground focus:ring-foreground"
+                                />
+                                <Label htmlFor="outOfStockOnly" className="text-sm cursor-pointer font-normal">재고 없는 상품만</Label>
+                            </div>
                         </div>
                     </div>
 
@@ -283,8 +295,8 @@ export default function SellerProductsPage() {
                                                         )}
                                                     </div>
                                                     <div className="min-w-0">
-                                                        <p className="font-medium truncate">{product.name}</p>
-                                                        <p className="text-xs text-muted-foreground truncate">{product.description}</p>
+                                                        <Link href={`/products/${product.id}`} className="font-medium truncate hover:underline underline-offset-2 line-clamp-1">{product.name}</Link>
+
                                                     </div>
                                                 </div>
                                             </td>
@@ -303,8 +315,8 @@ export default function SellerProductsPage() {
                                                     <Edit2 className="h-3.5 w-3.5" />
                                                 </Button>
                                             </td>
-                                            <td className="px-0 py-3 text-center">
-                                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => router.push(`/seller/products/stock?id=${product.id}`)}>
+                                            <td className="px-1 py-3 text-center">
+                                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => router.push(`/seller/products/stock?productId=${product.id}`)}>
                                                     <History className="h-3.5 w-3.5" />
                                                 </Button>
                                             </td>

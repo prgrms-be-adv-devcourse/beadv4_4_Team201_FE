@@ -210,12 +210,13 @@ export async function getStockHistory(params?: StockHistorySearchParams): Promis
   if (params?.changeType) queryParams.append('changeType', params.changeType);
   if (params?.fromDate) queryParams.append('fromDate', params.fromDate);
   if (params?.toDate) queryParams.append('toDate', params.toDate);
+  if (params?.sort) queryParams.append('sort', params.sort);
   if (params?.page !== undefined) queryParams.append('page', params.page.toString());
   if (params?.size !== undefined) queryParams.append('size', params.size.toString());
 
   const queryString = queryParams.toString();
   const endpoint = queryString
-    ? `/api/v2/products/my/stock-histories?${queryString}`
-    : '/api/v2/products/my/stock-histories';
+    ? `/api/v2/products/stock-histories/my?${queryString}`
+    : '/api/v2/products/stock-histories/my';
   return apiClient.get<StockHistoryPage>(endpoint);
 }
