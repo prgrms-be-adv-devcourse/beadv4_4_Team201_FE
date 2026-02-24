@@ -475,7 +475,7 @@ export const handlers = [
   }),
 
   http.patch('**/api/v2/products/my/:productId', async ({ params, request }) => {
-    const body = await request.json();
+    const body = await request.json() as Record<string, unknown>;
     return HttpResponse.json({
       id: Number(params.productId),
       ...body,
