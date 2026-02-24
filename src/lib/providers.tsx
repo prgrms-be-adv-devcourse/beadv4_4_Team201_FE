@@ -4,6 +4,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { Auth0Provider } from '@auth0/nextjs-auth0/client';
 import { Toaster } from 'sonner';
 import { AuthInitializer } from '@/features/auth/components/AuthInitializer';
+import { NotificationSSEProvider } from '@/features/notification/components/NotificationSSEProvider';
 import { getQueryClient } from '@/lib/query/get-query-client';
 
 /**
@@ -21,6 +22,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <Auth0Provider>
             <AuthInitializer />
             <QueryClientProvider client={queryClient}>
+                <NotificationSSEProvider />
                 {children}
                 <Toaster
                     position="top-center"

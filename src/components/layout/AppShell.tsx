@@ -43,7 +43,7 @@ export function AppShell({
                 className={cn(
                     'flex-1',
                     // BottomNav height is h-14 (3.5rem) + safe area
-                    showBottomNav && 'pb-14',
+                    showBottomNav && 'pb-14 md:pb-0',
                     className
                 )}
             >

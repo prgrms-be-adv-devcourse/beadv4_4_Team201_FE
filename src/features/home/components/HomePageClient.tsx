@@ -21,7 +21,7 @@ export function HomePageClient() {
             <AppShell
                 headerVariant="main"
                 showHeader={true}
-                showBottomNav={false}
+                showBottomNav
             >
                 <HomePageSkeleton />
             </AppShell>
@@ -33,7 +33,7 @@ export function HomePageClient() {
             <AppShell
                 headerVariant="main"
                 showHeader={true}
-                showBottomNav={false}
+                showBottomNav
             >
                 <InlineError
                     error={error}
@@ -54,7 +54,7 @@ export function HomePageClient() {
         <AppShell
             headerVariant="main"
             showHeader={true}
-            showBottomNav={false}
+            showBottomNav
         >
             <div className="flex flex-col min-h-full">
                 {/* Welcome Greeting */}

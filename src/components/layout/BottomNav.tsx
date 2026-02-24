@@ -2,17 +2,20 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Search, ShoppingBag, Wallet } from 'lucide-react';
+import { Home, Search, Bell, ShoppingBag, Wallet } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { useCart } from '@/features/cart/hooks/useCart';
+import { useUnreadCount } from '@/features/notification/hooks/useNotifications';
 
 export function BottomNav() {
     const pathname = usePathname();
     const { user } = useUser();
     const { data: cart } = useCart();
 
+    const { data: unreadCount } = useUnreadCount();
     const cartItemCount = user ? (cart?.items.length || 0) : 0;
+    const notificationCount = user ? (unreadCount?.count || 0) : 0;
 
     const navItems = [
         {
@@ -26,6 +29,13 @@ export function BottomNav() {
             href: '/products',
             icon: Search,
             isActive: pathname === '/products',
+        },
+        {
+            label: '알림',
+            href: '/notifications',
+            icon: Bell,
+            isActive: pathname.startsWith('/notifications'),
+            badge: notificationCount,
         },
         {
             label: '장바구니',
@@ -43,8 +53,8 @@ export function BottomNav() {
     ];
 
     return (
-        <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border/50 bg-background pb-safe">
-            <div className="grid h-14 grid-cols-4">
+        <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border/50 bg-background pb-safe md:hidden">
+            <div className="grid h-14 grid-cols-5">
                 {navItems.map((item) => {
                     const Icon = item.icon;
                     return (

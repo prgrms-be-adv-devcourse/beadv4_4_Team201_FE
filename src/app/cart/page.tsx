@@ -113,7 +113,7 @@ export default function CartPage() {
 
     if (isLoading) {
         return (
-            <AppShell headerVariant="main">
+            <AppShell headerVariant="main" showBottomNav>
                 <div className="max-w-7xl mx-auto px-4 lg:px-8 py-8 lg:py-12">
                     <Skeleton className="h-7 w-24 mb-8 lg:mb-12" />
                     {/* Mobile skeleton */}
@@ -172,7 +172,7 @@ export default function CartPage() {
 
     if (isError) {
         return (
-            <AppShell headerVariant="main">
+            <AppShell headerVariant="main" showBottomNav>
                 <div className="max-w-7xl mx-auto px-4 lg:px-8 py-8 lg:py-12">
                     <h1 className="text-xl lg:text-2xl font-medium tracking-tight mb-8">장바구니</h1>
                     <InlineError
@@ -188,7 +188,7 @@ export default function CartPage() {
     const hasItems = cart && cart.items.length > 0;
 
     return (
-        <AppShell headerVariant="main">
+        <AppShell headerVariant="main" showBottomNav>
             <div className="max-w-7xl mx-auto px-4 lg:px-8 py-8 lg:py-12">
                 {/* Page Title - 29cm Style */}
                 <h1 className="text-xl lg:text-2xl font-medium tracking-tight mb-8 lg:mb-12">장바구니</h1>
