@@ -3,6 +3,7 @@ import { queryKeys } from '@/lib/query/keys';
 import {
   getFunding,
   getMyFunding,
+  getParticipatedFunding,
   getMyParticipatedFundings,
   getMyReceivedFundings,
 } from '@/lib/api/fundings';
@@ -34,6 +35,17 @@ export function useMyFunding(fundingId: string) {
   });
 }
 
+/**
+ * Hook to fetch a specific participated funding detail
+ * @param fundingId - The ID of the participated funding to fetch
+ */
+export function useParticipatedFunding(fundingId: string) {
+  return useQuery({
+    queryKey: ['participatedFunding', fundingId],
+    queryFn: () => getParticipatedFunding(fundingId),
+    enabled: !!fundingId,
+  });
+}
 
 
 /**
