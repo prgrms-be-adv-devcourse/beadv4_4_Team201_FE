@@ -343,13 +343,17 @@ export const handlers = [
     return HttpResponse.json({ result: 'SUCCESS', data: publicResponse });
   }),
 
-  http.patch('**/api/v2/wishlists/visibility', async ({ request }) => {
+  http.patch('**/api/v2/wishlists/me/settings', async ({ request }) => {
     const body = await request.json();
-    const updatedWishlist = {
+    const { visibility } = body as { visibility: string };
+
+    // Update the mock data
+    myWishlist.visibility = visibility as any;
+
+    return HttpResponse.json({
       ...myWishlist,
-      visibility: (body as { visibility: string }).visibility,
-    };
-    return HttpResponse.json(updatedWishlist);
+      visibility,
+    });
   }),
 
   http.post('**/api/v2/wishlists/items', async ({ request }) => {
@@ -368,6 +372,11 @@ export const handlers = [
       fundingId: null,
       createdAt: new Date().toISOString(),
     };
+
+    // Persist to mock data
+    myWishlist.items.unshift(newItem);
+    myWishlist.itemCount++;
+
     return HttpResponse.json(newItem, { status: 201 });
   }),
 

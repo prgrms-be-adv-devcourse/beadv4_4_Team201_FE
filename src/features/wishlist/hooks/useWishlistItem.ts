@@ -1,23 +1,20 @@
 import { useCallback } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import { queryKeys } from '@/lib/query/keys';
 import { useAddWishlistItem, useRemoveWishlistItem } from './useWishlistMutations';
-import { useUser } from '@auth0/nextjs-auth0/client';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useMyWishlist } from './useWishlist';
 import { toast } from 'sonner';
+import { ApiError } from '@/lib/api/client';
 
-import type { Wishlist, WishItem } from '@/types/wishlist';
+import type { WishItem } from '@/types/wishlist';
 
 /**
  * Hook to manage wishlist state for a specific product
  */
 export function useWishlistItem(productId: string) {
-  const { user } = useUser();
-  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const { data: wishlist } = useMyWishlist({ page: 0, size: 100 }); // Large size to check existence
   const addMutation = useAddWishlistItem();
   const removeMutation = useRemoveWishlistItem();
-
-  // Read wishlist from cache without triggering a fetch
-  const wishlist = queryClient.getQueryData<Wishlist>(queryKeys.myWishlist);
 
   // Check if product is in wishlist
   const wishlistItem = wishlist?.items?.find(
@@ -39,8 +36,12 @@ export function useWishlistItem(productId: string) {
         await addMutation.mutateAsync({ productId });
         toast.success('찜 목록에 추가했습니다');
       }
-    } catch {
-      toast.error('처리 중 오류가 발생했습니다');
+    } catch (error) {
+      if (error instanceof ApiError && error.code === 'W204') {
+        toast.error('진행 중인 펀딩이 있어 삭제가 불가합니다.');
+      } else {
+        toast.error('처리 중 오류가 발생했습니다');
+      }
     }
   }, [user, isInWishlist, wishlistItem?.id, productId, addMutation, removeMutation]);
 
