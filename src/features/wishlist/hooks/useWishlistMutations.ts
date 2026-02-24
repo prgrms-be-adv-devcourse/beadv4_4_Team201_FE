@@ -19,7 +19,7 @@ export function useAddWishlistItem() {
   return useMutation({
     mutationFn: (data: WishItemCreateRequest) => addWishlistItem(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.myWishlist });
+      queryClient.invalidateQueries({ queryKey: ['wishlists'] });
     },
   });
 }
@@ -62,7 +62,7 @@ export function useRemoveWishlistItem() {
     },
     // Always refetch after error or success:
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.myWishlist });
+      queryClient.invalidateQueries({ queryKey: ['wishlists'] });
     },
   });
 }
@@ -78,7 +78,7 @@ export function useUpdateVisibility() {
   return useMutation({
     mutationFn: (data: UpdateWishlistSettingsRequest) => updateWishlistVisibility(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.myWishlist });
+      queryClient.invalidateQueries({ queryKey: ['wishlists'] });
     },
   });
 }
