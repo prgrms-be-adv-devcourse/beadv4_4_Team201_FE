@@ -14,9 +14,10 @@ import { useUpdateCartItem, useRemoveCartItems, useToggleCartSelection } from '@
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { Skeleton } from '@/components/ui/skeleton';
 import { InlineError } from '@/components/common/InlineError';
-import { Gift, Loader2 } from 'lucide-react';
+import { Gift, Loader2, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatPrice } from '@/lib/format';
+import { cn } from '@/lib/utils';
 
 export default function CartPage() {
     const router = useRouter();
@@ -75,7 +76,7 @@ export default function CartPage() {
         if (!cart) return;
         const newSelected = !allSelected;
         cart.items.forEach(item => {
-            if (item.selected !== newSelected) {
+            if (item.status === 'AVAILABLE' && item.selected !== newSelected) {
                 toggleSelection.mutate({ itemId: item.id, selected: newSelected });
             }
         });
@@ -232,11 +233,15 @@ export default function CartPage() {
                                     ? (funding.currentAmount / funding.targetAmount) * 100
                                     : 0;
                                 const daysLeft = getDaysLeft(funding.expiresAt);
+                                const isAvailable = item.status === 'AVAILABLE';
 
                                 return (
                                     <div
                                         key={item.id}
-                                        className="grid grid-cols-12 gap-4 border-b border-border py-6 items-start"
+                                        className={cn(
+                                            "grid grid-cols-12 gap-4 border-b border-border py-6 items-start",
+                                            !isAvailable && "opacity-60"
+                                        )}
                                     >
                                         {/* Checkbox */}
                                         <div className="col-span-1 pt-1">
@@ -245,6 +250,7 @@ export default function CartPage() {
                                                 onCheckedChange={(checked) =>
                                                     handleToggleSelect(item.id, checked as boolean)
                                                 }
+                                                disabled={!isAvailable}
                                             />
                                         </div>
 
@@ -255,7 +261,10 @@ export default function CartPage() {
                                                     src={funding?.product?.imageUrl || "/images/placeholder-product.svg"}
                                                     alt={productName || "상품 이미지"}
                                                     fill
-                                                    className="object-cover hover:opacity-80 transition-opacity"
+                                                    className={cn(
+                                                        "object-cover transition-opacity",
+                                                        isAvailable ? "hover:opacity-80" : "grayscale"
+                                                    )}
                                                     onError={(e) => {
                                                         const target = e.target as HTMLImageElement;
                                                         target.src = "/images/placeholder-product.svg";
@@ -275,9 +284,21 @@ export default function CartPage() {
                                                         {funding.recipient.nickname || '알 수 없음'}님에게
                                                     </span>
                                                 </div>
-                                                <h3 className="text-sm font-medium hover:underline transition-all line-clamp-2 leading-relaxed">
+                                                <h3 className={cn(
+                                                    "text-sm font-medium transition-all line-clamp-2 leading-relaxed",
+                                                    isAvailable ? "hover:underline" : "text-muted-foreground"
+                                                )}>
                                                     {productName}
                                                 </h3>
+
+                                                {/* Unavailable message */}
+                                                {!isAvailable && (
+                                                    <div className="flex items-center gap-1.5 py-1 px-2 mt-2 bg-destructive/5 text-destructive border border-destructive/10 rounded text-[11px] font-medium animate-in fade-in slide-in-from-top-1 duration-300">
+                                                        <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                                                        <span>{item.statusMessage || '구매가 불가능한 상품입니다.'}</span>
+                                                    </div>
+                                                )}
+
                                                 <p className="text-sm font-medium mt-2">
                                                     {formatPrice(item.productPrice)}
                                                 </p>
@@ -294,12 +315,17 @@ export default function CartPage() {
                                                     type="text"
                                                     value={item.amount.toLocaleString()}
                                                     onChange={(e) => {
+                                                        if (!isAvailable) return;
                                                         const value = parseInt(e.target.value.replace(/,/g, '')) || 0;
                                                         if (value >= 0) {
                                                             handleUpdateAmount(item.id, value);
                                                         }
                                                     }}
-                                                    className="w-full text-sm font-medium text-center bg-transparent border-b border-border focus:border-foreground focus:outline-none py-1"
+                                                    disabled={!isAvailable}
+                                                    className={cn(
+                                                        "w-full text-sm font-medium text-center bg-transparent border-b border-border focus:border-foreground focus:outline-none py-1",
+                                                        !isAvailable && "text-muted-foreground cursor-not-allowed"
+                                                    )}
                                                 />
                                                 <p className="text-[11px] text-muted-foreground text-center mt-1">
                                                     원
@@ -315,17 +341,23 @@ export default function CartPage() {
 
                                         {/* Progress */}
                                         <div className="col-span-2 pt-1">
-                                            <div className="space-y-1">
-                                                <Progress value={progressPercent} className="h-1.5" />
-                                                <p className="text-xs text-muted-foreground text-center">
-                                                    {Math.round(progressPercent)}% 달성
-                                                </p>
-                                            </div>
+                                            {isAvailable ? (
+                                                <div className="space-y-1">
+                                                    <Progress value={progressPercent} className="h-1.5" />
+                                                    <p className="text-xs text-muted-foreground text-center">
+                                                        {Math.round(progressPercent)}% 달성
+                                                    </p>
+                                                </div>
+                                            ) : (
+                                                <div className="text-center text-xs text-muted-foreground italic">
+                                                    -
+                                                </div>
+                                            )}
                                         </div>
 
                                         {/* Days Left - 29cm Style */}
                                         <div className="col-span-2 text-center pt-1">
-                                            {daysLeft !== null && (
+                                            {isAvailable && daysLeft !== null && (
                                                 <>
                                                     <p className={`text-sm font-medium ${daysLeft <= 3 ? 'text-destructive' : ''}`}>
                                                         D-{daysLeft}
@@ -374,7 +406,7 @@ export default function CartPage() {
                                         aria-label="전체 선택"
                                     />
                                     <span className="text-sm">
-                                        전체 선택 ({selectedItems.length}/{cart.items.length})
+                                        전체 선택 ({selectedItems.length}/{cart.items.filter(item => item.status === 'AVAILABLE').length})
                                     </span>
                                 </div>
                                 <button
@@ -393,11 +425,15 @@ export default function CartPage() {
                                     ? (funding.currentAmount / funding.targetAmount) * 100
                                     : 0;
                                 const daysLeft = getDaysLeft(funding.expiresAt);
+                                const isAvailable = item.status === 'AVAILABLE';
 
                                 return (
                                     <div
                                         key={item.id}
-                                        className="flex gap-3 py-5 border-b border-border"
+                                        className={cn(
+                                            "flex gap-3 py-5 border-b border-border",
+                                            !isAvailable && "opacity-60"
+                                        )}
                                     >
                                         <Checkbox
                                             checked={item.selected}
@@ -405,13 +441,14 @@ export default function CartPage() {
                                                 handleToggleSelect(item.id, checked as boolean)
                                             }
                                             className="mt-1"
+                                            disabled={!isAvailable}
                                         />
                                         <div className="relative w-20 h-24 bg-secondary flex-shrink-0 overflow-hidden">
                                             <Image
                                                 src={funding?.product?.imageUrl || "/images/placeholder-product.svg"}
                                                 alt={productName}
                                                 fill
-                                                className="object-cover"
+                                                className={cn("object-cover", !isAvailable && "grayscale")}
                                                 onError={(e) => {
                                                     const target = e.target as HTMLImageElement;
                                                     target.src = "/images/placeholder-product.svg";
@@ -433,7 +470,10 @@ export default function CartPage() {
                                                             {funding.recipient.nickname}님에게
                                                         </span>
                                                     </div>
-                                                    <p className="text-sm line-clamp-2">{productName}</p>
+                                                    <p className={cn(
+                                                        "text-sm line-clamp-2",
+                                                        !isAvailable && "text-muted-foreground"
+                                                    )}>{productName}</p>
                                                 </div>
                                                 <button
                                                     onClick={() => handleRemove(item.id)}
@@ -443,18 +483,28 @@ export default function CartPage() {
                                                 </button>
                                             </div>
 
-                                            {/* Progress Bar */}
-                                            <div className="space-y-1 mt-2">
-                                                <Progress value={progressPercent} className="h-1" />
-                                                <div className="flex justify-between text-[10px] text-muted-foreground">
-                                                    <span>{Math.round(progressPercent)}% 달성</span>
-                                                    {daysLeft !== null && (
-                                                        <span className={daysLeft <= 3 ? 'text-destructive' : ''}>
-                                                            D-{daysLeft}
-                                                        </span>
-                                                    )}
+                                            {/* Unavailable message */}
+                                            {!isAvailable && (
+                                                <div className="flex items-center gap-1.5 py-1 px-2 mb-2 bg-destructive/5 text-destructive border border-destructive/10 rounded text-[10px] font-medium animate-in fade-in slide-in-from-top-1 duration-300">
+                                                    <AlertCircle className="h-3 w-3 shrink-0" />
+                                                    <span>{item.statusMessage || '구매 불가'}</span>
                                                 </div>
-                                            </div>
+                                            )}
+
+                                            {/* Progress Bar */}
+                                            {isAvailable && (
+                                                <div className="space-y-1 mt-2">
+                                                    <Progress value={progressPercent} className="h-1" />
+                                                    <div className="flex justify-between text-[10px] text-muted-foreground">
+                                                        <span>{Math.round(progressPercent)}% 달성</span>
+                                                        {daysLeft !== null && (
+                                                            <span className={daysLeft <= 3 ? 'text-destructive' : ''}>
+                                                                D-{daysLeft}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
 
                                             {/* Amount Input */}
                                             <div className="flex items-center justify-between mt-3">
@@ -464,12 +514,17 @@ export default function CartPage() {
                                                         type="text"
                                                         value={item.amount.toLocaleString()}
                                                         onChange={(e) => {
+                                                            if (!isAvailable) return;
                                                             const value = parseInt(e.target.value.replace(/,/g, '')) || 0;
                                                             if (value >= 0) {
                                                                 handleUpdateAmount(item.id, value);
                                                             }
                                                         }}
-                                                        className="w-20 text-sm font-medium text-right bg-transparent border-b border-border focus:border-foreground focus:outline-none py-0.5"
+                                                        disabled={!isAvailable}
+                                                        className={cn(
+                                                            "w-20 text-sm font-medium text-right bg-transparent border-b border-border focus:border-foreground focus:outline-none py-0.5",
+                                                            !isAvailable && "text-muted-foreground cursor-not-allowed"
+                                                        )}
                                                     />
                                                     <span className="text-sm">원</span>
                                                 </div>
