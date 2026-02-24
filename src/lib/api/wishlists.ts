@@ -44,10 +44,8 @@ export async function getWishlist(memberId: string): Promise<Wishlist> {
 function transformWishlist(data: any): Wishlist {
   if (!data) return data;
 
-  // Handle case where items might be missing or already in correct format
-  const rawItems = Array.isArray(data.items)
-    ? data.items
-    : (data.items?.content || []);
+  const isArray = Array.isArray(data);
+  const rawItems = isArray ? data : (Array.isArray(data.items) ? data.items : (data.items?.content || []));
 
   const items = rawItems.map((item: any) => {
     // If it's already a WishItem (nested product), return as is
@@ -59,13 +57,13 @@ function transformWishlist(data: any): Wishlist {
       };
     }
 
-    // Otherwise, it's a flat PublicWishlistItem style, transform it
+    // Otherwise, it's a flat style, transform it
     return {
-      id: (item.wishlistItemId || item.id).toString(),
+      id: (item.wishlistItemId || item.id || '').toString(),
       wishlistId: (item.wishlistId || data.id || '').toString(),
-      productId: item.productId.toString(),
+      productId: (item.productId || '').toString(),
       product: {
-        id: item.productId.toString(),
+        id: (item.productId || '').toString(),
         name: item.productName || '',
         price: item.price || 0,
         imageUrl: resolveImageUrl(item.imageKey || item.imageUrl),
@@ -73,8 +71,8 @@ function transformWishlist(data: any): Wishlist {
         brandName: item.brandName || '',
         sellerNickname: item.sellerNickname || '',
         category: item.category || item.productCategory || '',
-        isSoldout: item.isSoldout,
-        isActive: item.isActive,
+        isSoldout: item.isSoldout || false,
+        isActive: item.isActive !== false,
       },
       status: item.status || 'AVAILABLE',
       fundingId: item.fundingId || null,
@@ -82,10 +80,21 @@ function transformWishlist(data: any): Wishlist {
     };
   });
 
+  if (isArray) {
+    return {
+      id: '',
+      memberId: '',
+      member: { nickname: '친구' } as any,
+      visibility: 'PUBLIC',
+      items,
+      itemCount: items.length,
+    };
+  }
+
   return {
     ...data,
-    id: data.id.toString(),
-    memberId: data.memberId.toString(),
+    id: (data.id || '').toString(),
+    memberId: (data.memberId || '').toString(),
     items,
     itemCount: data.itemCount || items.length,
     page: data.page,
