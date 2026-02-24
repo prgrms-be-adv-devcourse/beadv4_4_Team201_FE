@@ -51,7 +51,6 @@ export function CartItem({ item, onUpdateAmount, onToggleSelect, onRemove }: Car
                 onCheckedChange={(checked) => onToggleSelect(item.id, checked === true)}
                 aria-label="아이템 선택"
                 className="mt-1"
-                disabled={!isAvailable}
             />
 
             <div className="relative aspect-square h-24 w-24 shrink-0 bg-secondary overflow-hidden">

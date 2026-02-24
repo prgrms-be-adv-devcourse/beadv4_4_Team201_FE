@@ -36,7 +36,8 @@ export default function CartPage() {
     const toggleSelection = useToggleCartSelection();
 
     const selectedItems = cart?.items.filter(item => item.selected) || [];
-    const totalAmount = selectedItems.reduce((sum, item) => sum + item.amount, 0);
+    const purchasableSelectedItems = selectedItems.filter(item => item.status === 'AVAILABLE');
+    const totalAmount = purchasableSelectedItems.reduce((sum, item) => sum + item.amount, 0);
     const allSelected = (cart?.items.length ?? 0) > 0 && cart?.items.every(item => item.selected);
 
     const handleUpdateAmount = (id: string, amount: number) => {
@@ -76,7 +77,7 @@ export default function CartPage() {
         if (!cart) return;
         const newSelected = !allSelected;
         cart.items.forEach(item => {
-            if (item.status === 'AVAILABLE' && item.selected !== newSelected) {
+            if (item.selected !== newSelected) {
                 toggleSelection.mutate({ itemId: item.id, selected: newSelected });
             }
         });
@@ -98,8 +99,8 @@ export default function CartPage() {
     };
 
     const handleCheckout = () => {
-        if (selectedItems.length === 0) {
-            toast.error('결제할 펀딩을 선택해주세요.');
+        if (purchasableSelectedItems.length === 0) {
+            toast.error('결제 가능한 펀딩을 선택해주세요.');
             return;
         }
         router.push('/checkout');
@@ -250,7 +251,6 @@ export default function CartPage() {
                                                 onCheckedChange={(checked) =>
                                                     handleToggleSelect(item.id, checked as boolean)
                                                 }
-                                                disabled={!isAvailable}
                                             />
                                         </div>
 
@@ -406,7 +406,7 @@ export default function CartPage() {
                                         aria-label="전체 선택"
                                     />
                                     <span className="text-sm">
-                                        전체 선택 ({selectedItems.length}/{cart.items.filter(item => item.status === 'AVAILABLE').length})
+                                        전체 선택 ({selectedItems.length}/{cart.items.length})
                                     </span>
                                 </div>
                                 <button
@@ -441,7 +441,6 @@ export default function CartPage() {
                                                 handleToggleSelect(item.id, checked as boolean)
                                             }
                                             className="mt-1"
-                                            disabled={!isAvailable}
                                         />
                                         <div className="relative w-20 h-24 bg-secondary flex-shrink-0 overflow-hidden">
                                             <Image
@@ -575,7 +574,7 @@ export default function CartPage() {
                                 <Button
                                     className="flex-1 h-14 text-sm font-normal tracking-wide"
                                     onClick={handleCheckout}
-                                    disabled={selectedItems.length === 0}
+                                    disabled={purchasableSelectedItems.length === 0}
                                 >
                                     CHECK OUT
                                 </Button>
