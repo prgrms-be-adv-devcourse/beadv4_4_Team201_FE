@@ -31,10 +31,11 @@ interface BackendCartItemRequest {
 interface BackendCartItemResponse {
   targetType: BackendTargetType;
   targetId: number;
+  receiverId: number | null; // Added
   productName: string | null;
   productPrice: number;
   contributionAmount: number;
-  status: string; // ItemStatus enum (AVAILABLE, SOLD_OUT, DISCONTINUED)
+  status: string; // ItemStatus enum (AVAILABLE, SOLD_OUT, DISCONTINUED, FUNDING_ENDED)
   statusMessage: string | null;
 }
 
@@ -68,6 +69,7 @@ function mapBackendCartItem(item: BackendCartItemResponse, cartId: number): Cart
     cartId: cartId.toString(),
     targetType: item.targetType as any,
     targetId: item.targetId.toString(),
+    receiverId: item.receiverId?.toString() || null,
     productName: item.productName || '',
     productPrice: item.productPrice,
     contributionAmount: item.contributionAmount,
@@ -85,8 +87,12 @@ function mapBackendCartItem(item: BackendCartItemResponse, cartId: number): Cart
       },
       organizerId: '',
       organizer: { id: '', nickname: '', avatarUrl: null },
-      recipientId: '',
-      recipient: { id: '', nickname: '', avatarUrl: null },
+      recipientId: item.receiverId?.toString() || '',
+      recipient: {
+        id: item.receiverId?.toString() || '',
+        nickname: '', // 백엔드에서 닉네임은 미제공 (필요시 별도 조회 필요)
+        avatarUrl: null
+      },
       targetAmount: item.productPrice,
       currentAmount: 0, // 백엔드에서 미제공
       status: 'IN_PROGRESS',

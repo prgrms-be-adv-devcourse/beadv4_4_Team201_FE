@@ -3,7 +3,7 @@ import { Funding } from './funding';
 /**
  * Cart item availability status
  */
-export type ItemStatus = 'AVAILABLE' | 'SOLD_OUT' | 'DISCONTINUED';
+export type ItemStatus = 'AVAILABLE' | 'SOLD_OUT' | 'DISCONTINUED' | 'FUNDING_ENDED';
 
 /**
  * Shopping cart containing funding participation items
@@ -24,6 +24,7 @@ export interface CartItem {
     cartId: string;
     targetType: 'FUNDING' | 'FUNDING_PENDING';
     targetId: string;
+    receiverId: string | null;
     productName: string;
     productPrice: number;
     contributionAmount: number;
