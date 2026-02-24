@@ -23,7 +23,6 @@ interface CartItemProps {
 export function CartItem({ item, onUpdateAmount, onToggleSelect, onRemove }: CartItemProps) {
     const { funding, amount, selected, targetType, productName, status, statusMessage } = item;
     const isAvailable = status === 'AVAILABLE';
-    const isNewFunding = targetType === 'FUNDING_PENDING';
 
     const progressPercent = (funding.targetAmount > 0)
         ? (funding.currentAmount / funding.targetAmount) * 100
@@ -79,9 +78,6 @@ export function CartItem({ item, onUpdateAmount, onToggleSelect, onRemove }: Car
                             <span className="text-xs text-muted-foreground">
                                 {funding.recipient.nickname || '알 수 없음'}
                             </span>
-                            {isNewFunding && (
-                                <span className="text-xs text-muted-foreground">· 새 펀딩</span>
-                            )}
                         </div>
                         <h3 className={cn(
                             "text-sm font-medium line-clamp-2",
@@ -100,10 +96,10 @@ export function CartItem({ item, onUpdateAmount, onToggleSelect, onRemove }: Car
                 </div>
 
                 {/* Unavailable message */}
-                {!isAvailable && statusMessage && (
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <AlertCircle className="h-3 w-3 shrink-0" />
-                        <span>{statusMessage}</span>
+                {!isAvailable && (
+                    <div className="flex items-center gap-1.5 py-1 px-2 bg-destructive/5 text-destructive border border-destructive/10 rounded text-[11px] font-medium animate-in fade-in slide-in-from-top-1 duration-300">
+                        <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                        <span>{statusMessage || '구매가 불가능한 상품입니다.'}</span>
                     </div>
                 )}
 

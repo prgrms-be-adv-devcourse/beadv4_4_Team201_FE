@@ -274,9 +274,6 @@ export default function CartPage() {
                                                     <span className="text-xs text-muted-foreground">
                                                         {funding.recipient.nickname || '알 수 없음'}님에게
                                                     </span>
-                                                    {item.isNewFunding && (
-                                                        <span className="text-[10px] text-primary bg-primary/10 px-1.5 py-0.5">NEW</span>
-                                                    )}
                                                 </div>
                                                 <h3 className="text-sm font-medium hover:underline transition-all line-clamp-2 leading-relaxed">
                                                     {productName}
