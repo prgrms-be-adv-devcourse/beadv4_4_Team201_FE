@@ -1,4 +1,5 @@
 import { apiClient } from './client';
+import { resolveImageUrl } from '@/lib/image';
 import type { PageParams } from '@/types/api';
 import type {
   Wishlist,
@@ -21,7 +22,7 @@ export async function getMyWishlist(params?: WishlistQueryParams): Promise<Wishl
   const queryParams = new URLSearchParams();
   if (params?.page !== undefined) queryParams.append('page', params.page.toString());
   if (params?.size !== undefined) queryParams.append('size', params.size.toString());
-  if (params?.category) queryParams.append('category', params.category);
+  if (params?.category) queryParams.append('category', params.category.toUpperCase());
   if (params?.status) queryParams.append('status', params.status);
 
   const queryString = queryParams.toString();
@@ -67,10 +68,13 @@ function transformWishlist(data: any): Wishlist {
         id: item.productId.toString(),
         name: item.productName || '',
         price: item.price || 0,
-        imageUrl: item.imageUrl || '',
+        imageUrl: resolveImageUrl(item.imageKey || item.imageUrl),
         status: 'ON_SALE' as const,
         brandName: item.brandName || '',
         sellerNickname: item.sellerNickname || '',
+        category: item.category || item.productCategory || '',
+        isSoldout: item.isSoldout,
+        isActive: item.isActive,
       },
       status: item.status || 'AVAILABLE',
       fundingId: item.fundingId || null,
