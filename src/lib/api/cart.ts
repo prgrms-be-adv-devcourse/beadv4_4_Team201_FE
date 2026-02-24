@@ -30,6 +30,7 @@ interface BackendCartItemRequest {
 interface BackendCartItemResponse {
   targetType: BackendTargetType;
   targetId: number;
+  receiverId: number;
   productName: string;
   productPrice: number;
   contributionAmount: number;
@@ -64,6 +65,7 @@ function mapBackendCartItem(item: BackendCartItemResponse, cartId: number): Cart
     id: `${cartId}::${item.targetType}::${item.targetId}`, // 복합 키 생성
     cartId: cartId.toString(),
     fundingId: item.targetType === 'FUNDING' ? item.targetId.toString() : '',
+    receiverId: item.receiverId,
     funding: {
       id: item.targetType === 'FUNDING' ? item.targetId.toString() : '',
       wishItemId: item.targetType === 'FUNDING_PENDING' ? item.targetId.toString() : '',

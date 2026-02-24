@@ -18,29 +18,16 @@ import { usePlaceOrder } from '@/features/order/hooks/useOrderMutations';
 import type { PlaceOrderItemRequest, OrderItemType } from '@/types/order';
 import type { CartItem } from '@/types/cart';
 
-/**
- * Cart 아이템을 PlaceOrderItemRequest로 변환
- *
- * @note 현재 Cart 응답에 receiverId가 없어 임시값 사용
- * @todo 백엔드에서 Cart 아이템에 receiverId 포함하거나,
- *       Cart 기반 주문 API 추가 필요
- */
 function cartItemToOrderItem(item: CartItem): PlaceOrderItemRequest {
-    // 카트 아이템은 펀딩 선물 타입
     const orderItemType: OrderItemType = 'FUNDING_GIFT';
 
-    // TODO: 백엔드와 협의 필요 - Cart 응답에서 wishlistItemId 제공 여부
     const wishlistItemId = item.funding.wishItemId
         ? parseInt(item.funding.wishItemId, 10)
         : parseInt(item.fundingId, 10);
 
-    // receiverId: Cart 응답에 없음
-    // TODO: 백엔드에서 Cart 아이템에 receiverId 포함 필요
-    const receiverId = 0; // 임시값
-
     return {
         wishlistItemId,
-        receiverId,
+        receiverId: item.receiverId,
         amount: item.amount,
         orderItemType,
     };

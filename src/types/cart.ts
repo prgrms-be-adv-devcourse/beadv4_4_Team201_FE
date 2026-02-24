@@ -18,6 +18,7 @@ export interface CartItem {
     id: string;
     cartId: string;
     fundingId: string;
+    receiverId: number;
     funding: Funding;
     amount: number;
     selected: boolean;
