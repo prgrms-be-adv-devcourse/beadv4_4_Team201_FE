@@ -3,17 +3,17 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
-    Sheet,
-    SheetContent,
-    SheetDescription,
-    SheetHeader,
-    SheetTitle,
-} from '@/components/ui/sheet';
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { Globe, Users, Lock, Check } from 'lucide-react';
 import { WishlistVisibility } from '@/types/wishlist';
 import { cn } from '@/lib/utils';
 
-interface VisibilitySheetProps {
+interface VisibilityDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     currentVisibility: WishlistVisibility;
@@ -41,12 +41,12 @@ const VISIBILITY_OPTIONS = [
     },
 ];
 
-export function VisibilitySheet({
+export function VisibilityDialog({
     open,
     onOpenChange,
     currentVisibility,
     onVisibilityChange,
-}: VisibilitySheetProps) {
+}: VisibilityDialogProps) {
     const [selectedVisibility, setSelectedVisibility] = useState(currentVisibility);
 
     const handleConfirm = () => {
@@ -57,16 +57,16 @@ export function VisibilitySheet({
     };
 
     return (
-        <Sheet open={open} onOpenChange={onOpenChange}>
-            <SheetContent side="bottom" className="rounded-t-3xl">
-                <SheetHeader>
-                    <SheetTitle>공개 범위 설정</SheetTitle>
-                    <SheetDescription>
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent className="sm:max-w-[425px] rounded-2xl">
+                <DialogHeader className="text-left">
+                    <DialogTitle className="text-xl font-bold">공개 범위 설정</DialogTitle>
+                    <DialogDescription className="text-muted-foreground">
                         위시리스트를 누가 볼 수 있는지 선택하세요
-                    </SheetDescription>
-                </SheetHeader>
+                    </DialogDescription>
+                </DialogHeader>
 
-                <div className="mt-6 space-y-3">
+                <div className="mt-4 space-y-2">
                     {VISIBILITY_OPTIONS.map((option) => {
                         const Icon = option.icon;
                         const isSelected = selectedVisibility === option.value;
@@ -76,27 +76,32 @@ export function VisibilitySheet({
                                 key={option.value}
                                 onClick={() => setSelectedVisibility(option.value)}
                                 className={cn(
-                                    'w-full flex items-start gap-4 p-4 rounded-lg border-2 transition-all text-left',
+                                    'w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left group',
                                     isSelected
-                                        ? 'border-primary bg-primary/5'
-                                        : 'border-border hover:border-primary/50 hover:bg-secondary/50'
+                                        ? 'border-foreground bg-foreground/5'
+                                        : 'border-border hover:border-foreground/50 hover:bg-muted'
                                 )}
                             >
                                 <div className={cn(
-                                    'mt-0.5 p-2 rounded-full',
-                                    isSelected ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground'
+                                    'p-2 rounded-full transition-colors',
+                                    isSelected ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground group-hover:text-foreground'
                                 )}>
                                     <Icon className="h-5 w-5" />
                                 </div>
 
                                 <div className="flex-1">
                                     <div className="flex items-center justify-between">
-                                        <h4 className="font-semibold">{option.label}</h4>
+                                        <h4 className={cn(
+                                            "font-semibold transition-colors",
+                                            isSelected ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"
+                                        )}>
+                                            {option.label}
+                                        </h4>
                                         {isSelected && (
-                                            <Check className="h-5 w-5 text-primary" />
+                                            <Check className="h-4 w-4 text-foreground" strokeWidth={3} />
                                         )}
                                     </div>
-                                    <p className="text-sm text-muted-foreground mt-1">
+                                    <p className="text-xs text-muted-foreground mt-0.5">
                                         {option.description}
                                     </p>
                                 </div>
@@ -107,21 +112,21 @@ export function VisibilitySheet({
 
                 <div className="mt-6 flex gap-3">
                     <Button
-                        variant="outline"
+                        variant="ghost"
                         onClick={() => onOpenChange(false)}
-                        className="flex-1"
+                        className="flex-1 rounded-xl h-12 font-medium"
                     >
                         취소
                     </Button>
                     <Button
                         onClick={handleConfirm}
-                        className="flex-1"
+                        className="flex-1 rounded-xl h-12 font-bold bg-foreground text-background hover:bg-foreground/90 disabled:opacity-30"
                         disabled={selectedVisibility === currentVisibility}
                     >
                         변경하기
                     </Button>
                 </div>
-            </SheetContent>
-        </Sheet>
+            </DialogContent>
+        </Dialog>
     );
 }

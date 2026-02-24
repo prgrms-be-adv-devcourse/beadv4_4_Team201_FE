@@ -7,6 +7,8 @@ import { queryKeys } from '@/lib/query/keys';
 import { getProduct } from '@/lib/api/products';
 import type { Product } from '@/types/product';
 import { cn } from '@/lib/utils/cn';
+import { Heart } from 'lucide-react';
+import { useWishlistItem } from '@/features/wishlist/hooks/useWishlistItem';
 
 export interface ProductCardProps {
   product: Product;
@@ -20,6 +22,7 @@ export interface ProductCardProps {
  */
 export function ProductCard({ product, onClick, className }: ProductCardProps) {
   const queryClient = useQueryClient();
+  const { isInWishlist, toggleWishlist, isLoading: wishlistLoading } = useWishlistItem(product.id);
 
   const handleMouseEnter = () => {
     queryClient.prefetchQuery({
@@ -27,6 +30,11 @@ export function ProductCard({ product, onClick, className }: ProductCardProps) {
       queryFn: () => getProduct(product.id),
       staleTime: 60 * 1000,
     });
+  };
+
+  const handleWishlistClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleWishlist();
   };
 
   return (
@@ -49,6 +57,24 @@ export function ProductCard({ product, onClick, className }: ProductCardProps) {
           onError={handleImageError}
         />
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
+
+        {/* Wishlist Heart Overlay */}
+        <button
+          onClick={handleWishlistClick}
+          disabled={wishlistLoading}
+          className={cn(
+            "absolute top-2.5 right-2.5 p-2 bg-white/80 hover:bg-white rounded-full shadow-sm shadow-black/5 active:scale-90 transition-all z-10",
+            "opacity-0 group-hover:opacity-100 focus:opacity-100"
+          )}
+        >
+          <Heart
+            className={cn(
+              "w-4 h-4 transition-colors",
+              isInWishlist ? "fill-red-500 text-red-500" : "text-black/30 group-hover:text-black/50"
+            )}
+            strokeWidth={2}
+          />
+        </button>
       </div>
 
       {/* Product Info */}

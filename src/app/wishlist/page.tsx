@@ -6,7 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { AppShell } from '@/components/layout/AppShell';
 import { Footer } from '@/components/layout/Footer';
-import { VisibilitySheet } from '@/features/wishlist/components/VisibilitySheet';
+import { VisibilityDialog } from '@/features/wishlist/components/VisibilityDialog';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Heart, ExternalLink, Globe, Users, Lock, Settings2 } from 'lucide-react';
@@ -85,7 +85,7 @@ export default function MyWishlistPage() {
     const updateVisibility = useUpdateVisibility();
     const removeItem = useRemoveWishlistItem();
 
-    const [visibilitySheetOpen, setVisibilitySheetOpen] = useState(false);
+    const [visibilityDialogOpen, setVisibilityDialogOpen] = useState(false);
 
     const handleVisibilityChange = async (visibility: WishlistVisibility) => {
         try {
@@ -120,13 +120,22 @@ export default function MyWishlistPage() {
     };
 
     // Filter items - exclude items without valid product data AND apply client-side category filter
-    const wishlistItems = (wishlist?.items || []).filter(item => {
-        if (!item?.product?.id) return false;
-        if (!activeCategory) return true;
+    const wishlistItems = (wishlist?.items || [])
+        .filter(item => {
+            if (!item?.product?.id) return false;
+            if (!activeCategory) return true;
 
-        const itemCategory = (item.product.category || '').toLowerCase();
-        return itemCategory === activeCategory.toLowerCase();
-    });
+            const itemCategory = (item.product.category || '').toLowerCase();
+            return itemCategory === activeCategory.toLowerCase();
+        })
+        .sort((a, b) => {
+            const getStatusScore = (item: WishItem) => {
+                if (item.product.isActive === false) return 2; // 판매 중단 (최하단)
+                if (item.product.isSoldout) return 1;          // 품절 (중간)
+                return 0;                                       // 판매 중 (최상단)
+            };
+            return getStatusScore(a) - getStatusScore(b);
+        });
 
     const absoluteTotalItems = wishlist?.page?.totalElements || wishlist?.itemCount || 0;
     const totalItems = activeCategory ? wishlistItems.length : absoluteTotalItems;
@@ -214,7 +223,7 @@ export default function MyWishlistPage() {
                             <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => setVisibilitySheetOpen(true)}
+                                onClick={() => setVisibilityDialogOpen(true)}
                                 className="flex items-center gap-2 text-sm"
                             >
                                 <Settings2 className="h-4 w-4" />
@@ -358,9 +367,9 @@ export default function MyWishlistPage() {
 
             <Footer />
 
-            <VisibilitySheet
-                open={visibilitySheetOpen}
-                onOpenChange={setVisibilitySheetOpen}
+            <VisibilityDialog
+                open={visibilityDialogOpen}
+                onOpenChange={setVisibilityDialogOpen}
                 currentVisibility={wishlist?.visibility || 'PUBLIC'}
                 onVisibilityChange={handleVisibilityChange}
             />
