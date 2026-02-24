@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { getSellerProducts, getStockHistory } from '@/lib/api/products';
@@ -54,6 +54,20 @@ function getPageNumbers(current: number, total: number): (number | '...')[] {
 }
 
 export default function StockHistoryPage() {
+    return (
+        <Suspense fallback={
+            <ProfileLayout>
+                <div className="flex items-center justify-center h-96">
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+            </ProfileLayout>
+        }>
+            <StockHistoryContent />
+        </Suspense>
+    );
+}
+
+function StockHistoryContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const initProductId = searchParams.get('productId') ? Number(searchParams.get('productId')) : undefined;
