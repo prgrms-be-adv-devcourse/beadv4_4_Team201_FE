@@ -128,7 +128,8 @@ export default function MyWishlistPage() {
         return itemCategory === activeCategory.toLowerCase();
     });
 
-    const totalItems = activeCategory ? wishlistItems.length : (wishlist?.page?.totalElements || wishlist?.itemCount || 0);
+    const absoluteTotalItems = wishlist?.page?.totalElements || wishlist?.itemCount || 0;
+    const totalItems = activeCategory ? wishlistItems.length : absoluteTotalItems;
     const totalPages = activeCategory ? Math.ceil(wishlistItems.length / PAGE_SIZE) : (wishlist?.page?.totalPages || 0);
 
     // Loading state
@@ -203,8 +204,8 @@ export default function MyWishlistPage() {
                                 {wishlist?.visibility && (
                                     <VisibilityBadge visibility={wishlist.visibility} />
                                 )}
-                                <span className="text-xs text-muted-foreground">
-                                    총 <strong className="text-foreground">{totalItems.toLocaleString()}</strong>개 상품
+                                <span className="text-[13px] text-muted-foreground">
+                                    총 <strong className="text-foreground">{absoluteTotalItems.toLocaleString()}</strong>개 상품
                                 </span>
                             </div>
                         </div>
@@ -219,31 +220,12 @@ export default function MyWishlistPage() {
                                 <Settings2 className="h-4 w-4" />
                                 공개 설정 변경
                             </Button>
-                            <p className="text-[11px] text-muted-foreground">
+                            <p className="text-[13px] text-muted-foreground">
                                 현재: <span className="font-medium text-foreground">{visibilityLabel}</span>
                             </p>
                         </div>
                     </div>
 
-                    <div className="border-t border-border mt-6 pt-5">
-                        <div className="grid grid-cols-3 gap-4 text-center">
-                            <div>
-                                <p className="text-xl font-bold">{totalItems.toLocaleString()}</p>
-                                <p className="text-[11px] text-muted-foreground mt-0.5">전체</p>
-                            </div>
-                            <div>
-                                <p className="text-xl font-bold">
-                                    {wishlist?.visibility === 'PUBLIC' ? '전체 공개' :
-                                        wishlist?.visibility === 'FRIENDS_ONLY' ? '친구 공개' : '비공개'}
-                                </p>
-                                <p className="text-[11px] text-muted-foreground mt-0.5">공개 범위</p>
-                            </div>
-                            <div>
-                                <p className="text-xl font-bold">{totalPages > 0 ? totalPages : 1}</p>
-                                <p className="text-[11px] text-muted-foreground mt-0.5">페이지</p>
-                            </div>
-                        </div>
-                    </div>
                 </section>
 
                 <div className="flex flex-col md:flex-row gap-10">
@@ -302,7 +284,7 @@ export default function MyWishlistPage() {
                                 <p className="text-muted-foreground mb-6 text-sm">
                                     해당 조건의 아이템이 없습니다
                                 </p>
-                                <Link href="/products">
+                                <Link href={activeCategory ? `/products?category=${activeCategory}` : "/products"}>
                                     <Button variant="outline" size="sm">상품 둘러보기</Button>
                                 </Link>
                             </div>
