@@ -278,7 +278,9 @@ export const handlers = [
     let filteredItems = [...myWishlist.items];
 
     if (category) {
-      filteredItems = filteredItems.filter(item => item.product.category === category);
+      filteredItems = filteredItems.filter(item =>
+        item.product.category?.toUpperCase() === category.toUpperCase()
+      );
     }
     if (status) {
       filteredItems = filteredItems.filter(item => item.status === status);
@@ -286,19 +288,33 @@ export const handlers = [
 
     const start = page * size;
     const end = start + size;
-    const paginatedItems = filteredItems.slice(start, end);
+    const paginatedItems = filteredItems.slice(start, end).map(item => ({
+      id: parseInt(item.id.replace('wish-item-', '').replace('extra-', '100'), 10),
+      wishlistId: 3,
+      productId: parseInt(item.product.id.replace('product-', ''), 10),
+      productName: item.product.name,
+      price: item.product.price,
+      imageKey: item.product.imageUrl.includes('/') ? item.product.imageUrl.split('/').pop() : 'mock-key',
+      isSoldout: item.product.isSoldout || false,
+      isActive: item.product.isActive !== false,
+      sellerNickname: item.product.sellerNickname || 'Seller',
+      category: item.product.category?.toUpperCase() || 'GENERAL',
+      status: item.status,
+      addedAt: item.createdAt,
+    }));
 
     return HttpResponse.json({
-      ...myWishlist,
+      id: 3,
+      memberId: 1,
       items: paginatedItems,
       itemCount: filteredItems.length,
       page: {
-        page,
-        size,
+        pageNumber: page,
+        pageSize: size,
         totalElements: filteredItems.length,
         totalPages: Math.ceil(filteredItems.length / size),
-        hasNext: end < filteredItems.length,
-        hasPrevious: page > 0,
+        isFirst: page === 0,
+        isLast: end >= filteredItems.length,
       },
     });
   }),

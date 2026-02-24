@@ -35,13 +35,6 @@ const CATEGORIES = [
     { label: '주방', value: 'kitchen' },
 ];
 
-// Status filters
-const STATUS_FILTERS = [
-    { label: '전체', value: '' },
-    { label: '펀딩 가능', value: 'AVAILABLE' },
-    { label: '펀딩 진행중', value: 'IN_FUNDING' },
-    { label: '펀딩 완료', value: 'FUNDED' },
-];
 
 function getPageNumbers(current: number, total: number): (number | '...')[] {
     if (total <= 7) return Array.from({ length: total }, (_, i) => i);
@@ -83,13 +76,10 @@ function VisibilityBadge({ visibility }: { visibility: WishlistVisibility }) {
 export default function MyWishlistPage() {
     const router = useRouter();
     const [currentPage, setCurrentPage] = useState(0);
-    const [activeStatus, setActiveStatus] = useState<string | ''>('');
     const [activeCategory, setActiveCategory] = useState('');
-
     const { data: wishlist, isLoading, error, refetch } = useMyWishlist({
         page: currentPage,
         size: PAGE_SIZE,
-        status: activeStatus as any,
         category: activeCategory,
     });
 
@@ -282,32 +272,6 @@ export default function MyWishlistPage() {
                                 </ul>
                             </div>
 
-                            {/* 상태 섹션 */}
-                            <div>
-                                <h3 className="text-sm font-bold mb-4 flex items-center gap-2">
-                                    펀딩 상태
-                                </h3>
-                                <ul className="space-y-1">
-                                    {STATUS_FILTERS.map(status => (
-                                        <li key={status.value}>
-                                            <button
-                                                onClick={() => {
-                                                    setActiveStatus(status.value);
-                                                    setCurrentPage(0);
-                                                }}
-                                                className={cn(
-                                                    'w-full text-left px-3 py-2 rounded-md text-[13px] transition-colors',
-                                                    activeStatus === status.value
-                                                        ? 'bg-foreground text-background font-medium'
-                                                        : 'text-muted-foreground hover:bg-muted font-medium'
-                                                )}
-                                            >
-                                                {status.label}
-                                            </button>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
                         </div>
                     </aside>
 
@@ -432,34 +396,53 @@ function WishItemCard({
     return (
         <div className="group relative">
             {/* 이미지 */}
-            <Link href={`/products/${item.product.id}`}>
-                <div className="relative aspect-[3/4] bg-secondary overflow-hidden rounded-lg">
+            {item.product.isActive !== false ? (
+                <Link href={`/products/${item.product.id}`}>
+                    <div className="relative aspect-[3/4] bg-secondary overflow-hidden rounded-lg">
+                        {item.product.imageUrl ? (
+                            <Image
+                                src={item.product.imageUrl}
+                                alt={item.product.name}
+                                fill
+                                className="object-cover transition-transform duration-300 group-hover:scale-105"
+                            />
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                                <span className="text-muted-foreground/40 text-xs">No Image</span>
+                            </div>
+                        )}
+
+                        {/* 상태 뱃지 (이미지 위) */}
+                        <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
+                            {item.status === 'IN_FUNDING' && (
+                                <div className="px-1.5 py-0.5 bg-blue-600 text-white text-[10px] font-bold">
+                                    펀딩중
+                                </div>
+                            )}
+                            {item.status === 'FUNDED' && (
+                                <div className="px-1.5 py-0.5 bg-gray-600 text-white text-[10px] font-bold">
+                                    완료
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </Link>
+            ) : (
+                <div className="relative aspect-[3/4] bg-secondary overflow-hidden rounded-lg opacity-60">
                     {item.product.imageUrl ? (
                         <Image
                             src={item.product.imageUrl}
                             alt={item.product.name}
                             fill
-                            className="object-cover transition-transform duration-300 group-hover:scale-105"
+                            className="object-cover grayscale"
                         />
                     ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                            <span className="text-muted-foreground/40 text-xs">No Image</span>
-                        </div>
-                    )}
-
-                    {/* 상태 뱃지 */}
-                    {item.status === 'IN_FUNDING' && (
-                        <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-blue-600 text-white text-[9px] font-bold rounded">
-                            펀딩중
-                        </div>
-                    )}
-                    {item.status === 'FUNDED' && (
-                        <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-gray-600 text-white text-[9px] font-bold rounded">
-                            완료
+                        <div className="w-full h-full flex items-center justify-center font-black">
+                            <span className="text-muted-foreground/40 text-xs">판매 중단</span>
                         </div>
                     )}
                 </div>
-            </Link>
+            )}
 
             {/* 하트 버튼 */}
             <button
@@ -475,12 +458,35 @@ function WishItemCard({
                 <p className="text-[10px] text-muted-foreground uppercase tracking-wide">
                     {item.product.sellerNickname || item.product.brandName || 'Seller'}
                 </p>
-                <Link href={`/products/${item.product.id}`}>
-                    <p className="text-xs line-clamp-2 hover:underline transition-all leading-relaxed">
+                {item.product.isActive !== false ? (
+                    <Link href={`/products/${item.product.id}`}>
+                        <p className="text-xs line-clamp-2 hover:underline transition-all leading-relaxed">
+                            {item.product.name}
+                        </p>
+                    </Link>
+                ) : (
+                    <p className="text-xs line-clamp-2 leading-relaxed text-muted-foreground">
                         {item.product.name}
                     </p>
-                </Link>
-                <p className="text-sm font-semibold pt-1">{formatPrice(item.product.price)}</p>
+                )}
+                <div className="flex items-center flex-wrap gap-2 mt-1">
+                    <p className={cn(
+                        "text-sm font-semibold pt-1",
+                        (item.product.isSoldout || item.product.isActive === false) && "text-muted-foreground"
+                    )}>
+                        {formatPrice(item.product.price)}
+                    </p>
+                    {item.product.isSoldout && (
+                        <span className="text-[10px] font-bold text-white bg-black px-1.5 py-0.5">
+                            품절
+                        </span>
+                    )}
+                    {item.product.isActive === false && (
+                        <span className="text-[10px] font-bold text-white bg-red-600 px-1.5 py-0.5">
+                            판매 중단
+                        </span>
+                    )}
+                </div>
             </div>
 
             {/* 액션 버튼 */}
