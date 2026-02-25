@@ -408,12 +408,7 @@ export default function CartPage() {
 
                             {/* Action Buttons - 29cm Style */}
                             <div className="flex gap-2 py-6">
-                                <button
-                                    onClick={handleSelectAll}
-                                    className="px-4 py-2 border border-border text-xs hover:bg-secondary transition-colors"
-                                >
-                                    전체상품 선택
-                                </button>
+
                                 <button
                                     onClick={handleRemoveSelected}
                                     disabled={selectedItems.length === 0}
