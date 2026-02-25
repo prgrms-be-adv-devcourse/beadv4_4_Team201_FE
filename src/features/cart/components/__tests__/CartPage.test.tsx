@@ -11,6 +11,7 @@ const mockCart: Cart = {
             id: 'c1',
             cartId: 'cart-1',
             fundingId: 'f1',
+            receiverId: 2,
             funding: {
                 id: 'f1',
                 wishItemId: 'wi-1',
@@ -35,6 +36,7 @@ const mockCart: Cart = {
             id: 'c2',
             cartId: 'cart-1',
             fundingId: 'f2',
+            receiverId: 4,
             funding: {
                 id: 'f2',
                 wishItemId: 'wi-2',

@@ -2,34 +2,15 @@ import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query/keys';
 import { getCart } from '@/lib/api/cart';
 import { useUser } from '@auth0/nextjs-auth0/client';
-import { useAddToCart as useAddToCartMutation } from './useCartMutations';
-import { useCallback } from 'react';
 
-/**
- * Hook to fetch the current user's cart with add functionality
- */
 export function useCart() {
   const { user } = useUser();
-  const addMutation = useAddToCartMutation();
 
-  const query = useQuery({
+  return useQuery({
     queryKey: queryKeys.cart,
     queryFn: getCart,
     enabled: !!user,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    gcTime: 1000 * 60 * 30, // 30 minutes
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 30,
   });
-
-  const addToCart = useCallback(async (params: { productId: string; quantity?: number }) => {
-    return addMutation.mutateAsync({
-      productId: params.productId,
-      quantity: params.quantity || 1,
-    });
-  }, [addMutation]);
-
-  return {
-    ...query,
-    addToCart,
-    isLoading: query.isLoading || addMutation.isPending,
-  };
 }

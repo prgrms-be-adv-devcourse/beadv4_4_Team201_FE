@@ -31,8 +31,8 @@ interface BackendCartItemRequest {
 interface BackendCartItemResponse {
   targetType: BackendTargetType;
   targetId: number;
-  receiverId: number | null; // Added
-  productName: string | null;
+  receiverId: number;
+  productName: string;
   productPrice: number;
   contributionAmount: number;
   status: string; // ItemStatus enum (AVAILABLE, SOLD_OUT, DISCONTINUED, FUNDING_ENDED)
@@ -140,15 +140,13 @@ export async function addCartItem(data: CartItemCreateRequest): Promise<void> {
   let amount: number;
 
   if (data.fundingId) {
-    // 기존 펀딩에 참여
     targetType = 'FUNDING';
     targetId = parseInt(data.fundingId, 10);
     amount = data.amount;
   } else if (data.wishItemId) {
-    // 새 펀딩 개설
     targetType = 'FUNDING_PENDING';
     targetId = parseInt(data.wishItemId, 10);
-    amount = data.amount;
+    amount = data.amount || 0;
   } else {
     throw new Error('fundingId or wishItemId is required');
   }

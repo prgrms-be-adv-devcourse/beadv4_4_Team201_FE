@@ -37,13 +37,7 @@ export interface CartItem {
     statusMessage?: string | null;
 }
 
-/**
- * Request body for creating a cart item
- * - For funding: provide fundingId or wishItemId with amount
- * - For product: provide productId with quantity
- */
 export interface CartItemCreateRequest {
-    // Funding related
     fundingId?: string;
     wishItemId?: string;
     amount: number;

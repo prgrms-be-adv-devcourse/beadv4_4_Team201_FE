@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Loader2, ChevronLeft } from 'lucide-react';
@@ -36,6 +36,20 @@ interface FormState {
 }
 
 export default function EditProductPage() {
+    return (
+        <Suspense fallback={
+            <ProfileLayout>
+                <div className="flex items-center justify-center h-96">
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+            </ProfileLayout>
+        }>
+            <EditProductContent />
+        </Suspense>
+    );
+}
+
+function EditProductContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const productIdStr = searchParams.get('id');

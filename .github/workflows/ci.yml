@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Lint (non-blocking)
+        run: npm run lint || true
+
+      - run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: https://example.com
+          NEXT_PUBLIC_IMAGE_BASE_URL: https://example.com
+          NEXT_PUBLIC_TOSS_CLIENT_KEY: test_key
+          NEXT_PUBLIC_API_MOCKING: disabled
