@@ -373,9 +373,19 @@ export default function CartPage() {
                                                     </div>
                                                 )}
 
-                                                <p className="text-sm font-medium mt-2">
-                                                    {formatPrice(item.productPrice)}
-                                                </p>
+                                                <div className="flex items-center gap-3 mt-2">
+                                                    <p className="text-sm font-medium text-foreground">
+                                                        {formatPrice(item.productPrice)}
+                                                    </p>
+                                                    {!item.isNewFunding && (
+                                                        <>
+                                                            <div className="h-3 w-[1px] bg-border" />
+                                                            <p className="text-[11px] text-muted-foreground">
+                                                                남은 금액: <span className="text-foreground font-medium">{formatPrice(Math.max(0, item.productPrice - (item.currentAmount || 0)))}</span>
+                                                            </p>
+                                                        </>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
 
@@ -527,6 +537,14 @@ export default function CartPage() {
                                                         "text-sm line-clamp-2",
                                                         !isAvailable && "text-muted-foreground"
                                                     )}>{productName || '상품 정보 없음'}</p>
+                                                    <div className="flex items-center gap-2 mt-1">
+                                                        <span className="text-xs font-medium text-foreground">{formatPrice(item.productPrice)}</span>
+                                                        {!item.isNewFunding && (
+                                                            <span className="text-[10px] text-muted-foreground">
+                                                                (남은 금액: {formatPrice(Math.max(0, item.productPrice - (item.currentAmount || 0)))})
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </div>
                                                 <button
                                                     onClick={() => handleRemove(item.id)}
