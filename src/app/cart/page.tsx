@@ -431,10 +431,6 @@ export default function CartPage() {
                                 )}
                             </div>
 
-                            {/* Cart Notice - 29cm Style */}
-                            <div className="text-right text-xs text-muted-foreground py-2">
-                                장바구니는 최대 100개의 펀딩을 담을 수 있습니다.
-                            </div>
                         </div>
 
                         {/* Mobile Cart - 29cm Style */}
