@@ -480,7 +480,7 @@ export const handlers = [
       wishlistId: myWishlist.id,
       productId: product.id,
       product,
-      status: 'AVAILABLE' as const,
+      status: 'PENDING' as const,
       fundingId: null,
       createdAt: new Date().toISOString(),
     };
