@@ -3,6 +3,11 @@ export const PLACEHOLDER_IMAGE = '/images/placeholder-product.svg';
 export function resolveImageUrl(imageKey?: string | null): string {
   if (!imageKey) return PLACEHOLDER_IMAGE;
 
+  // Demo images are served as static files from /public/images/demo/
+  if (imageKey.startsWith('demo/')) {
+    return `/images/${imageKey}`;
+  }
+
   const baseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL;
   if (!baseUrl) return PLACEHOLDER_IMAGE;
 
