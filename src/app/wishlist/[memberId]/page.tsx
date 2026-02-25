@@ -144,6 +144,23 @@ export default function PublicWishlistPage({ params }: { params: Promise<{ membe
         }
 
         return matchesCategory && item.status === activeStatus;
+    }).sort((a, b) => {
+        // 정렬 우선순위 정의
+        const getPriority = (item: WishItem) => {
+            // 4순위: 비활성 상품 (판매 중단)
+            if (item.product.isActive === false) return 3;
+
+            // 3순위: 품절 상품
+            if (item.product.isSoldout) return 2;
+
+            // 1순위: 펀딩 가능 (대기 중, 진행 중)
+            if (item.status === 'PENDING' || item.status === 'IN_PROGRESS') return 0;
+
+            // 2순위: 펀딩 달성 완료 (수락 대기, 완료)
+            return 1;
+        };
+
+        return getPriority(a) - getPriority(b);
     });
 
     const totalItems = filteredItems.length;
@@ -413,7 +430,13 @@ function PublicWishItemCard({
                                 <div className="px-1.5 py-0.5 bg-black/60 text-white text-[10px] font-bold">펀딩 대기중</div>
                             )}
                             {item.status === 'IN_PROGRESS' && (
-                                <div className="px-1.5 py-0.5 bg-blue-600 text-white text-[10px] font-bold">펀딩 중</div>
+                                <div className="px-1.5 py-0.5 bg-blue-600 text-white text-[10px] font-bold">펀딩 진행 중</div>
+                            )}
+                            {item.status === 'REQUESTED_CONFIRM' && (
+                                <div className="px-1.5 py-0.5 bg-black/60 text-white text-[10px] font-bold">펀딩 달성 완료</div>
+                            )}
+                            {item.status === 'COMPLETED' && (
+                                <div className="px-1.5 py-0.5 bg-black/60 text-white text-[10px] font-bold">펀딩 달성 완료</div>
                             )}
                         </div>
                     </div>
