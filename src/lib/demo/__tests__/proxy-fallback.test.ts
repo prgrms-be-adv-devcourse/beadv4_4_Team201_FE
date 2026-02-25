@@ -48,17 +48,16 @@ describe('tryFetchWithFallback', () => {
     expect(body.message).toContain('unavailable');
   });
 
-  test('returns real 4xx error (not fallback) for client errors', async () => {
-    const notFoundResponse = new Response(
-      JSON.stringify({ result: 'FAIL', message: 'Not found' }),
-      { status: 404, headers: { 'Content-Type': 'application/json' } },
-    );
+  test('falls back to mock when BE returns 404 (app not running)', async () => {
+    const notFoundResponse = new Response('404 page not found', { status: 404 });
     const fetcher = vi.fn().mockResolvedValue(notFoundResponse);
 
     const result = await tryFetchWithFallback(fetcher, 'GET', 'api/v2/members/me');
 
-    // 4xx from BE = real error, not fallback
-    expect(result.status).toBe(404);
+    // In demo mode, non-2xx with mock available = fallback
+    expect(result.status).toBe(200);
+    const body = await result.json();
+    expect(body.data).toHaveProperty('nickname');
   });
 
   test('adds X-Demo-Fallback header when using mock data', async () => {

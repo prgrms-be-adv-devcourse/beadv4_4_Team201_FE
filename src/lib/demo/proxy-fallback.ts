@@ -10,13 +10,12 @@ export async function tryFetchWithFallback(
   try {
     const response = await fetcher();
 
-    // 4xx = client error, return as-is (not a BE availability issue)
-    // 2xx/3xx = success, return as-is
-    if (response.status < 500) {
+    // 2xx = success, return as-is
+    if (response.ok) {
       return response;
     }
 
-    // 5xx = server error, try fallback
+    // Any non-2xx = try fallback (BE might be down, returning 404/500/etc.)
     return fallbackOrError(method, path, `BE returned ${response.status}`);
   } catch {
     // Network error (ECONNREFUSED, timeout, etc.)
