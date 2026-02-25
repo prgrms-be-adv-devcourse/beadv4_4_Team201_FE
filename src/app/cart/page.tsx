@@ -7,7 +7,6 @@ import { AppShell } from '@/components/layout/AppShell';
 import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useCart } from '@/features/cart/hooks/useCart';
 import { useUpdateCartItem, useRemoveCartItems, useToggleCartSelection } from '@/features/cart/hooks/useCartMutations';
@@ -106,13 +105,6 @@ export default function CartPage() {
         router.push('/checkout');
     };
 
-    // Calculate D-day helper
-    const getDaysLeft = (expiresAt?: string) => {
-        if (!expiresAt) return null;
-        const today = new Date();
-        const expiryDate = new Date(expiresAt);
-        return Math.ceil((expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-    };
 
     if (isLoading) {
         return (
@@ -143,15 +135,13 @@ export default function CartPage() {
                     </div>
                     {/* Desktop skeleton */}
                     <div className="hidden lg:block">
-                        <div className="grid grid-cols-12 gap-4 border-b border-foreground pb-3">
+                        <div className="grid grid-cols-8 gap-4 border-b border-foreground pb-3">
                             <Skeleton className="col-span-1 h-4 w-4" />
                             <Skeleton className="col-span-5 h-4 w-20" />
                             <Skeleton className="col-span-2 h-4 w-16 mx-auto" />
-                            <Skeleton className="col-span-2 h-4 w-12 mx-auto" />
-                            <Skeleton className="col-span-2 h-4 w-12 mx-auto" />
                         </div>
                         {[1, 2, 3].map((i) => (
-                            <div key={i} className="grid grid-cols-12 gap-4 border-b border-border py-6 items-start">
+                            <div key={i} className="grid grid-cols-8 gap-4 border-b border-border py-6 items-start">
                                 <Skeleton className="col-span-1 h-4 w-4 mt-1" />
                                 <div className="col-span-5 flex gap-4">
                                     <Skeleton className="w-[100px] h-[130px] flex-shrink-0" />
@@ -159,12 +149,9 @@ export default function CartPage() {
                                         <Skeleton className="h-3 w-24" />
                                         <Skeleton className="h-4 w-full" />
                                         <Skeleton className="h-4 w-20 mt-2" />
-                                        <Skeleton className="h-3 w-28" />
                                     </div>
                                 </div>
                                 <Skeleton className="col-span-2 h-6 w-20 mx-auto" />
-                                <Skeleton className="col-span-2 h-4 w-full" />
-                                <Skeleton className="col-span-2 h-5 w-12 mx-auto" />
                             </div>
                         ))}
                     </div>
@@ -213,7 +200,7 @@ export default function CartPage() {
                         {/* Cart Table - Desktop (29cm Style) */}
                         <div className="hidden lg:block">
                             {/* Table Header */}
-                            <div className="grid grid-cols-12 gap-4 border-b border-foreground pb-3 text-xs text-muted-foreground">
+                            <div className="grid grid-cols-8 gap-4 border-b border-foreground pb-3 text-xs text-muted-foreground">
                                 <div className="col-span-1 flex items-center">
                                     <Checkbox
                                         checked={allSelected}
@@ -223,24 +210,18 @@ export default function CartPage() {
                                 </div>
                                 <div className="col-span-5">펀딩 정보</div>
                                 <div className="col-span-2 text-center">참여 금액</div>
-                                <div className="col-span-2 text-center">진행률</div>
-                                <div className="col-span-2 text-center">마감</div>
                             </div>
 
                             {/* Cart Items */}
                             {cart.items.map((item) => {
                                 const { funding, productName } = item;
-                                const progressPercent = (funding.targetAmount > 0)
-                                    ? (funding.currentAmount / funding.targetAmount) * 100
-                                    : 0;
-                                const daysLeft = getDaysLeft(funding.expiresAt);
                                 const isAvailable = item.status === 'AVAILABLE';
 
                                 return (
                                     <div
                                         key={item.id}
                                         className={cn(
-                                            "grid grid-cols-12 gap-4 border-b border-border py-6 items-start",
+                                            "grid grid-cols-8 gap-4 border-b border-border py-6 items-start",
                                             !isAvailable && "opacity-60"
                                         )}
                                     >
@@ -302,9 +283,6 @@ export default function CartPage() {
                                                 <p className="text-sm font-medium mt-2">
                                                     {formatPrice(item.productPrice)}
                                                 </p>
-                                                <p className="text-xs text-muted-foreground mt-1">
-                                                    현재 {formatPrice(funding.currentAmount)} 모금됨
-                                                </p>
                                             </div>
                                         </div>
 
@@ -339,35 +317,6 @@ export default function CartPage() {
                                             </button>
                                         </div>
 
-                                        {/* Progress */}
-                                        <div className="col-span-2 pt-1">
-                                            {isAvailable ? (
-                                                <div className="space-y-1">
-                                                    <Progress value={progressPercent} className="h-1.5" />
-                                                    <p className="text-xs text-muted-foreground text-center">
-                                                        {Math.round(progressPercent)}% 달성
-                                                    </p>
-                                                </div>
-                                            ) : (
-                                                <div className="text-center text-xs text-muted-foreground italic">
-                                                    -
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        {/* Days Left - 29cm Style */}
-                                        <div className="col-span-2 text-center pt-1">
-                                            {isAvailable && daysLeft !== null && (
-                                                <>
-                                                    <p className={`text-sm font-medium ${daysLeft <= 3 ? 'text-destructive' : ''}`}>
-                                                        D-{daysLeft}
-                                                    </p>
-                                                    <p className="text-[11px] text-muted-foreground mt-1">
-                                                        {funding.participantCount || 0}명 참여
-                                                    </p>
-                                                </>
-                                            )}
-                                        </div>
                                     </div>
                                 );
                             })}
@@ -421,10 +370,6 @@ export default function CartPage() {
                             {/* Mobile Cart Items */}
                             {cart.items.map((item) => {
                                 const { funding, productName } = item;
-                                const progressPercent = (funding.targetAmount > 0)
-                                    ? (funding.currentAmount / funding.targetAmount) * 100
-                                    : 0;
-                                const daysLeft = getDaysLeft(funding.expiresAt);
                                 const isAvailable = item.status === 'AVAILABLE';
 
                                 return (
@@ -487,21 +432,6 @@ export default function CartPage() {
                                                 <div className="flex items-center gap-1.5 py-1 px-2 mb-2 bg-destructive/5 text-destructive border border-destructive/10 rounded text-[10px] font-medium animate-in fade-in slide-in-from-top-1 duration-300">
                                                     <AlertCircle className="h-3 w-3 shrink-0" />
                                                     <span>{item.statusMessage || '구매 불가'}</span>
-                                                </div>
-                                            )}
-
-                                            {/* Progress Bar */}
-                                            {isAvailable && (
-                                                <div className="space-y-1 mt-2">
-                                                    <Progress value={progressPercent} className="h-1" />
-                                                    <div className="flex justify-between text-[10px] text-muted-foreground">
-                                                        <span>{Math.round(progressPercent)}% 달성</span>
-                                                        {daysLeft !== null && (
-                                                            <span className={daysLeft <= 3 ? 'text-destructive' : ''}>
-                                                                D-{daysLeft}
-                                                            </span>
-                                                        )}
-                                                    </div>
                                                 </div>
                                             )}
 
