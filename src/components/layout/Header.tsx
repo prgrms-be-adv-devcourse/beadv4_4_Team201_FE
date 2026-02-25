@@ -294,23 +294,6 @@ function DesktopMainNav() {
                 </Link>
             </div>
 
-            {/* STORY — 호버 시 Event/Trend 드롭다운 */}
-            <div className="relative" onMouseEnter={() => setHoveredMenu('STORY')}>
-                <Link href="/reviews" className="text-4xl font-extrabold tracking-tight hover:text-gray-600 transition-colors">
-                    STORY
-                </Link>
-                <div className={cn(
-                    "absolute top-full left-0 pt-3 transition-all duration-200 z-50",
-                    hoveredMenu === 'STORY' ? "opacity-100 visible translate-y-0" : "opacity-0 invisible -translate-y-1"
-                )}>
-                    <div className="bg-white border border-gray-100 shadow-lg p-4 min-w-[120px]">
-                        <div className="flex flex-col gap-3">
-                            <Link href="/events" className="text-sm font-serif italic hover:text-gray-500 transition-colors whitespace-nowrap">Event</Link>
-                            <Link href="/lookbook" className="text-sm font-serif italic hover:text-gray-500 transition-colors whitespace-nowrap">Trend</Link>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </nav>
     );
 }

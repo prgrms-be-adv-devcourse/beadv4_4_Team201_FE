@@ -40,7 +40,6 @@ describe('Header Component', () => {
 
         expect(screen.getByRole('link', { name: /PRODUCT/i })).toBeInTheDocument();
         expect(screen.getByRole('link', { name: /DISCOVER/i })).toBeInTheDocument();
-        expect(screen.getByRole('link', { name: /STORY/i })).toBeInTheDocument();
     });
 
     it('shows categories on PRODUCT hover', async () => {
@@ -56,16 +55,4 @@ describe('Header Component', () => {
         expect(screen.getByText('뷰티')).toBeInTheDocument();
     });
 
-    it('shows Event and Trend on STORY hover', async () => {
-        renderWithProviders(<Header variant="main" />);
-
-        const storyLink = screen.getByRole('link', { name: /STORY/i });
-        fireEvent.mouseEnter(storyLink.parentElement!);
-
-        await waitFor(() => {
-            expect(screen.getByText('Event')).toBeInTheDocument();
-        });
-
-        expect(screen.getByText('Trend')).toBeInTheDocument();
-    });
 });
