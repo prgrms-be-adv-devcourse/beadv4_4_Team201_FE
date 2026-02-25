@@ -37,8 +37,9 @@ const CATEGORIES = [
 ];
 
 const STATUS_FILTERS = [
-    { label: '미개시 펀딩', value: 'PENDING' },
-    { label: '펀딩 중', value: 'IN_PROGRESS' },
+    { label: '펀딩 대기 중', value: 'PENDING' },
+    { label: '펀딩 진행 중', value: 'IN_PROGRESS' },
+    { label: '펀딩 달성 완료', value: 'ACHIEVED' },
 ];
 
 function getPageNumbers(current: number, total: number): (number | '...')[] {
@@ -135,8 +136,14 @@ export default function PublicWishlistPage({ params }: { params: Promise<{ membe
     const allItems = wishlist?.items ?? [];
     const filteredItems = allItems.filter(item => {
         const matchesCategory = !activeCategory || item.product.category?.toLowerCase() === activeCategory.toLowerCase();
-        const matchesStatus = !activeStatus || item.status === activeStatus;
-        return matchesCategory && matchesStatus;
+
+        if (!activeStatus) return matchesCategory;
+
+        if (activeStatus === 'ACHIEVED') {
+            return matchesCategory && (item.status === 'REQUESTED_CONFIRM' || item.status === 'COMPLETED');
+        }
+
+        return matchesCategory && item.status === activeStatus;
     });
 
     const totalItems = filteredItems.length;
@@ -402,14 +409,11 @@ function PublicWishItemCard({
                         )}
 
                         <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
+                            {item.status === 'PENDING' && (
+                                <div className="px-1.5 py-0.5 bg-black/60 text-white text-[10px] font-bold">펀딩 대기중</div>
+                            )}
                             {item.status === 'IN_PROGRESS' && (
                                 <div className="px-1.5 py-0.5 bg-blue-600 text-white text-[10px] font-bold">펀딩 중</div>
-                            )}
-                            {item.status === 'REQUESTED_CONFIRM' && (
-                                <div className="px-1.5 py-0.5 bg-amber-500 text-white text-[10px] font-bold">펀딩 수락 대기</div>
-                            )}
-                            {item.status === 'COMPLETED' && (
-                                <div className="px-1.5 py-0.5 bg-gray-600 text-white text-[10px] font-bold">펀딩 수락 완료</div>
                             )}
                         </div>
                     </div>

@@ -36,8 +36,8 @@ const CATEGORIES = [
 ];
 
 const STATUS_FILTERS = [
-    { label: '미개시 펀딩', value: 'PENDING' },
-    { label: '펀딩 중', value: 'IN_PROGRESS' },
+    { label: '펀딩 대기 중', value: 'PENDING' },
+    { label: '펀딩 진행 중', value: 'IN_PROGRESS' },
     { label: '펀딩 수락 대기', value: 'REQUESTED_CONFIRM' },
     { label: '펀딩 수락 완료', value: 'COMPLETED' },
 ];
