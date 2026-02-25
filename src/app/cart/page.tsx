@@ -13,7 +13,7 @@ import { useUpdateCartItem, useRemoveCartItems, useToggleCartSelection } from '@
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { Skeleton } from '@/components/ui/skeleton';
 import { InlineError } from '@/components/common/InlineError';
-import { Gift, Loader2, AlertCircle } from 'lucide-react';
+import { Gift, Loader2, AlertCircle, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatPrice } from '@/lib/format';
 import { cn } from '@/lib/utils';
@@ -209,7 +209,7 @@ export default function CartPage() {
                                     />
                                 </div>
                                 <div className="col-span-5">펀딩 정보</div>
-                                <div className="col-span-2 text-center">참여 금액</div>
+                                <div className="col-span-2 text-left">참여 금액</div>
                             </div>
 
                             {/* Cart Items */}
@@ -287,8 +287,8 @@ export default function CartPage() {
                                         </div>
 
                                         {/* Participation Amount/Quantity - 29cm Style */}
-                                        <div className="col-span-2 flex flex-col items-center gap-2 pt-1">
-                                            <div className="w-full max-w-[120px]">
+                                        <div className="col-span-2 flex items-center justify-between pt-1">
+                                            <div className="flex items-center">
                                                 <input
                                                     type="text"
                                                     value={item.amount.toLocaleString()}
@@ -301,19 +301,24 @@ export default function CartPage() {
                                                     }}
                                                     disabled={!isAvailable}
                                                     className={cn(
-                                                        "w-full text-sm font-medium text-center bg-transparent border-b border-border focus:border-foreground focus:outline-none py-1",
-                                                        !isAvailable && "text-muted-foreground cursor-not-allowed"
+                                                        "text-sm font-medium text-left bg-transparent focus:outline-none py-1",
+                                                        !isAvailable ? "text-muted-foreground cursor-not-allowed" : "text-foreground"
                                                     )}
+                                                    style={{
+                                                        width: `${Math.max(1, item.amount.toLocaleString().length)}ch`,
+                                                        minWidth: '1ch'
+                                                    }}
                                                 />
-                                                <p className="text-[11px] text-muted-foreground text-center mt-1">
+                                                <span className="text-sm text-foreground">
                                                     원
-                                                </p>
+                                                </span>
                                             </div>
                                             <button
                                                 onClick={() => handleRemove(item.id)}
-                                                className="text-[11px] text-muted-foreground hover:text-foreground underline transition-colors"
+                                                className="text-black hover:opacity-70 transition-colors pr-0 p-1"
+                                                aria-label="삭제"
                                             >
-                                                삭제
+                                                <X className="h-8 w-4" stroke="black" />
                                             </button>
                                         </div>
 
@@ -451,7 +456,7 @@ export default function CartPage() {
                                                         }}
                                                         disabled={!isAvailable}
                                                         className={cn(
-                                                            "w-20 text-sm font-medium text-right bg-transparent border-b border-border focus:border-foreground focus:outline-none py-0.5",
+                                                            "w-20 text-sm font-medium text-right bg-transparent focus:outline-none py-0.5",
                                                             !isAvailable && "text-muted-foreground cursor-not-allowed"
                                                         )}
                                                     />
