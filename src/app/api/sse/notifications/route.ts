@@ -18,12 +18,17 @@ export async function GET() {
     return new Response('Unauthorized', { status: 401 });
   }
 
-  const upstream = await fetch(`${API_URL}/api/v1/notifications/subscribe`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      Accept: 'text/event-stream',
-    },
-  });
+  let upstream: Response;
+  try {
+    upstream = await fetch(`${API_URL}/api/v1/notifications/subscribe`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        Accept: 'text/event-stream',
+      },
+    });
+  } catch {
+    return new Response('Notification service unavailable', { status: 503 });
+  }
 
   if (!upstream.ok || !upstream.body) {
     return new Response('Failed to connect to notification stream', {
