@@ -133,6 +133,23 @@ export default function MyWishlistPage() {
         const matchesCategory = !activeCategory || item.product.category?.toLowerCase() === activeCategory.toLowerCase();
         const matchesStatus = !activeStatus || item.status === activeStatus;
         return matchesCategory && matchesStatus;
+    }).sort((a, b) => {
+        // 정렬 우선순위 정의 (Public 위시리스트와 동일하게 적용)
+        const getPriority = (item: WishItem) => {
+            // 4순위: 비활성 상품 (판매 중단)
+            if (item.product.isActive === false) return 3;
+
+            // 3순위: 품절 상품
+            if (item.product.isSoldout) return 2;
+
+            // 1순위: 펀딩 가능 (대기 중, 진행 중)
+            if (item.status === 'PENDING' || item.status === 'IN_PROGRESS') return 0;
+
+            // 2순위: 펀딩 달성 완료 (수락 대기, 완료)
+            return 1;
+        };
+
+        return getPriority(a) - getPriority(b);
     });
 
     const totalItems = filteredItems.length;
@@ -449,19 +466,19 @@ function WishItemCard({
 
                         {/* 상태 뱃지 (이미지 위) */}
                         <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
+                            {item.status === 'PENDING' && (
+                                <div className="px-1.5 py-0.5 bg-black/60 text-white text-[10px] font-bold">
+                                    펀딩 대기 중
+                                </div>
+                            )}
                             {item.status === 'IN_PROGRESS' && (
                                 <div className="px-1.5 py-0.5 bg-blue-600 text-white text-[10px] font-bold">
-                                    펀딩 중
+                                    펀딩 진행 중
                                 </div>
                             )}
-                            {item.status === 'REQUESTED_CONFIRM' && (
-                                <div className="px-1.5 py-0.5 bg-amber-500 text-white text-[10px] font-bold">
-                                    펀딩 수락 대기
-                                </div>
-                            )}
-                            {item.status === 'COMPLETED' && (
-                                <div className="px-1.5 py-0.5 bg-gray-600 text-white text-[10px] font-bold">
-                                    펀딩 수락 완료
+                            {(item.status === 'REQUESTED_CONFIRM' || item.status === 'COMPLETED') && (
+                                <div className="px-1.5 py-0.5 bg-black/60 text-white text-[10px] font-bold">
+                                    펀딩 달성 완료
                                 </div>
                             )}
                         </div>
@@ -520,11 +537,11 @@ function WishItemCard({
                         <span className="text-[10px] font-bold text-white bg-red-600 px-1.5 py-0.5">
                             판매 중단
                         </span>
-                    ) : item.product.isSoldout && (
+                    ) : item.product.isSoldout ? (
                         <span className="text-[10px] font-bold text-white bg-black px-1.5 py-0.5">
                             품절
                         </span>
-                    )}
+                    ) : null}
                 </div>
             </div>
 
