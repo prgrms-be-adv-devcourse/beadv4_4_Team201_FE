@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query/keys';
 import { placeOrder } from '@/lib/api/orders';
+import { clearCart } from '@/lib/api/cart';
 import type { PlaceOrderRequest, PlaceOrderResult } from '@/types/order';
 
 /**
@@ -19,10 +20,16 @@ export function usePlaceOrder() {
       const idempotencyKey = crypto.randomUUID();
       return placeOrder(request, idempotencyKey);
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.orders });
-      queryClient.invalidateQueries({ queryKey: queryKeys.cart });
       queryClient.invalidateQueries({ queryKey: queryKeys.myParticipatedFundings });
+
+      try {
+        await clearCart();
+      } catch {
+        // cart clear failure should not affect order success
+      }
+      queryClient.invalidateQueries({ queryKey: queryKeys.cart });
     },
   });
 }

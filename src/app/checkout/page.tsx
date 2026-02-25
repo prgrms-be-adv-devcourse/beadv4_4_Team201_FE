@@ -15,15 +15,31 @@ import { toast } from 'sonner';
 import { useCart } from '@/features/cart/hooks/useCart';
 import { useWallet } from '@/features/wallet/hooks/useWallet';
 import { usePlaceOrder } from '@/features/order/hooks/useOrderMutations';
+import { getFunding } from '@/lib/api/fundings';
 import type { PlaceOrderItemRequest, OrderItemType } from '@/types/order';
 import type { CartItem } from '@/types/cart';
 
-function cartItemToOrderItem(item: CartItem): PlaceOrderItemRequest {
+async function resolveOrderItem(item: CartItem): Promise<PlaceOrderItemRequest> {
     const orderItemType: OrderItemType = 'FUNDING_GIFT';
 
-    // targetId already contains either wishItemId or fundingId depending on targetType
-    const wishlistItemId = parseInt(item.targetId, 10);
-    const receiverId = item.receiverId ? parseInt(item.receiverId, 10) : 0;
+    let wishlistItemId: number;
+
+    if (item.targetType === 'FUNDING_PENDING') {
+        wishlistItemId = parseInt(item.targetId, 10);
+    } else {
+        if (item.funding.wishItemId) {
+            wishlistItemId = parseInt(item.funding.wishItemId, 10);
+        } else {
+            const funding = await getFunding(item.targetId);
+            wishlistItemId = parseInt(funding.wishItemId, 10);
+        }
+    }
+
+    const receiverId = item.receiverId
+        ? parseInt(item.receiverId, 10)
+        : item.funding.recipientId
+            ? parseInt(item.funding.recipientId, 10)
+            : 0;
 
     return {
         wishlistItemId,
@@ -71,8 +87,16 @@ export default function CheckoutPage() {
 
         setIsProcessing(true);
         try {
-            // V2 API: 주문+결제 한 번에 처리
-            const orderItems = selectedItems.map(cartItemToOrderItem);
+            const orderItems = await Promise.all(
+                selectedItems.map(resolveOrderItem)
+            );
+
+            const invalidItem = orderItems.find(item => item.receiverId === 0);
+            if (invalidItem) {
+                toast.error('수신자 정보를 확인할 수 없습니다.');
+                setIsProcessing(false);
+                return;
+            }
 
             const result = await placeOrder.mutateAsync({
                 items: orderItems,
