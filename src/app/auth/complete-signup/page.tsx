@@ -271,7 +271,7 @@ export default function CompleteSignupPage() {
                                         <FormItem>
                                             <FormLabel>닉네임</FormLabel>
                                             <FormControl>
-                                                <Input placeholder={`${placeholderNickname} (선택)`} {...field} />
+                                                <Input placeholder={`${placeholderNickname} (선택)`} autoComplete="off" {...field} />
                                             </FormControl>
                                             <FormDescription>
                                                 입력하지 않으면 자동으로 닉네임이 생성됩니다.
