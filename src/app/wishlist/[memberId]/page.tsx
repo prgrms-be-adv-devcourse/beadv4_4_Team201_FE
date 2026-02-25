@@ -381,47 +381,89 @@ function PublicWishItemCard({
 }) {
     return (
         <div className="group relative">
-            <Link href={`/products/${item.product.id}`}>
-                <div className="relative aspect-[3/4] bg-secondary overflow-hidden rounded-lg">
+            {/* 이미지 */}
+            {item.product.isActive !== false ? (
+                <Link href={`/products/${item.product.id}`}>
+                    <div className="relative aspect-[3/4] bg-secondary overflow-hidden rounded-lg">
+                        {item.product.imageUrl ? (
+                            <Image
+                                src={item.product.imageUrl}
+                                alt={item.product.name}
+                                fill
+                                className={cn(
+                                    "object-cover transition-transform duration-300 group-hover:scale-105",
+                                    item.product.isSoldout && "opacity-60 grayscale"
+                                )}
+                            />
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                                <span className="text-muted-foreground/40 text-xs">No Image</span>
+                            </div>
+                        )}
+
+                        <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
+                            {item.status === 'IN_PROGRESS' && (
+                                <div className="px-1.5 py-0.5 bg-blue-600 text-white text-[10px] font-bold">펀딩 중</div>
+                            )}
+                            {item.status === 'REQUESTED_CONFIRM' && (
+                                <div className="px-1.5 py-0.5 bg-amber-500 text-white text-[10px] font-bold">펀딩 수락 대기</div>
+                            )}
+                            {item.status === 'COMPLETED' && (
+                                <div className="px-1.5 py-0.5 bg-gray-600 text-white text-[10px] font-bold">펀딩 수락 완료</div>
+                            )}
+                        </div>
+                    </div>
+                </Link>
+            ) : (
+                <div className="relative aspect-[3/4] bg-secondary overflow-hidden rounded-lg opacity-60">
                     {item.product.imageUrl ? (
                         <Image
                             src={item.product.imageUrl}
                             alt={item.product.name}
                             fill
-                            className="object-cover transition-transform duration-300 group-hover:scale-105"
+                            className="object-cover grayscale"
                         />
                     ) : (
-                        <div className="w-full h-full flex items-center justify-center grayscale opacity-20">
-                            <span className="text-xs">No Image</span>
+                        <div className="w-full h-full flex items-center justify-center">
+                            <span className="text-muted-foreground/40 text-[10px] font-black uppercase">판매 중단</span>
                         </div>
                     )}
-
-                    <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
-                        {item.status === 'IN_PROGRESS' && (
-                            <div className="px-1.5 py-0.5 bg-blue-600 text-white text-[10px] font-bold">펀딩 중</div>
-                        )}
-                        {item.status === 'REQUESTED_CONFIRM' && (
-                            <div className="px-1.5 py-0.5 bg-amber-500 text-white text-[10px] font-bold">펀딩 수락 대기</div>
-                        )}
-                        {item.status === 'COMPLETED' && (
-                            <div className="px-1.5 py-0.5 bg-gray-600 text-white text-[10px] font-bold">펀딩 수락 완료</div>
-                        )}
-                    </div>
                 </div>
-            </Link>
+            )}
 
+            {/* 상품 정보 */}
             <div className="mt-3 space-y-0.5">
                 <p className="text-[10px] text-muted-foreground uppercase tracking-wide">
                     {item.product.sellerNickname || item.product.brandName || 'Seller'}
                 </p>
-                <Link href={`/products/${item.product.id}`}>
-                    <p className="text-xs line-clamp-2 hover:underline leading-relaxed">
+                {item.product.isActive !== false ? (
+                    <Link href={`/products/${item.product.id}`}>
+                        <p className="text-xs line-clamp-2 hover:underline transition-all leading-relaxed">
+                            {item.product.name}
+                        </p>
+                    </Link>
+                ) : (
+                    <p className="text-xs line-clamp-2 leading-relaxed text-muted-foreground">
                         {item.product.name}
                     </p>
-                </Link>
-                <p className="text-sm font-semibold pt-1">
-                    {formatPrice(item.product.price)}
-                </p>
+                )}
+                <div className="flex items-center flex-wrap gap-2 mt-1">
+                    <p className={cn(
+                        "text-sm font-semibold pt-1",
+                        (item.product.isSoldout || item.product.isActive === false) && "text-muted-foreground"
+                    )}>
+                        {formatPrice(item.product.price)}
+                    </p>
+                    {item.product.isActive === false ? (
+                        <span className="text-[10px] font-bold text-white bg-red-600 px-1.5 py-0.5">
+                            판매 중단
+                        </span>
+                    ) : item.product.isSoldout && (
+                        <span className="text-[10px] font-bold text-white bg-black px-1.5 py-0.5">
+                            품절
+                        </span>
+                    )}
+                </div>
             </div>
 
             {item.status === 'PENDING' && item.product.isActive !== false && !item.product.isSoldout && (
