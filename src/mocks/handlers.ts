@@ -86,6 +86,25 @@ interface CartItem {
   createdAt: string;
 }
 
+// Mock Friend Data - Use localStorage for persistence across refreshes
+const GET_STORED_FRIENDS = () => {
+  if (typeof window === 'undefined') return [];
+  const stored = localStorage.getItem('mockFriends');
+  return stored ? JSON.parse(stored) : [
+    { id: 2, friendshipId: 101, nickname: '민수', avatarUrl: 'https://i.pravatar.cc/150?u=member2' },
+    { id: 3, friendshipId: 102, nickname: '지영', avatarUrl: 'https://i.pravatar.cc/150?u=member3' },
+  ];
+};
+
+const GET_STORED_SENT_REQUESTS = () => {
+  if (typeof window === 'undefined') return [];
+  const stored = localStorage.getItem('mockSentRequests');
+  return stored ? JSON.parse(stored) : [];
+};
+
+let mockFriends = GET_STORED_FRIENDS();
+let mockSentRequests = GET_STORED_SENT_REQUESTS();
+let mockReceivedRequests: any[] = [];
 let cartItems: CartItem[] = [];
 
 export const handlers = [
@@ -266,6 +285,74 @@ export const handlers = [
   }),
 
   // ============================================
+  // ============================================
+  // FRIENDS
+  // ============================================
+  http.get('**/api/v2/friends', () => {
+    return HttpResponse.json(mockFriends);
+  }),
+
+  http.get('**/api/v2/friends/requests', () => {
+    return HttpResponse.json(mockReceivedRequests);
+  }),
+
+  http.get('**/api/v2/friends/requests/sent', () => {
+    return HttpResponse.json(mockSentRequests);
+  }),
+
+  http.post('**/api/v2/friends/request', async ({ request }) => {
+    const body = await request.json();
+    const { receiverId } = body as { receiverId: number };
+
+    // Find the receiver in members data
+    const receiver = members.find(m => {
+      const id = parseInt(m.id.replace('member-', '').replace('dev', '0'), 10);
+      return id === receiverId;
+    });
+
+    if (!receiver) {
+      return new HttpResponse(null, { status: 404 });
+    }
+
+    const friendshipId = Date.now();
+    const newRequest = {
+      friendshipId,
+      requester: {
+        id: receiverId, // Reusing field for simplicity as identified receiver
+        nickname: receiver.nickname,
+        avatarUrl: receiver.avatarUrl,
+      },
+      createdAt: new Date().toISOString(),
+    };
+
+    mockSentRequests.push(newRequest);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('mockSentRequests', JSON.stringify(mockSentRequests));
+    }
+
+    return HttpResponse.json({
+      id: friendshipId,
+      requesterId: 0, // dev user id
+      receiverId,
+      status: 'PENDING',
+      createdAt: new Date().toISOString(),
+      acceptedAt: null,
+    });
+  }),
+
+  http.delete('**/api/v2/friends/:friendshipId', ({ params }) => {
+    const { friendshipId } = params;
+    const idNum = parseInt(friendshipId as string, 10);
+    mockFriends = mockFriends.filter((f: any) => f.friendshipId !== idNum);
+    mockSentRequests = mockSentRequests.filter((r: any) => r.friendshipId !== idNum);
+
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('mockFriends', JSON.stringify(mockFriends));
+      localStorage.setItem('mockSentRequests', JSON.stringify(mockSentRequests));
+    }
+    return new HttpResponse(null, { status: 204 });
+  }),
+
   // WISHLISTS
   // ============================================
   http.get('**/api/v2/wishlists/me', ({ request }) => {
@@ -300,6 +387,7 @@ export const handlers = [
       sellerNickname: item.product.sellerNickname || 'Seller',
       category: item.product.category?.toUpperCase() || 'GENERAL',
       status: item.status,
+      fundingId: item.fundingId,
       addedAt: item.createdAt,
     }));
 
@@ -353,6 +441,8 @@ export const handlers = [
         productId: parseInt(item.productId.replace('product-', ''), 10),
         productName: item.product.name,
         price: item.product.price,
+        status: item.status,
+        fundingId: item.fundingId,
         addedAt: item.createdAt,
       })),
     };
@@ -642,8 +732,20 @@ export const handlers = [
       (p) => p.memberId === currentUser.id
     );
 
+    // V2 Backend Response format
     return HttpResponse.json({
-      ...funding,
+      fundingId: parseInt(funding.id.replace('funding-', ''), 10),
+      targetAmount: funding.targetAmount,
+      currentAmount: funding.currentAmount,
+      status: funding.status,
+      deadline: funding.expiresAt,
+      wishlistItemId: parseInt(funding.wishItemId.replace('wish-item-', ''), 10),
+      productId: parseInt(funding.product.id.replace('product-', ''), 10),
+      productName: funding.product.name,
+      productPrice: funding.product.price,
+      imageKey: funding.product.imageUrl.split('/').pop(),
+      achievementRate: Math.floor((funding.currentAmount / funding.targetAmount) * 100),
+      daysRemaining: 14,
       participants: participants.slice(0, 5),
       myParticipation: myParticipation || null,
     });
@@ -755,10 +857,10 @@ export const handlers = [
   // CART
   // ============================================
   http.get('**/api/v2/cart', () => {
-    const selectedCount = cartItems.filter((item) => item.selected).length;
+    const selectedCount = cartItems.filter((item: any) => item.selected).length;
     const totalAmount = cartItems
-      .filter((item) => item.selected)
-      .reduce((sum, item) => sum + item.amount, 0);
+      .filter((item: any) => item.selected)
+      .reduce((sum: number, item: any) => sum + item.amount, 0);
 
     return HttpResponse.json({
       id: 'cart-1',
@@ -839,7 +941,7 @@ export const handlers = [
       selected?: boolean;
     };
 
-    const item = cartItems.find((i) => i.id === itemId);
+    const item = cartItems.find((i: any) => i.id === itemId);
     if (!item) {
       return new HttpResponse(null, { status: 404 });
     }
@@ -852,7 +954,7 @@ export const handlers = [
 
   http.delete('**/api/v2/cart/items/:itemId', ({ params }) => {
     const { itemId } = params;
-    cartItems = cartItems.filter((i) => i.id !== itemId);
+    cartItems = cartItems.filter((i: any) => i.id !== itemId);
     return new HttpResponse(null, { status: 204 });
   }),
 

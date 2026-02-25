@@ -12,10 +12,12 @@ import { Search, Gift, Users, ArrowRight } from 'lucide-react';
 import { usePublicWishlistSearch } from '@/features/wishlist/hooks/useWishlist';
 import { AddFriendButton } from '@/features/friend/components/AddFriendButton';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useProfile } from '@/features/profile/hooks/useProfile';
 
 export default function DiscoverPage() {
     const router = useRouter();
     const { user } = useAuth();
+    const { data: me } = useProfile();
     const [searchNickname, setSearchNickname] = useState('');
     const [searchedNickname, setSearchedNickname] = useState<string | undefined>(undefined);
 
@@ -83,7 +85,7 @@ export default function DiscoverPage() {
                                     </div>
                                 </div>
                             </Card>
-                        ) : !searchResults || searchResults.filter(m => m.memberId.toString() !== user?.id?.toString()).length === 0 ? (
+                        ) : !searchResults || searchResults.filter(m => m.memberId.toString() !== me?.id?.toString()).length === 0 ? (
                             <Card className="p-12 text-center border-2 border-dashed border-gray-200 rounded-none bg-gray-50">
                                 <p className="font-bold text-gray-400">"{searchedNickname}" 검색 결과가 없습니다.</p>
                                 <p className="text-xs text-muted-foreground mt-1">닉네임을 다시 확인해주세요.</p>
@@ -91,7 +93,7 @@ export default function DiscoverPage() {
                         ) : (
                             <div className="space-y-3">
                                 {searchResults
-                                    .filter(m => m.memberId.toString() !== user?.id?.toString())
+                                    .filter(m => m.memberId.toString() !== me?.id?.toString())
                                     .map((member) => (
                                         <Card
                                             key={member.memberId}
@@ -150,9 +152,9 @@ export default function DiscoverPage() {
                                     <Skeleton className="h-4 w-16" />
                                 </div>
                             ))
-                        ) : publicMembers && publicMembers.filter(m => m.memberId.toString() !== user?.id?.toString()).length > 0 ? (
+                        ) : publicMembers && publicMembers.filter(m => m.memberId.toString() !== me?.id?.toString()).length > 0 ? (
                             publicMembers
-                                .filter(m => m.memberId.toString() !== user?.id?.toString())
+                                .filter(m => m.memberId.toString() !== me?.id?.toString())
                                 .map((member) => (
                                     <MemberCard
                                         key={member.memberId}

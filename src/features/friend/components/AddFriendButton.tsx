@@ -1,14 +1,16 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { UserPlus, UserCheck, UserMinus, Loader2 } from 'lucide-react';
-import { useMyFriends } from '../hooks/useFriends';
+import { useMyFriends, useFriendRequests, useSentFriendRequests } from '../hooks/useFriends';
 import { useSendFriendRequest, useRemoveFriend } from '../hooks/useFriendMutations';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useProfile } from '@/features/profile/hooks/useProfile';
 import { toast } from 'sonner';
 
-type FriendStatus = 'self' | 'friend' | 'not_friend' | 'requested';
+type FriendStatus = 'self' | 'friend' | 'not_friend' | 'sent_request' | 'received_request';
 
 interface AddFriendButtonProps {
   targetUserId: string;
@@ -17,22 +19,28 @@ interface AddFriendButtonProps {
 }
 
 export function AddFriendButton({ targetUserId, targetNickname, variant = 'default' }: AddFriendButtonProps) {
-  const { user } = useAuth();
+  const router = useRouter();
+  const { data: me } = useProfile();
   const { data: friends } = useMyFriends();
+  const { data: sentRequests } = useSentFriendRequests();
+  const { data: receivedRequests } = useFriendRequests();
   const sendRequest = useSendFriendRequest();
   const removeFriend = useRemoveFriend();
   const [localRequested, setLocalRequested] = useState(false);
 
-  const currentUserId = user?.sub;
-  const friend = friends?.find(f => f.id === targetUserId);
+  const friend = friends?.find(f => f.id.toString() === targetUserId.toString());
+  const sent = sentRequests?.find(r => r.requester.id.toString() === targetUserId.toString()); // Note: if backend uses the same DTO, requester field might actually be the receiver here
+  const received = receivedRequests?.find(r => r.requester.id.toString() === targetUserId.toString());
 
   let status: FriendStatus;
-  if (currentUserId === targetUserId) {
+  if (me?.id.toString() === targetUserId.toString()) {
     status = 'self';
   } else if (friend) {
     status = 'friend';
-  } else if (localRequested) {
-    status = 'requested';
+  } else if (sent || localRequested) {
+    status = 'sent_request';
+  } else if (received) {
+    status = 'received_request';
   } else {
     status = 'not_friend';
   }
@@ -88,7 +96,7 @@ export function AddFriendButton({ targetUserId, targetNickname, variant = 'defau
     );
   }
 
-  if (status === 'requested') {
+  if (status === 'sent_request') {
     return (
       <Button
         variant="outline"
@@ -98,6 +106,19 @@ export function AddFriendButton({ targetUserId, targetNickname, variant = 'defau
       >
         <UserCheck className="h-3.5 w-3.5 mr-1" strokeWidth={1.5} />
         요청됨
+      </Button>
+    );
+  }
+
+  if (status === 'received_request') {
+    return (
+      <Button
+        variant="default"
+        size={isCompact ? 'sm' : 'default'}
+        onClick={() => router.push('/friends')}
+        className={isCompact ? 'h-7 text-xs' : ''}
+      >
+        요청 받음
       </Button>
     );
   }

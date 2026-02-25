@@ -10,6 +10,7 @@ interface AmountInputProps {
     value: number;
     onChange: (value: number) => void;
     maxAmount?: number;          // Target amount cap
+    minAmount?: number;          // Minimum amount requirement
     walletBalance?: number;      // For checking insufficient funds
     quickAmounts?: number[];     // e.g. [10000, 30000, 50000]
     className?: string;
@@ -19,25 +20,34 @@ export function AmountInput({
     value,
     onChange,
     maxAmount,
+    minAmount,
     walletBalance,
     quickAmounts = [10000, 30000, 50000],
     className,
 }: AmountInputProps) {
-    const [inputValue, setInputValue] = React.useState(value.toString());
+    const formatWithCommas = (val: string | number) => {
+        const num = val.toString().replace(/[^0-9]/g, '');
+        if (!num) return '';
+        return Number(num).toLocaleString();
+    };
+
+    const [inputValue, setInputValue] = React.useState(formatWithCommas(value));
 
     // Sync internal input state with prop value
     React.useEffect(() => {
-        setInputValue(value.toString());
+        setInputValue(formatWithCommas(value));
     }, [value]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        // Basic number only filter
-        const val = e.target.value.replace(/[^0-9]/g, '');
-        setInputValue(val);
-        onChange(Number(val));
+        const rawVal = e.target.value.replace(/[^0-9]/g, '');
+        setInputValue(formatWithCommas(rawVal));
+        onChange(Number(rawVal));
     };
 
     const handleError = () => {
+        if (minAmount && value > 0 && value < minAmount) {
+            return `최소 참여 금액은 ${minAmount.toLocaleString()}원입니다.`;
+        }
         if (maxAmount && value > maxAmount) {
             return `남은 금액(${maxAmount.toLocaleString()}원)을 초과할 수 없습니다.`;
         }
@@ -98,6 +108,7 @@ export function AmountInput({
                 {quickAmounts.map((amt) => (
                     <Button
                         key={amt}
+                        type="button"
                         variant="outline"
                         size="sm"
                         onClick={() => handleQuickAdd(amt)}
@@ -108,6 +119,7 @@ export function AmountInput({
                 ))}
                 {maxAmount && (
                     <Button
+                        type="button"
                         variant="outline"
                         size="sm"
                         onClick={handleFullAmount}

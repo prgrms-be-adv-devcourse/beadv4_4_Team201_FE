@@ -12,11 +12,12 @@ export type WishlistVisibility = 'PUBLIC' | 'FRIENDS_ONLY' | 'PRIVATE';
 
 /**
  * Wish item status
- * - AVAILABLE: Can create funding
- * - IN_FUNDING: Funding in progress
- * - FUNDED: Funding completed
+ * - PENDING: Not yet started
+ * - IN_PROGRESS: Funding in progress
+ * - REQUESTED_CONFIRM: Awaiting recipient acceptance
+ * - COMPLETED: Funding accepted/completed
  */
-export type WishItemStatus = 'AVAILABLE' | 'IN_FUNDING' | 'FUNDED';
+export type WishItemStatus = 'PENDING' | 'IN_PROGRESS' | 'REQUESTED_CONFIRM' | 'COMPLETED';
 
 /**
  * Wish item in a wishlist

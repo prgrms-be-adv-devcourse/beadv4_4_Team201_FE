@@ -21,10 +21,10 @@ export function useMyWishlist(params: WishlistQueryParams = { page: 0, size: 20 
  * Hook to fetch a specific member's wishlist
  * @param memberId - The ID of the member whose wishlist to fetch
  */
-export function useWishlist(memberId: string) {
+export function useWishlist(memberId: string, params: WishlistQueryParams = { page: 0, size: 20 }) {
   return useQuery({
-    queryKey: queryKeys.wishlist(memberId),
-    queryFn: () => getWishlist(memberId),
+    queryKey: [...queryKeys.wishlist(memberId), params],
+    queryFn: () => getWishlist(memberId, params),
     enabled: !!memberId,
   });
 }

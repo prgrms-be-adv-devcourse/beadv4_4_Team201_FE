@@ -9,7 +9,7 @@ import { Footer } from '@/components/layout/Footer';
 import { VisibilityDialog } from '@/features/wishlist/components/VisibilityDialog';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Heart, ExternalLink, Globe, Users, Lock, Settings2 } from 'lucide-react';
+import { Heart, ExternalLink, Globe, Users, Lock, Settings2, X } from 'lucide-react';
 import { ApiError } from '@/lib/api/client';
 import { InlineError } from '@/components/common/InlineError';
 import { useMyWishlist } from '@/features/wishlist/hooks/useWishlist';
@@ -33,6 +33,13 @@ const CATEGORIES = [
     { label: '아웃도어', value: 'outdoor' },
     { label: '반려동물', value: 'pet' },
     { label: '주방', value: 'kitchen' },
+];
+
+const STATUS_FILTERS = [
+    { label: '미개시 펀딩', value: 'PENDING' },
+    { label: '펀딩 중', value: 'IN_PROGRESS' },
+    { label: '펀딩 수락 대기', value: 'REQUESTED_CONFIRM' },
+    { label: '펀딩 수락 완료', value: 'COMPLETED' },
 ];
 
 
@@ -77,9 +84,10 @@ export default function MyWishlistPage() {
     const router = useRouter();
     const [currentPage, setCurrentPage] = useState(0);
     const [activeCategory, setActiveCategory] = useState('');
+    const [activeStatus, setActiveStatus] = useState<string>('');
     const { data: wishlist, isLoading, error, refetch } = useMyWishlist({
-        page: currentPage,
-        size: PAGE_SIZE,
+        page: 0,
+        size: 100,
     });
 
     const updateVisibility = useUpdateVisibility();
@@ -119,27 +127,17 @@ export default function MyWishlistPage() {
         document.getElementById('wishlist-items-section')?.scrollIntoView({ behavior: 'smooth' });
     };
 
-    // Filter items - exclude items without valid product data AND apply client-side category filter
-    const wishlistItems = (wishlist?.items || [])
-        .filter(item => {
-            if (!item?.product?.id) return false;
-            if (!activeCategory) return true;
+    // Client-side filtering
+    const allItems = wishlist?.items ?? [];
+    const filteredItems = allItems.filter(item => {
+        const matchesCategory = !activeCategory || item.product.category?.toLowerCase() === activeCategory.toLowerCase();
+        const matchesStatus = !activeStatus || item.status === activeStatus;
+        return matchesCategory && matchesStatus;
+    });
 
-            const itemCategory = (item.product.category || '').toLowerCase();
-            return itemCategory === activeCategory.toLowerCase();
-        })
-        .sort((a, b) => {
-            const getStatusScore = (item: WishItem) => {
-                if (item.product.isActive === false) return 2; // 판매 중단 (최하단)
-                if (item.product.isSoldout) return 1;          // 품절 (중간)
-                return 0;                                       // 판매 중 (최상단)
-            };
-            return getStatusScore(a) - getStatusScore(b);
-        });
-
-    const absoluteTotalItems = wishlist?.page?.totalElements || wishlist?.itemCount || 0;
-    const totalItems = activeCategory ? wishlistItems.length : absoluteTotalItems;
-    const totalPages = activeCategory ? Math.ceil(wishlistItems.length / PAGE_SIZE) : (wishlist?.page?.totalPages || 0);
+    const totalItems = filteredItems.length;
+    const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
+    const paginatedItems = filteredItems.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
 
     // Loading state
     if (isLoading) {
@@ -205,7 +203,7 @@ export default function MyWishlistPage() {
 
                             {wishlist?.member?.nickname && (
                                 <p className="text-sm text-muted-foreground mb-4">
-                                    {wishlist.member.nickname}의 위시리스트
+                                    {wishlist.member.nickname}님의 위시리스트
                                 </p>
                             )}
 
@@ -214,7 +212,7 @@ export default function MyWishlistPage() {
                                     <VisibilityBadge visibility={wishlist.visibility} />
                                 )}
                                 <span className="text-[15px] text-muted-foreground">
-                                    총 <strong className="text-foreground font-black">{absoluteTotalItems.toLocaleString()}</strong>개 상품
+                                    총 <strong className="text-foreground font-black">{totalItems.toLocaleString()}</strong>개 상품
                                 </span>
                             </div>
                         </div>
@@ -268,17 +266,58 @@ export default function MyWishlistPage() {
                                 </ul>
                             </div>
 
+                            {/* 상태 섹션 (필터) */}
+                            <div>
+                                <h3 className="text-sm font-bold mb-4 flex items-center gap-2">
+                                    상태
+                                </h3>
+                                <ul className="space-y-1">
+                                    {STATUS_FILTERS.map(filter => (
+                                        <li key={filter.value}>
+                                            <button
+                                                onClick={() => {
+                                                    setActiveStatus(prev => prev === filter.value ? '' : filter.value);
+                                                    setCurrentPage(0);
+                                                }}
+                                                className={cn(
+                                                    'w-full text-left px-3 py-2 rounded-md text-[13px] transition-colors font-medium',
+                                                    activeStatus === filter.value
+                                                        ? 'bg-foreground text-background'
+                                                        : 'text-muted-foreground hover:bg-muted'
+                                                )}
+                                            >
+                                                {filter.label}
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+
                         </div>
                     </aside>
 
                     {/* ─── 오른쪽: 위시리스트 아이템 ─────────────────────────────── */}
                     <section id="wishlist-items-section" className="flex-1">
                         <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-lg font-bold">
+                            <h2 className="text-lg font-bold flex items-center flex-wrap">
                                 {activeCategory ? CATEGORIES.find(c => c.value === activeCategory)?.label : '전체 상품'}
                                 <span className="ml-2 text-sm text-muted-foreground font-normal">
                                     {totalItems}개
                                 </span>
+                                {activeStatus && (
+                                    <span className="ml-2 inline-flex items-center gap-1 px-2 py-0.5 bg-secondary text-secondary-foreground text-[11px] rounded transition-all">
+                                        [{STATUS_FILTERS.find(f => f.value === activeStatus)?.label}]
+                                        <button
+                                            onClick={() => {
+                                                setActiveStatus('');
+                                                setCurrentPage(0);
+                                            }}
+                                            className="hover:text-foreground opacity-60 hover:opacity-100 transition-opacity"
+                                        >
+                                            <X className="h-3 w-3" />
+                                        </button>
+                                    </span>
+                                )}
                             </h2>
                             {totalPages > 1 && (
                                 <span className="text-[11px] text-muted-foreground">
@@ -287,11 +326,11 @@ export default function MyWishlistPage() {
                             )}
                         </div>
 
-                        {wishlistItems.length === 0 ? (
+                        {paginatedItems.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-24 border border-dashed border-border rounded-xl bg-card/50">
                                 <Heart className="h-12 w-12 text-muted-foreground/30 mb-4" strokeWidth={1} />
                                 <p className="text-muted-foreground mb-6 text-sm">
-                                    해당 조건의 아이템이 없습니다
+                                    해당 조건의 상품이 없습니다.
                                 </p>
                                 <Link href={activeCategory ? `/products?category=${activeCategory}` : "/products"}>
                                     <Button variant="outline" size="sm">상품 둘러보기</Button>
@@ -299,7 +338,7 @@ export default function MyWishlistPage() {
                             </div>
                         ) : (
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-5">
-                                {wishlistItems.map((item) => (
+                                {paginatedItems.map((item) => (
                                     <WishItemCard
                                         key={item.id}
                                         item={item}
@@ -410,14 +449,19 @@ function WishItemCard({
 
                         {/* 상태 뱃지 (이미지 위) */}
                         <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
-                            {item.status === 'IN_FUNDING' && (
+                            {item.status === 'IN_PROGRESS' && (
                                 <div className="px-1.5 py-0.5 bg-blue-600 text-white text-[10px] font-bold">
-                                    펀딩중
+                                    펀딩 중
                                 </div>
                             )}
-                            {item.status === 'FUNDED' && (
+                            {item.status === 'REQUESTED_CONFIRM' && (
+                                <div className="px-1.5 py-0.5 bg-amber-500 text-white text-[10px] font-bold">
+                                    펀딩 수락 대기
+                                </div>
+                            )}
+                            {item.status === 'COMPLETED' && (
                                 <div className="px-1.5 py-0.5 bg-gray-600 text-white text-[10px] font-bold">
-                                    완료
+                                    펀딩 수락 완료
                                 </div>
                             )}
                         </div>
@@ -485,7 +529,7 @@ function WishItemCard({
             </div>
 
             {/* 액션 버튼 */}
-            {item.status === 'IN_FUNDING' && (
+            {(item.status === 'IN_PROGRESS' || item.status === 'REQUESTED_CONFIRM' || item.status === 'COMPLETED') && (
                 <button
                     onClick={onViewFunding}
                     className="mt-2 w-full py-1.5 border border-border rounded text-[10px] font-medium hover:bg-secondary transition-colors flex items-center justify-center gap-1"

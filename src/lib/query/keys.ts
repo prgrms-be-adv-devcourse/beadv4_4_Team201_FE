@@ -43,6 +43,7 @@ export const queryKeys = {
   // Friends
   friends: ['friends'] as const,
   friendRequests: ['friends', 'requests'] as const,
+  sentFriendRequests: ['friends', 'requests', 'sent'] as const,
 
   // Members
   member: (id: string) => ['members', id] as const,
