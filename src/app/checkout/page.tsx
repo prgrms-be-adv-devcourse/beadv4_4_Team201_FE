@@ -21,13 +21,13 @@ import type { CartItem } from '@/types/cart';
 function cartItemToOrderItem(item: CartItem): PlaceOrderItemRequest {
     const orderItemType: OrderItemType = 'FUNDING_GIFT';
 
-    const wishlistItemId = item.funding.wishItemId
-        ? parseInt(item.funding.wishItemId, 10)
-        : parseInt(item.fundingId, 10);
+    // targetId already contains either wishItemId or fundingId depending on targetType
+    const wishlistItemId = parseInt(item.targetId, 10);
+    const receiverId = item.receiverId ? parseInt(item.receiverId, 10) : 0;
 
     return {
         wishlistItemId,
-        receiverId: item.receiverId,
+        receiverId,
         amount: item.amount,
         orderItemType,
     };
