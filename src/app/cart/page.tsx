@@ -278,8 +278,17 @@ export default function CartPage() {
                                         aria-label="전체 선택"
                                     />
                                 </div>
-                                <div className="col-span-5">펀딩 정보</div>
-                                <div className="col-span-2 text-left">참여 금액</div>
+                                <div className="col-span-5 flex items-center">펀딩 정보</div>
+                                <div className="col-span-2 flex items-center justify-between">
+                                    <span>참여 금액</span>
+                                    <button
+                                        onClick={handleRemoveSelected}
+                                        disabled={selectedItems.length === 0}
+                                        className="text-[11px] text-foreground border border-border rounded-sm px-2 py-1 hover:bg-secondary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                                    >
+                                        선택삭제
+                                    </button>
+                                </div>
                             </div>
 
                             {/* Cart Items */}
@@ -408,14 +417,6 @@ export default function CartPage() {
 
                             {/* Action Buttons - 29cm Style */}
                             <div className="flex gap-2 py-6">
-
-                                <button
-                                    onClick={handleRemoveSelected}
-                                    disabled={selectedItems.length === 0}
-                                    className="px-4 py-2 border border-border text-xs hover:bg-secondary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                                >
-                                    선택상품 삭제
-                                </button>
                                 {editingItemIds.size > 0 && (
                                     <button
                                         onClick={handleBulkUpdate}
@@ -445,7 +446,7 @@ export default function CartPage() {
                                 <button
                                     onClick={handleRemoveSelected}
                                     disabled={selectedItems.length === 0}
-                                    className="text-xs text-muted-foreground hover:text-foreground disabled:opacity-40"
+                                    className="text-xs text-foreground border border-border rounded-sm px-2 py-1 hover:bg-secondary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                                 >
                                     선택 삭제
                                 </button>
