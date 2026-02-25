@@ -75,6 +75,17 @@ export async function getFriendRequests(): Promise<FriendRequest[]> {
   return response.map(mapFriendRequest);
 }
 
+export async function getSentFriendRequests(): Promise<FriendRequest[]> {
+  try {
+    const response = await apiClient.get<BackendFriendRequestResponse[]>('/api/v2/friends/requests/sent');
+    return response.map(mapFriendRequest);
+  } catch (error) {
+    // If endpoint doesn't exist, return empty array to avoid breaking UI
+    console.error('Failed to fetch sent friend requests:', error);
+    return [];
+  }
+}
+
 export async function sendFriendRequest(receiverId: string): Promise<FriendshipResponse> {
   const response = await apiClient.post<BackendFriendshipResponse>(
     '/api/v2/friends/request',

@@ -8,14 +8,18 @@ import { AppShell } from '@/components/layout/AppShell';
 import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Heart, ExternalLink, Users, Gift, Globe, Lock } from 'lucide-react';
+import { Heart, ExternalLink, Users, Gift, Globe, Lock, X, ShoppingCart } from 'lucide-react';
 import { InlineError } from '@/components/common/InlineError';
 import { useWishlist } from '@/features/wishlist/hooks/useWishlist';
 import { WishItem, WishlistVisibility } from '@/types/wishlist';
 import { cn } from '@/lib/utils';
 import { formatPrice } from '@/lib/format';
+import { toast } from 'sonner';
 import { CreateFundingModal } from '@/features/funding/components/CreateFundingModal';
+import { ParticipateModal } from '@/features/funding/components/ParticipateModal';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import { getFunding } from '@/lib/api/fundings';
+import type { Funding } from '@/types/funding';
 
 const PAGE_SIZE = 20;
 
@@ -30,6 +34,11 @@ const CATEGORIES = [
     { label: '아웃도어', value: 'outdoor' },
     { label: '반려동물', value: 'pet' },
     { label: '주방', value: 'kitchen' },
+];
+
+const STATUS_FILTERS = [
+    { label: '미개시 펀딩', value: 'PENDING' },
+    { label: '펀딩 중', value: 'IN_PROGRESS' },
 ];
 
 function getPageNumbers(current: number, total: number): (number | '...')[] {
@@ -75,10 +84,16 @@ export default function PublicWishlistPage({ params }: { params: Promise<{ membe
     const { user } = useAuth();
     const [currentPage, setCurrentPage] = useState(0);
     const [activeCategory, setActiveCategory] = useState('');
+    const [activeStatus, setActiveStatus] = useState<string>('');
     const [selectedItem, setSelectedItem] = useState<WishItem | null>(null);
+    const [selectedFunding, setSelectedFunding] = useState<Funding | null>(null);
     const [isStartFundingOpen, setIsStartFundingOpen] = useState(false);
+    const [isParticipateOpen, setIsParticipateOpen] = useState(false);
 
-    const { data: wishlist, isLoading: isWishlistLoading, error: wishlistError, refetch } = useWishlist(memberId);
+    const { data: wishlist, isLoading: isWishlistLoading, error: wishlistError, refetch } = useWishlist(memberId, {
+        page: 0,
+        size: 100,
+    });
 
     const handleViewFunding = (fundingId: string) => {
         router.push(`/fundings/${fundingId}`);
@@ -93,33 +108,43 @@ export default function PublicWishlistPage({ params }: { params: Promise<{ membe
         setIsStartFundingOpen(true);
     };
 
+    const handleParticipateFunding = async (fundingId: string) => {
+        if (!user) {
+            router.push('/auth/login');
+            return;
+        }
+
+        const loadingToast = toast.loading('펀딩 정보를 불러오는 중...');
+        try {
+            console.log('Fetching funding details for:', fundingId);
+            const funding = await getFunding(fundingId);
+            console.log('Funding details fetched:', funding);
+
+            setSelectedFunding(funding);
+            setIsParticipateOpen(true);
+            toast.dismiss(loadingToast);
+        } catch (error) {
+            console.error('Failed to fetch funding:', error);
+            toast.error('펀딩 정보를 불러오는데 실패했습니다.', { id: loadingToast });
+        }
+    };
+
+    // Client-side filtering
+    const allItems = wishlist?.items ?? [];
+    const filteredItems = allItems.filter(item => {
+        const matchesCategory = !activeCategory || item.product.category?.toLowerCase() === activeCategory.toLowerCase();
+        const matchesStatus = !activeStatus || item.status === activeStatus;
+        return matchesCategory && matchesStatus;
+    });
+
+    const totalItems = filteredItems.length;
+    const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
+    const paginatedItems = filteredItems.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
+
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
         document.getElementById('wishlist-items-section')?.scrollIntoView({ behavior: 'smooth' });
     };
-
-    // Filter items
-    const wishlistItems = (wishlist?.items || [])
-        .filter(item => {
-            if (!item?.product?.id) return false;
-            if (!activeCategory) return true;
-            const itemCategory = (item.product.category || '').toLowerCase();
-            return itemCategory === activeCategory.toLowerCase();
-        })
-        .sort((a, b) => {
-            const getStatusScore = (item: WishItem) => {
-                if (item.product.isActive === false) return 2;
-                if (item.product.isSoldout) return 1;
-                return 0;
-            };
-            return getStatusScore(a) - getStatusScore(b);
-        });
-
-    const totalItems = wishlistItems.length;
-    const totalPages = Math.ceil(totalItems / PAGE_SIZE);
-
-    // Paginated items
-    const paginatedItems = wishlistItems.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
 
     if (isWishlistLoading) {
         return (
@@ -165,7 +190,7 @@ export default function PublicWishlistPage({ params }: { params: Promise<{ membe
     const nickname = wishlist?.member?.nickname || '친구';
 
     return (
-        <AppShell headerVariant="main">
+        <AppShell headerVariant="main" headerTitle={`${nickname}님의 위시리스트`}>
             <div className="max-w-screen-xl mx-auto px-6 py-10">
                 <section className="bg-card border border-border rounded-xl p-8 mb-10">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
@@ -173,7 +198,7 @@ export default function PublicWishlistPage({ params }: { params: Promise<{ membe
                             <div className="flex items-center gap-3 mb-3">
                                 <Users className="h-5 w-5 text-foreground" strokeWidth={1.5} />
                                 <h1 className="text-2xl font-semibold tracking-tight">
-                                    {nickname}의 위시리스트
+                                    {nickname}님의 위시리스트
                                 </h1>
                             </div>
                             <div className="flex items-center gap-3 flex-wrap">
@@ -181,7 +206,7 @@ export default function PublicWishlistPage({ params }: { params: Promise<{ membe
                                     <VisibilityBadge visibility={wishlist.visibility} />
                                 )}
                                 <p className="text-sm text-muted-foreground">
-                                    총 <strong className="text-foreground font-black">{totalItems.toLocaleString()}</strong>개의 위시 아이템이 있습니다.
+                                    총 <strong className="text-foreground font-black">{totalItems.toLocaleString()}</strong>개의 상품
                                 </p>
                             </div>
                         </div>
@@ -191,7 +216,7 @@ export default function PublicWishlistPage({ params }: { params: Promise<{ membe
                 <div className="flex flex-col md:flex-row gap-10">
                     <aside className="w-full md:w-48 bg-card border border-border rounded-xl p-6 h-fit sticky top-24">
                         <h3 className="text-sm font-bold mb-4">카테고리</h3>
-                        <ul className="space-y-1">
+                        <ul className="space-y-1 mb-8">
                             {CATEGORIES.map(cat => (
                                 <li key={cat.value}>
                                     <button
@@ -211,19 +236,58 @@ export default function PublicWishlistPage({ params }: { params: Promise<{ membe
                                 </li>
                             ))}
                         </ul>
+
+                        <h3 className="text-sm font-bold mb-4">상태</h3>
+                        <ul className="space-y-1">
+                            {STATUS_FILTERS.map(filter => (
+                                <li key={filter.value}>
+                                    <button
+                                        onClick={() => {
+                                            setActiveStatus(prev => prev === filter.value ? '' : filter.value);
+                                            setCurrentPage(0);
+                                        }}
+                                        className={cn(
+                                            'w-full text-left px-3 py-2 rounded-md text-[13px] transition-colors font-medium',
+                                            activeStatus === filter.value
+                                                ? 'bg-foreground text-background'
+                                                : 'text-muted-foreground hover:bg-muted'
+                                        )}
+                                    >
+                                        {filter.label}
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
                     </aside>
 
                     <section id="wishlist-items-section" className="flex-1">
                         <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-lg font-bold">
+                            <h2 className="text-lg font-bold flex items-center flex-wrap">
                                 {activeCategory ? CATEGORIES.find(c => c.value === activeCategory)?.label : '전체 상품'}
+                                <span className="ml-2 text-sm text-muted-foreground font-normal">
+                                    {totalItems}개
+                                </span>
+                                {activeStatus && (
+                                    <span className="ml-2 inline-flex items-center gap-1 px-2 py-0.5 bg-secondary text-secondary-foreground text-[11px] rounded transition-all">
+                                        [{STATUS_FILTERS.find(f => f.value === activeStatus)?.label}]
+                                        <button
+                                            onClick={() => {
+                                                setActiveStatus('');
+                                                setCurrentPage(0);
+                                            }}
+                                            className="hover:text-foreground opacity-60 hover:opacity-100 transition-opacity"
+                                        >
+                                            <X className="h-3 w-3" />
+                                        </button>
+                                    </span>
+                                )}
                             </h2>
                         </div>
 
                         {paginatedItems.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-24 border border-dashed border-border rounded-xl bg-card/50">
                                 <Heart className="h-12 w-12 text-muted-foreground/30 mb-4" strokeWidth={1} />
-                                <p className="text-muted-foreground text-sm">기록된 위시 아이템이 없습니다.</p>
+                                <p className="text-muted-foreground text-sm">해당 조건의 상품이 없습니다.</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-5">
@@ -233,6 +297,7 @@ export default function PublicWishlistPage({ params }: { params: Promise<{ membe
                                         item={item}
                                         onViewFunding={() => item.fundingId && handleViewFunding(item.fundingId)}
                                         onStartFunding={() => handleStartFunding(item)}
+                                        onParticipate={() => item.fundingId && handleParticipateFunding(item.fundingId)}
                                     />
                                 ))}
                             </div>
@@ -281,6 +346,14 @@ export default function PublicWishlistPage({ params }: { params: Promise<{ membe
                     onSuccess={() => router.push('/cart')}
                 />
             )}
+            {selectedFunding && (
+                <ParticipateModal
+                    open={isParticipateOpen}
+                    onOpenChange={setIsParticipateOpen}
+                    funding={selectedFunding}
+                    onSuccess={() => router.push('/cart')}
+                />
+            )}
             <Footer />
         </AppShell>
     );
@@ -290,10 +363,12 @@ function PublicWishItemCard({
     item,
     onViewFunding,
     onStartFunding,
+    onParticipate,
 }: {
     item: WishItem;
     onViewFunding: () => void;
     onStartFunding: () => void;
+    onParticipate: () => void;
 }) {
     return (
         <div className="group relative">
@@ -313,11 +388,14 @@ function PublicWishItemCard({
                     )}
 
                     <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
-                        {item.status === 'IN_FUNDING' && (
-                            <div className="px-1.5 py-0.5 bg-blue-600 text-white text-[10px] font-bold">펀딩중</div>
+                        {item.status === 'IN_PROGRESS' && (
+                            <div className="px-1.5 py-0.5 bg-blue-600 text-white text-[10px] font-bold">펀딩 중</div>
                         )}
-                        {item.status === 'FUNDED' && (
-                            <div className="px-1.5 py-0.5 bg-gray-600 text-white text-[10px] font-bold">완료</div>
+                        {item.status === 'REQUESTED_CONFIRM' && (
+                            <div className="px-1.5 py-0.5 bg-amber-500 text-white text-[10px] font-bold">펀딩 수락 대기</div>
+                        )}
+                        {item.status === 'COMPLETED' && (
+                            <div className="px-1.5 py-0.5 bg-gray-600 text-white text-[10px] font-bold">펀딩 수락 완료</div>
                         )}
                     </div>
                 </div>
@@ -337,23 +415,47 @@ function PublicWishItemCard({
                 </p>
             </div>
 
-            {item.status === 'AVAILABLE' && item.product.isActive !== false && !item.product.isSoldout && (
-                <button
-                    onClick={onStartFunding}
-                    className="mt-2 w-full py-1.5 border border-black bg-black text-white rounded text-[10px] font-bold hover:bg-gray-800 transition-colors uppercase tracking-widest"
-                >
-                    Start Funding
-                </button>
+            {item.status === 'PENDING' && item.product.isActive !== false && !item.product.isSoldout && (
+                <div className="space-y-2 mt-2">
+                    <button
+                        onClick={onStartFunding}
+                        className="w-full py-1.5 bg-black text-white rounded text-[10px] font-bold hover:bg-black/80 transition-colors flex items-center justify-center gap-1"
+                    >
+                        <ShoppingCart className="h-3 w-3" strokeWidth={2} />
+                        장바구니 담기
+                    </button>
+                </div>
             )}
 
-            {item.status === 'IN_FUNDING' && (
-                <button
-                    onClick={onViewFunding}
-                    className="mt-2 w-full py-1.5 border border-border rounded text-[10px] font-medium hover:bg-secondary transition-colors flex items-center justify-center gap-1"
-                >
-                    <ExternalLink className="h-3 w-3" strokeWidth={1.5} />
-                    펀딩 참여하기
-                </button>
+            {item.status === 'IN_PROGRESS' && (
+                <div className="space-y-2 mt-2">
+                    <button
+                        onClick={onParticipate}
+                        className="w-full py-1.5 bg-black text-white rounded text-[10px] font-bold hover:bg-black/80 transition-colors flex items-center justify-center gap-1"
+                    >
+                        <ShoppingCart className="h-3 w-3" strokeWidth={2} />
+                        장바구니 담기
+                    </button>
+                    <button
+                        onClick={onViewFunding}
+                        className="w-full py-1.5 border border-border rounded text-[10px] font-medium hover:bg-secondary transition-colors flex items-center justify-center gap-1"
+                    >
+                        <ExternalLink className="h-3 w-3" strokeWidth={1.5} />
+                        펀딩 보러가기
+                    </button>
+                </div>
+            )}
+
+            {(item.status === 'REQUESTED_CONFIRM' || item.status === 'COMPLETED') && (
+                <div className="space-y-2 mt-2">
+                    <button
+                        onClick={onViewFunding}
+                        className="w-full py-1.5 border border-border rounded text-[10px] font-medium hover:bg-secondary transition-colors flex items-center justify-center gap-1"
+                    >
+                        <ExternalLink className="h-3 w-3" strokeWidth={1.5} />
+                        펀딩 보러가기
+                    </button>
+                </div>
             )}
         </div>
     );

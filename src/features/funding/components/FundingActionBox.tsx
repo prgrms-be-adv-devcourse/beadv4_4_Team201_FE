@@ -45,7 +45,10 @@ export function FundingActionBox({ funding, onParticipate }: FundingActionBoxPro
                     {funding.participantCount}명 참여 중
                 </p>
 
-                <Button className="w-full h-12" onClick={onParticipate}>
+                <Button variant="default" className="w-full h-12 mb-2" onClick={onParticipate}>
+                    장바구니 담기
+                </Button>
+                <Button variant="outline" className="w-full h-12" onClick={onParticipate}>
                     펀딩 참여하기
                 </Button>
             </div>

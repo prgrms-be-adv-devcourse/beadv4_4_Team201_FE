@@ -12,6 +12,7 @@ function useInvalidateFriends() {
   return () => {
     queryClient.invalidateQueries({ queryKey: queryKeys.friends });
     queryClient.invalidateQueries({ queryKey: queryKeys.friendRequests });
+    queryClient.invalidateQueries({ queryKey: queryKeys.sentFriendRequests });
   };
 }
 
