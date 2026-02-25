@@ -181,6 +181,23 @@ export async function updateCartItem(itemId: string, data: CartItemUpdateRequest
 }
 
 /**
+ * 장바구니 아이템 다중 수정 (참여 금액)
+ * @endpoint PATCH /api/v2/carts/items
+ */
+export async function updateCartItems(updates: { itemId: string; amount: number }[]): Promise<void> {
+  const requests = updates.map(({ itemId, amount }) => {
+    const { targetType, targetId } = parseCartItemId(itemId);
+    return {
+      targetType,
+      targetId,
+      amount,
+    };
+  });
+
+  await apiClient.patch<void>('/api/v2/carts/items', requests);
+}
+
+/**
  * 장바구니 아이템 삭제
  * @endpoint DELETE /api/v2/carts/items/{targetType}?targetIds={id1,id2,...}
  */

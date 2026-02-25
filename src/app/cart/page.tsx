@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -9,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useCart } from '@/features/cart/hooks/useCart';
-import { useUpdateCartItem, useRemoveCartItems, useToggleCartSelection } from '@/features/cart/hooks/useCartMutations';
+import { useUpdateCartItem, useUpdateCartItems, useRemoveCartItems, useToggleCartSelection } from '@/features/cart/hooks/useCartMutations';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { Skeleton } from '@/components/ui/skeleton';
 import { InlineError } from '@/components/common/InlineError';
@@ -22,6 +23,8 @@ export default function CartPage() {
     const router = useRouter();
     const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
     const { data: cart, isLoading: isCartLoading, isError, error, refetch } = useCart();
+    const [editingItemIds, setEditingItemIds] = useState<Set<string>>(new Set());
+    const [tempAmounts, setTempAmounts] = useState<Record<string, string>>({});
 
     // Redirect to login if not authenticated
     if (!isAuthLoading && !isAuthenticated) {
@@ -31,6 +34,7 @@ export default function CartPage() {
 
     const isLoading = isAuthLoading || isCartLoading;
     const updateCartItem = useUpdateCartItem();
+    const updateCartItems = useUpdateCartItems();
     const removeCartItems = useRemoveCartItems();
     const toggleSelection = useToggleCartSelection();
 
@@ -40,14 +44,52 @@ export default function CartPage() {
     const allSelected = (cart?.items.length ?? 0) > 0 && cart?.items.every(item => item.selected);
 
     const handleUpdateAmount = (id: string, amount: number) => {
+        if (amount < 1000) {
+            toast.error('최소 참여 금액은 1,000원입니다.');
+            return;
+        }
+
         updateCartItem.mutate(
             { itemId: id, data: { amount } },
             {
+                onSuccess: () => {
+                    setEditingItemIds((prev) => {
+                        const next = new Set(prev);
+                        next.delete(id);
+                        return next;
+                    });
+                },
                 onError: () => {
                     toast.error('금액 변경에 실패했습니다.');
                 }
             }
         );
+    };
+
+    const toggleEdit = (id: string, currentAmount: number) => {
+        setEditingItemIds((prev) => {
+            const next = new Set(prev);
+            const isEditing = next.has(id);
+
+            if (isEditing) {
+                // Save logic
+                const tempValue = tempAmounts[id];
+                const amount = parseInt(tempValue?.replace(/,/g, '') || '0', 10);
+
+                if (amount < 1000) {
+                    toast.error('최소 참여 금액은 1,000원입니다.');
+                    return prev;
+                }
+
+                handleUpdateAmount(id, amount);
+                return prev; // Let handleUpdateAmount success handler remove the ID
+            } else {
+                // Enter edit mode
+                next.add(id);
+                setTempAmounts(v => ({ ...v, [id]: currentAmount.toLocaleString() }));
+            }
+            return next;
+        });
     };
 
     const handleToggleSelect = (id: string, selected: boolean) => {
@@ -68,6 +110,34 @@ export default function CartPage() {
             },
             onError: () => {
                 toast.error('삭제에 실패했습니다.');
+            }
+        });
+    };
+
+    const handleBulkUpdate = () => {
+        const updates: { itemId: string; amount: number }[] = [];
+        const idsArray = Array.from(editingItemIds);
+
+        for (const id of idsArray) {
+            const tempValue = tempAmounts[id];
+            const amount = parseInt(tempValue?.replace(/,/g, '') || '0', 10);
+
+            if (amount < 1000) {
+                toast.error('모든 참여 금액은 1,000원 이상이어야 합니다.');
+                return;
+            }
+            updates.push({ itemId: id, amount });
+        }
+
+        if (updates.length === 0) return;
+
+        updateCartItems.mutate(updates, {
+            onSuccess: () => {
+                toast.success('금액이 저장되었습니다.');
+                setEditingItemIds(new Set());
+            },
+            onError: () => {
+                toast.error('금액 저장에 실패했습니다.');
             }
         });
     };
@@ -288,30 +358,40 @@ export default function CartPage() {
 
                                         {/* Participation Amount/Quantity - 29cm Style */}
                                         <div className="col-span-2 flex items-center justify-between pt-1">
-                                            <div className="flex items-center">
-                                                <input
-                                                    type="text"
-                                                    value={item.amount.toLocaleString()}
-                                                    onChange={(e) => {
-                                                        if (!isAvailable) return;
-                                                        const value = parseInt(e.target.value.replace(/,/g, '')) || 0;
-                                                        if (value >= 0) {
-                                                            handleUpdateAmount(item.id, value);
-                                                        }
-                                                    }}
-                                                    disabled={!isAvailable}
-                                                    className={cn(
-                                                        "text-sm font-medium text-left bg-transparent focus:outline-none py-1",
-                                                        !isAvailable ? "text-muted-foreground cursor-not-allowed" : "text-foreground"
-                                                    )}
-                                                    style={{
-                                                        width: `${Math.max(1, item.amount.toLocaleString().length)}ch`,
-                                                        minWidth: '1ch'
-                                                    }}
-                                                />
-                                                <span className="text-sm text-foreground">
-                                                    원
-                                                </span>
+                                            <div className="flex items-center gap-2">
+                                                <div className="flex items-center w-28 shrink-0">
+                                                    <input
+                                                        type="text"
+                                                        value={editingItemIds.has(item.id) ? (tempAmounts[item.id] || '') : item.amount.toLocaleString()}
+                                                        onChange={(e) => {
+                                                            if (!isAvailable) return;
+                                                            const value = e.target.value.replace(/[^0-9]/g, '');
+                                                            const formatted = value ? parseInt(value, 10).toLocaleString() : '';
+                                                            setTempAmounts(v => ({ ...v, [item.id]: formatted }));
+                                                        }}
+                                                        disabled={!isAvailable || !editingItemIds.has(item.id)}
+                                                        className={cn(
+                                                            "text-sm font-medium text-left bg-transparent focus:outline-none py-1 transition-all",
+                                                            !isAvailable ? "text-muted-foreground cursor-not-allowed" : "text-foreground",
+                                                            editingItemIds.has(item.id) && "border-b border-foreground"
+                                                        )}
+                                                        style={{
+                                                            width: `${Math.max(1, (editingItemIds.has(item.id) ? (tempAmounts[item.id] || '') : item.amount.toLocaleString()).length)}ch`,
+                                                            minWidth: '2ch'
+                                                        }}
+                                                    />
+                                                    <span className="text-sm text-foreground">
+                                                        원
+                                                    </span>
+                                                </div>
+                                                {isAvailable && (
+                                                    <button
+                                                        onClick={() => toggleEdit(item.id, item.amount)}
+                                                        className="text-[11px] text-foreground border border-border rounded-sm px-2 py-0.5 hover:bg-secondary transition-colors shrink-0"
+                                                    >
+                                                        {editingItemIds.has(item.id) ? '저장' : '수정'}
+                                                    </button>
+                                                )}
                                             </div>
                                             <button
                                                 onClick={() => handleRemove(item.id)}
@@ -341,6 +421,14 @@ export default function CartPage() {
                                 >
                                     선택상품 삭제
                                 </button>
+                                {editingItemIds.size > 0 && (
+                                    <button
+                                        onClick={handleBulkUpdate}
+                                        className="px-4 py-2 bg-foreground text-background text-xs hover:opacity-90 transition-opacity"
+                                    >
+                                        변경사항 저장
+                                    </button>
+                                )}
                             </div>
 
                             {/* Cart Notice - 29cm Style */}
@@ -443,24 +531,37 @@ export default function CartPage() {
                                             {/* Amount Input */}
                                             <div className="flex items-center justify-between mt-3">
                                                 <span className="text-xs text-muted-foreground">참여 금액</span>
-                                                <div className="flex items-center gap-1">
-                                                    <input
-                                                        type="text"
-                                                        value={item.amount.toLocaleString()}
-                                                        onChange={(e) => {
-                                                            if (!isAvailable) return;
-                                                            const value = parseInt(e.target.value.replace(/,/g, '')) || 0;
-                                                            if (value >= 0) {
-                                                                handleUpdateAmount(item.id, value);
-                                                            }
-                                                        }}
-                                                        disabled={!isAvailable}
-                                                        className={cn(
-                                                            "w-20 text-sm font-medium text-right bg-transparent focus:outline-none py-0.5",
-                                                            !isAvailable && "text-muted-foreground cursor-not-allowed"
-                                                        )}
-                                                    />
-                                                    <span className="text-sm">원</span>
+                                                <div className="flex items-center gap-2">
+                                                    <div className="flex items-center justify-end w-24">
+                                                        <input
+                                                            type="text"
+                                                            value={editingItemIds.has(item.id) ? (tempAmounts[item.id] || '') : item.amount.toLocaleString()}
+                                                            onChange={(e) => {
+                                                                if (!isAvailable) return;
+                                                                const value = e.target.value.replace(/[^0-9]/g, '');
+                                                                const formatted = value ? parseInt(value, 10).toLocaleString() : '';
+                                                                setTempAmounts(v => ({ ...v, [item.id]: formatted }));
+                                                            }}
+                                                            disabled={!isAvailable || !editingItemIds.has(item.id)}
+                                                            className={cn(
+                                                                "text-sm font-medium text-right bg-transparent focus:outline-none py-0.5 transition-all outline-none",
+                                                                !isAvailable ? "text-muted-foreground cursor-not-allowed" : "text-foreground",
+                                                                editingItemIds.has(item.id) && "border-b border-foreground"
+                                                            )}
+                                                            style={{
+                                                                width: `${Math.max(2, (editingItemIds.has(item.id) ? (tempAmounts[item.id] || '') : item.amount.toLocaleString()).length)}ch`,
+                                                            }}
+                                                        />
+                                                        <span className="text-sm">원</span>
+                                                    </div>
+                                                    {isAvailable && (
+                                                        <button
+                                                            onClick={() => toggleEdit(item.id, item.amount)}
+                                                            className="text-[11px] text-foreground border border-border rounded-sm px-2 py-0.5 hover:bg-secondary transition-colors shrink-0 ml-1"
+                                                        >
+                                                            {editingItemIds.has(item.id) ? '저장' : '수정'}
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>

@@ -3,6 +3,7 @@ import { queryKeys } from '@/lib/query/keys';
 import {
   addCartItem,
   updateCartItem,
+  updateCartItems,
   removeCartItem,
   toggleCartItemSelection,
   parseCartItemId,
@@ -102,7 +103,7 @@ export function useRemoveCartItems() {
     mutationFn: async (itemIds: string[]) => {
       // 1. Group IDs by targetType
       const groups = new Map<string, number[]>();
-      
+
       itemIds.forEach((id) => {
         const { targetType, targetId } = parseCartItemId(id);
         const list = groups.get(targetType) || [];
@@ -184,5 +185,46 @@ export function useToggleCartSelection() {
       }
     },
     // onSettled 제거: 서버 refetch하면 selected 상태가 리셋됨
+  });
+}
+
+/**
+ * Hook to update multiple cart items (amounts)
+ *
+ * Invalidates: cart
+ *
+ * Includes optimistic update for better UX
+ */
+export function useUpdateCartItems() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (updates: { itemId: string; amount: number }[]) =>
+      updateCartItems(updates),
+    onMutate: async (updates) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.cart });
+      const previousCart = queryClient.getQueryData(queryKeys.cart);
+
+      queryClient.setQueryData(queryKeys.cart, (old: any) => {
+        if (!old) return old;
+        const updateMap = new Map(updates.map((u) => [u.itemId, u.amount]));
+        return {
+          ...old,
+          items: old.items.map((item: any) =>
+            updateMap.has(item.id) ? { ...item, amount: updateMap.get(item.id) } : item
+          ),
+        };
+      });
+
+      return { previousCart };
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousCart) {
+        queryClient.setQueryData(queryKeys.cart, context.previousCart);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.cart });
+    },
   });
 }
