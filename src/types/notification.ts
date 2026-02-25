@@ -10,7 +10,7 @@ export type NotificationType =
   | 'PAYMENT_CANCEL_SUCCEEDED'
   | 'PAYMENT_CANCEL_FAILED';
 
-export type ReferenceType = 'FUNDING' | 'FRIENDSHIP' | 'PAYMENT' | 'ORDER';
+export type ReferenceType = 'FUNDING' | 'ORDER' | 'FRIENDSHIP';
 
 export interface Notification {
   id: number;

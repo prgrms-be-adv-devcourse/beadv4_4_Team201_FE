@@ -10,6 +10,7 @@ import type { CloudEventEnvelope } from '@/types/notification';
 const SSE_ENDPOINT = '/api/sse/notifications';
 const RECONNECT_DELAY_MS = 3000;
 const MAX_RECONNECT_ATTEMPTS = 10;
+const SSE_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes per server spec
 
 const NOTIFICATION_EVENT_TYPES = [
   'app.giftify.notification.funding-created',
@@ -30,6 +31,7 @@ export function useNotificationSSE() {
   const eventSourceRef = useRef<EventSource | null>(null);
   const reconnectAttempts = useRef(0);
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const timeoutTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const invalidateNotifications = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: queryKeys.notifications() });
@@ -63,12 +65,23 @@ export function useNotificationSSE() {
     if (eventSourceRef.current) {
       eventSourceRef.current.close();
     }
+    if (timeoutTimerRef.current) {
+      clearTimeout(timeoutTimerRef.current);
+    }
 
     const es = new EventSource(SSE_ENDPOINT);
     eventSourceRef.current = es;
 
     es.addEventListener('connect', () => {
       reconnectAttempts.current = 0;
+
+      // Server closes connection after 30 minutes; reconnect before that
+      timeoutTimerRef.current = setTimeout(() => {
+        es.close();
+        eventSourceRef.current = null;
+        reconnectAttempts.current = 0;
+        connect();
+      }, SSE_TIMEOUT_MS);
     });
 
     NOTIFICATION_EVENT_TYPES.forEach((type) => {
@@ -78,6 +91,9 @@ export function useNotificationSSE() {
     es.onerror = () => {
       es.close();
       eventSourceRef.current = null;
+      if (timeoutTimerRef.current) {
+        clearTimeout(timeoutTimerRef.current);
+      }
 
       if (reconnectAttempts.current < MAX_RECONNECT_ATTEMPTS) {
         reconnectAttempts.current += 1;
@@ -94,6 +110,9 @@ export function useNotificationSSE() {
     return () => {
       if (reconnectTimerRef.current) {
         clearTimeout(reconnectTimerRef.current);
+      }
+      if (timeoutTimerRef.current) {
+        clearTimeout(timeoutTimerRef.current);
       }
       if (eventSourceRef.current) {
         eventSourceRef.current.close();

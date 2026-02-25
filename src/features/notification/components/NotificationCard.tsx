@@ -29,11 +29,10 @@ function getNavigationPath(notification: Notification): string | null {
   switch (notification.referenceType) {
     case 'FUNDING':
       return `/fundings/${notification.referenceId}`;
-    case 'FRIENDSHIP':
-      return '/friends';
-    case 'PAYMENT':
     case 'ORDER':
       return `/orders/${notification.referenceId}`;
+    case 'FRIENDSHIP':
+      return '/friends';
     default:
       return null;
   }
