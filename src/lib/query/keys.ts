@@ -52,6 +52,11 @@ export const queryKeys = {
   orders: ['orders'] as const,
   order: (id: string) => ['orders', id] as const,
 
+  // Notifications
+  notifications: (params?: object) => ['notifications', params] as const,
+  notificationsUnread: (params?: object) => ['notifications', 'unread', params] as const,
+  notificationUnreadCount: ['notifications', 'unread', 'count'] as const,
+
   // Auth
   me: ['auth', 'me'] as const,
 

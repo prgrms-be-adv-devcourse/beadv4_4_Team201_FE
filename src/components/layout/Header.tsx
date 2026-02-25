@@ -18,6 +18,7 @@ import { useAuth } from '@/features/auth/hooks/useAuth';
 import { LoginButton } from '@/features/auth/components/LoginButton';
 import { SignupButton } from '@/features/auth/components/SignupButton';
 import { SearchOverlay } from '@/components/common/SearchOverlay';
+import { NotificationBell } from '@/features/notification/components/NotificationBell';
 import { useCart } from '@/features/cart/hooks/useCart';
 import { useWallet } from '@/features/wallet/hooks/useWallet';
 import { formatPrice } from '@/lib/format';
@@ -208,6 +209,11 @@ function DesktopTopNav() {
                         <Heart className="w-3 h-3" />
                         MY LIKE
                     </Link>
+                    <NotificationBell
+                        className="flex items-center gap-1 hover:opacity-60 transition-opacity"
+                        iconSize="w-3 h-3"
+                        strokeWidth={2}
+                    />
                     <Link href="/cart" className="flex items-center gap-1 hover:opacity-60 transition-opacity relative">
                         <ShoppingBag className="w-3 h-3" />
                         CART
@@ -318,6 +324,7 @@ function MobileNavigationIcons() {
             <Link href="/wallet">
                 <Wallet className="w-6 h-6" strokeWidth={1.5} />
             </Link>
+            <NotificationBell />
             <Link href="/cart" className="relative">
                 <ShoppingBag className="w-6 h-6" strokeWidth={1.5} />
                 {cartCount > 0 && (

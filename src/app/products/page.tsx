@@ -129,7 +129,7 @@ function ProductSearchContent() {
   };
 
   return (
-    <AppShell headerVariant="main">
+    <AppShell headerVariant="main" showBottomNav>
       <div className="max-w-screen-2xl mx-auto px-8">
 
         <div className="flex min-h-screen gap-12">

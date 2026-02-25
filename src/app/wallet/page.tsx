@@ -47,7 +47,7 @@ export default function WalletPage() {
             <AppShell
                 headerTitle="내 지갑"
                 headerVariant="main"
-                showBottomNav={false}
+                showBottomNav
             >
                 <div className="max-w-screen-2xl mx-auto px-4 md:px-8 py-6 md:py-10 space-y-6 md:space-y-8 w-full">
                     {/* Balance skeleton */}
@@ -97,7 +97,7 @@ export default function WalletPage() {
             <AppShell
                 headerTitle="내 지갑"
                 headerVariant="main"
-                showBottomNav={false}
+                showBottomNav
             >
                 <div className="max-w-screen-2xl mx-auto px-4 md:px-8 py-6 md:py-10">
                     <InlineError
@@ -114,7 +114,7 @@ export default function WalletPage() {
         <AppShell
             headerTitle="내 지갑"
             headerVariant="main"
-            showBottomNav={false}
+            showBottomNav
         >
             <div className="max-w-screen-2xl mx-auto px-4 md:px-8 py-6 md:py-10 space-y-6 md:space-y-8 pb-24 w-full">
                 <section>

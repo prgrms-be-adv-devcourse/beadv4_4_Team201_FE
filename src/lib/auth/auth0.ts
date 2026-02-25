@@ -84,6 +84,7 @@ export const protectedRoutes = [
   '/wallet',
   '/profile',
   '/wishlist',
+  '/notifications',
 ] as const;
 
 /**
