@@ -39,6 +39,8 @@ export const ERROR_MESSAGES: Record<string, string> = {
     // Cart errors
     CART_EMPTY: '장바구니가 비어있습니다',
     CART_ITEM_NOT_FOUND: '장바구니 항목을 찾을 수 없습니다',
+    EXCEED_REMAINING_AMOUNT: '참여 금액은 펀딩 잔액{%d}원을 초과할 수 없습니다.',
+    C014: '참여 금액은 펀딩 잔액{%d}원을 초과할 수 없습니다.',
 
     // Order errors
     ORDER_NOT_FOUND: '주문을 찾을 수 없습니다',
@@ -69,11 +71,44 @@ export function getErrorMessage(code: string): string {
  * Get error message from Error object
  */
 export function getMessageFromError(error: unknown): string {
-    if (error instanceof Error) {
-        // Check if it's an ApiError with a code
-        if ('code' in error && typeof error.code === 'string') {
-            return getErrorMessage(error.code);
+    if (error && typeof error === 'object') {
+        const err = error as any;
+        const code = err.code || err.errorCode;
+        const messageFromBackend = err.message;
+        const details = err.details || err.data;
+
+        if (code && typeof code === 'string') {
+            // Handle C014 or EXCEED_REMAINING_AMOUNT specifically with data
+            if (code === 'C014' || code === 'EXCEED_REMAINING_AMOUNT') {
+                // If backend message already has the number (formatted by backend)
+                if (messageFromBackend && !messageFromBackend.includes('{%d}')) {
+                    return messageFromBackend;
+                }
+
+                // Otherwise use our template or backend template
+                const template = ERROR_MESSAGES[code] || messageFromBackend || '참여 금액은 펀딩 잔액{%d}원을 초과할 수 없습니다.';
+                if (details !== undefined && details !== null) {
+                    return template.replace('{%d}', Number(details).toLocaleString());
+                }
+                return template.replace('{%d}', '알 수 없음');
+            }
+
+            // For other codes, if we have a mapping in ERROR_MESSAGES, use it
+            if (ERROR_MESSAGES[code]) {
+                return ERROR_MESSAGES[code];
+            }
         }
+
+        // Fallback to backend message if present and not a generic "Something went wrong" message
+        if (messageFromBackend &&
+            messageFromBackend !== 'Operation failed' &&
+            messageFromBackend !== 'Something went wrong' &&
+            messageFromBackend !== 'Internal Server Error') {
+            return messageFromBackend;
+        }
+    }
+
+    if (error instanceof Error) {
         return error.message || ERROR_MESSAGES.UNKNOWN_ERROR;
     }
 

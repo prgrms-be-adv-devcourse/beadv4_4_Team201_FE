@@ -18,6 +18,7 @@ import { Gift, Loader2, AlertCircle, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatPrice } from '@/lib/format';
 import { cn } from '@/lib/utils';
+import { getMessageFromError } from '@/lib/error/error-messages';
 
 export default function CartPage() {
     const router = useRouter();
@@ -59,8 +60,8 @@ export default function CartPage() {
                         return next;
                     });
                 },
-                onError: () => {
-                    toast.error('금액 변경에 실패했습니다.');
+                onError: (error) => {
+                    toast.error(getMessageFromError(error) || '금액 변경에 실패했습니다.');
                 }
             }
         );
@@ -92,12 +93,25 @@ export default function CartPage() {
         });
     };
 
+    const handleCancelEdit = (id: string) => {
+        setEditingItemIds((prev) => {
+            const next = new Set(prev);
+            next.delete(id);
+            return next;
+        });
+        setTempAmounts((prev) => {
+            const next = { ...prev };
+            delete next[id];
+            return next;
+        });
+    };
+
     const handleToggleSelect = (id: string, selected: boolean) => {
         toggleSelection.mutate(
             { itemId: id, selected },
             {
-                onError: () => {
-                    toast.error('선택 변경에 실패했습니다.');
+                onError: (error) => {
+                    toast.error(getMessageFromError(error) || '금액 저장에 실패했습니다.');
                 }
             }
         );
@@ -394,12 +408,22 @@ export default function CartPage() {
                                                     </span>
                                                 </div>
                                                 {isAvailable && (
-                                                    <button
-                                                        onClick={() => toggleEdit(item.id, item.amount)}
-                                                        className="text-[11px] text-foreground border border-border rounded-sm px-2 py-0.5 hover:bg-secondary transition-colors shrink-0"
-                                                    >
-                                                        {editingItemIds.has(item.id) ? '저장' : '수정'}
-                                                    </button>
+                                                    <div className="flex flex-col gap-1">
+                                                        <button
+                                                            onClick={() => toggleEdit(item.id, item.amount)}
+                                                            className="text-[11px] text-foreground border border-border rounded-sm px-2 py-0.5 hover:bg-secondary transition-colors shrink-0"
+                                                        >
+                                                            {editingItemIds.has(item.id) ? '저장' : '수정'}
+                                                        </button>
+                                                        {editingItemIds.has(item.id) && (
+                                                            <button
+                                                                onClick={() => handleCancelEdit(item.id)}
+                                                                className="text-[11px] text-muted-foreground border border-border rounded-sm px-2 py-0.5 hover:bg-secondary transition-colors shrink-0"
+                                                            >
+                                                                취소
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 )}
                                             </div>
                                             <button
@@ -547,12 +571,22 @@ export default function CartPage() {
                                                         <span className="text-sm">원</span>
                                                     </div>
                                                     {isAvailable && (
-                                                        <button
-                                                            onClick={() => toggleEdit(item.id, item.amount)}
-                                                            className="text-[11px] text-foreground border border-border rounded-sm px-2 py-0.5 hover:bg-secondary transition-colors shrink-0 ml-1"
-                                                        >
-                                                            {editingItemIds.has(item.id) ? '저장' : '수정'}
-                                                        </button>
+                                                        <div className="flex gap-1">
+                                                            <button
+                                                                onClick={() => toggleEdit(item.id, item.amount)}
+                                                                className="text-[11px] text-foreground border border-border rounded-sm px-2 py-0.5 hover:bg-secondary transition-colors shrink-0 ml-1"
+                                                            >
+                                                                {editingItemIds.has(item.id) ? '저장' : '수정'}
+                                                            </button>
+                                                            {editingItemIds.has(item.id) && (
+                                                                <button
+                                                                    onClick={() => handleCancelEdit(item.id)}
+                                                                    className="text-[11px] text-muted-foreground border border-border rounded-sm px-2 py-0.5 hover:bg-secondary transition-colors shrink-0"
+                                                                >
+                                                                    취소
+                                                                </button>
+                                                            )}
+                                                        </div>
                                                     )}
                                                 </div>
                                             </div>

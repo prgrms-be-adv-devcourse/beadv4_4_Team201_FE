@@ -25,7 +25,7 @@ export function CartItem({ item, onUpdateAmount, onToggleSelect, onRemove }: Car
     const isAvailable = status === 'AVAILABLE';
 
     const progressPercent = (funding.targetAmount > 0)
-        ? (funding.currentAmount / funding.targetAmount) * 100
+        ? ((item.currentAmount || 0) / funding.targetAmount) * 100
         : 0;
 
     // Calculate D-day

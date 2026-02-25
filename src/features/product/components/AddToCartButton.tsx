@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useAddToCart } from '@/features/cart/hooks/useCartMutations';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils/cn';
+import { getMessageFromError } from '@/lib/error/error-messages';
 
 interface AddToCartButtonProps {
     productId: string;
@@ -40,7 +41,7 @@ export function AddToCartButton({
 
             toast.success('장바구니에 담겼습니다.');
         } catch (error: any) {
-            toast.error(error?.message || '장바구니 담기에 실패했습니다.');
+            toast.error(getMessageFromError(error) || '장바구니 담기에 실패했습니다.');
         }
     };
 

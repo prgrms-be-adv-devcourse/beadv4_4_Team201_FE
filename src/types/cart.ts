@@ -30,6 +30,7 @@ export interface CartItem {
     productName: string | null;
     productPrice: number;
     contributionAmount: number;
+    currentAmount: number | null;
     amount: number; // For backward compatibility / UI consistency
     funding: Funding; // Always present for funding types
     selected: boolean;

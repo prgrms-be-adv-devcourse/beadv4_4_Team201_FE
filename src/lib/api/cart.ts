@@ -37,6 +37,7 @@ interface BackendCartItemResponse {
   imageKey: string | null;
   productPrice: number;
   contributionAmount: number;
+  currentAmount: number | null;
   status: string; // ItemStatus enum (AVAILABLE, SOLD_OUT, DISCONTINUED, FUNDING_ENDED)
   statusMessage: string | null;
 }
@@ -77,6 +78,7 @@ function mapBackendCartItem(item: BackendCartItemResponse, cartId: number): Cart
     productName: item.productName,
     productPrice: item.productPrice,
     contributionAmount: item.contributionAmount,
+    currentAmount: item.currentAmount,
     amount: item.contributionAmount,
     funding: {
       id: item.targetType === 'FUNDING' ? item.targetId.toString() : '',
@@ -98,7 +100,7 @@ function mapBackendCartItem(item: BackendCartItemResponse, cartId: number): Cart
         avatarUrl: null
       },
       targetAmount: item.productPrice,
-      currentAmount: 0, // 백엔드에서 미제공
+      currentAmount: item.currentAmount || 0,
       status: 'IN_PROGRESS',
       participantCount: 0,
       expiresAt: '',

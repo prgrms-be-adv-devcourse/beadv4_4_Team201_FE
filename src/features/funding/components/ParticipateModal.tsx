@@ -17,6 +17,7 @@ import { useWallet } from '@/features/wallet/hooks/useWallet';
 import { Loader2, ShoppingCart } from 'lucide-react';
 import { toast } from 'sonner';
 import { useParticipateFunding } from '@/features/funding/hooks/useFundingMutations';
+import { getMessageFromError } from '@/lib/error/error-messages';
 import type { Funding } from '@/types/funding';
 
 interface ParticipateModalProps {
@@ -67,8 +68,8 @@ export function ParticipateModal({
                     onSuccess('cart');
                     setAmount(0);
                 },
-                onError: (error) => {
-                    toast.error(error instanceof Error ? error.message : '펀딩 참여에 실패했습니다.');
+                onError: (error: any) => {
+                    toast.error(getMessageFromError(error) || '펀딩 참여에 실패했습니다.');
                 },
             }
         );
