@@ -4,7 +4,7 @@ import {
   addWishlistItem,
   removeWishlistItem,
   updateWishlistVisibility,
-  type WishlistVisibilityUpdateRequest,
+  type UpdateWishlistSettingsRequest,
 } from '@/lib/api/wishlists';
 import type { WishItemCreateRequest, Wishlist } from '@/types/wishlist';
 
@@ -19,7 +19,7 @@ export function useAddWishlistItem() {
   return useMutation({
     mutationFn: (data: WishItemCreateRequest) => addWishlistItem(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.myWishlist });
+      queryClient.invalidateQueries({ queryKey: ['wishlists'] });
     },
   });
 }
@@ -62,7 +62,7 @@ export function useRemoveWishlistItem() {
     },
     // Always refetch after error or success:
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.myWishlist });
+      queryClient.invalidateQueries({ queryKey: ['wishlists'] });
     },
   });
 }
@@ -76,9 +76,9 @@ export function useUpdateVisibility() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: WishlistVisibilityUpdateRequest) => updateWishlistVisibility(data),
+    mutationFn: (data: UpdateWishlistSettingsRequest) => updateWishlistVisibility(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.myWishlist });
+      queryClient.invalidateQueries({ queryKey: ['wishlists'] });
     },
   });
 }

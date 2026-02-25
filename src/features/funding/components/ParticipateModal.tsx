@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import {
@@ -35,12 +35,19 @@ export function ParticipateModal({
     const [amount, setAmount] = useState(0);
     const { data: wallet } = useWallet();
 
+    // Reset state when modal opens for a new funding
+    useEffect(() => {
+        if (open) {
+            setAmount(0);
+        }
+    }, [open, funding.id]);
+
     const participateFunding = useParticipateFunding();
     const remainingAmount = funding.targetAmount - funding.currentAmount;
 
-    const handleSubmit = (mode: 'cart' | 'checkout') => {
-        if (amount <= 0) {
-            toast.error('참여 금액을 입력해주세요.');
+    const handleSubmit = () => {
+        if (amount < 1000) {
+            toast.error('최소 참여 금액은 1,000원입니다.');
             return;
         }
 
@@ -56,9 +63,8 @@ export function ParticipateModal({
             },
             {
                 onSuccess: () => {
-                    toast.success('장바구니에 담겼습니다. 결제를 진행해주세요.');
                     onOpenChange(false);
-                    onSuccess(mode);
+                    onSuccess('cart');
                     setAmount(0);
                 },
                 onError: (error) => {
@@ -72,10 +78,7 @@ export function ParticipateModal({
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>펀딩 참여하기</DialogTitle>
-                    <DialogDescription>
-                        <span className="font-bold text-foreground">{funding.product.name}</span>에 마음을 전하세요.
-                    </DialogDescription>
+                    <DialogTitle>장바구니 담기</DialogTitle>
                 </DialogHeader>
 
                 <div className="grid gap-4 py-4">
@@ -101,6 +104,7 @@ export function ParticipateModal({
                     <AmountInput
                         value={amount}
                         onChange={setAmount}
+                        minAmount={1000}
                         maxAmount={remainingAmount}
                         walletBalance={wallet?.balance}
                     />
@@ -118,29 +122,15 @@ export function ParticipateModal({
                         )}
                     </div>
 
-                    <DialogFooter className="flex gap-2 sm:gap-2">
+                    <DialogFooter>
                         <Button
                             type="button"
-                            variant="outline"
-                            disabled={participateFunding.isPending || amount <= 0}
-                            className="flex-1"
-                            onClick={() => handleSubmit('cart')}
-                        >
-                            {participateFunding.isPending ? (
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            ) : (
-                                <ShoppingCart className="mr-2 h-4 w-4" />
-                            )}
-                            장바구니에 담기
-                        </Button>
-                        <Button
-                            type="button"
-                            disabled={participateFunding.isPending || amount <= 0}
-                            className="flex-1"
-                            onClick={() => handleSubmit('checkout')}
+                            disabled={participateFunding.isPending}
+                            className="w-full"
+                            onClick={handleSubmit}
                         >
                             {participateFunding.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            바로 결제하기
+                            장바구니 담기
                         </Button>
                     </DialogFooter>
                 </div>

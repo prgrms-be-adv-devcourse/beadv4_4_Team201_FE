@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import {
@@ -43,16 +43,25 @@ export function CreateFundingModal({
 }: CreateFundingModalProps) {
     const [amount, setAmount] = useState(0);
     const [expiresInDays, setExpiresInDays] = useState(14);
-    const { data: wallet } = useWallet();
     const [message, setMessage] = useState('');
+    const { data: wallet } = useWallet();
+
+    // Reset state when modal opens for a new item
+    useEffect(() => {
+        if (open) {
+            setAmount(0);
+            setMessage('');
+            setExpiresInDays(14);
+        }
+    }, [open, wishItem.id]);
 
     const createFunding = useCreateFunding();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (amount <= 0) {
-            toast.error('참여 금액을 입력해주세요.');
+        if (amount < 1000) {
+            toast.error('최소 참여 금액은 1,000원입니다.');
             return;
         }
 
@@ -75,7 +84,6 @@ export function CreateFundingModal({
             },
             {
                 onSuccess: () => {
-                    toast.success('장바구니에 담겼습니다. 결제를 진행해주세요.');
                     onOpenChange(false);
                     onSuccess();
                     setAmount(0);
@@ -93,10 +101,7 @@ export function CreateFundingModal({
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>펀딩 시작하기</DialogTitle>
-                    <DialogDescription>
-                        친구들에게 선물을 요청해보세요.
-                    </DialogDescription>
+                    <DialogTitle>장바구니 담기</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="grid gap-6 py-4">
                     {/* Product Display */}
@@ -118,37 +123,17 @@ export function CreateFundingModal({
                         </div>
                     </div>
 
-                    {/* First Contribution Amount */}
+                    {/* Contribution Amount */}
                     <div className="grid gap-3">
-                        <Label>첫 참여 금액</Label>
                         <AmountInput
                             value={amount}
                             onChange={setAmount}
+                            minAmount={1000}
                             maxAmount={wishItem.product.price}
                             walletBalance={wallet?.balance}
                         />
                         <p className="text-xs text-muted-foreground">
-                            펀딩을 시작하려면 먼저 참여 금액을 입력해주세요.
-                        </p>
-                    </div>
-
-                    {/* Expires In Days Slider */}
-                    <div className="grid gap-3">
-                        <div className="flex justify-between items-center">
-                            <Label htmlFor="expiresInDays">펀딩 기간</Label>
-                            <span className="text-sm font-bold">{expiresInDays}일</span>
-                        </div>
-                        <Slider
-                            id="expiresInDays"
-                            min={1}
-                            max={30}
-                            step={1}
-                            value={[expiresInDays]}
-                            onValueChange={(values) => setExpiresInDays(values[0])}
-                            className="w-full"
-                        />
-                        <p className="text-xs text-muted-foreground">
-                            1일 ~ 30일 사이로 설정 가능합니다.
+                            참여 금액을 입력해주세요.
                         </p>
                     </div>
 
@@ -164,16 +149,17 @@ export function CreateFundingModal({
                             id="message"
                             value={message}
                             onChange={(e) => setMessage(e.target.value)}
-                            placeholder="친구들에게 전할 말을 적어주세요."
+                            placeholder="친구들에게 전할 말을 적어주세요. (준비 중인 기능입니다.)"
                             maxLength={500}
                             rows={3}
+                            disabled
                         />
                     </div>
 
                     <DialogFooter>
                         <Button type="submit" disabled={createFunding.isPending} className="w-full">
                             {createFunding.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            펀딩 시작하기
+                            장바구니 담기
                         </Button>
                     </DialogFooter>
                 </form>

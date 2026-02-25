@@ -11,9 +11,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Search, Gift, Users, ArrowRight } from 'lucide-react';
 import { usePublicWishlistSearch } from '@/features/wishlist/hooks/useWishlist';
 import { AddFriendButton } from '@/features/friend/components/AddFriendButton';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useProfile } from '@/features/profile/hooks/useProfile';
 
 export default function DiscoverPage() {
     const router = useRouter();
+    const { user } = useAuth();
+    const { data: me } = useProfile();
     const [searchNickname, setSearchNickname] = useState('');
     const [searchedNickname, setSearchedNickname] = useState<string | undefined>(undefined);
 
@@ -81,44 +85,46 @@ export default function DiscoverPage() {
                                     </div>
                                 </div>
                             </Card>
-                        ) : !searchResults || searchResults.length === 0 ? (
+                        ) : !searchResults || searchResults.filter(m => m.memberId.toString() !== me?.id?.toString()).length === 0 ? (
                             <Card className="p-12 text-center border-2 border-dashed border-gray-200 rounded-none bg-gray-50">
                                 <p className="font-bold text-gray-400">"{searchedNickname}" 검색 결과가 없습니다.</p>
                                 <p className="text-xs text-muted-foreground mt-1">닉네임을 다시 확인해주세요.</p>
                             </Card>
                         ) : (
                             <div className="space-y-3">
-                                {searchResults.map((member) => (
-                                    <Card
-                                        key={member.memberId}
-                                        className="p-8 border-2 border-black rounded-none hover:bg-gray-50 transition-colors cursor-pointer group"
-                                        onClick={() => handleViewWishlist(member.memberId)}
-                                    >
-                                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                                            <div className="flex items-center gap-6">
-                                                <div className="w-16 h-16 bg-black flex items-center justify-center text-white text-2xl font-black rounded-full">
-                                                    {member.nickname.charAt(0)}
+                                {searchResults
+                                    .filter(m => m.memberId.toString() !== me?.id?.toString())
+                                    .map((member) => (
+                                        <Card
+                                            key={member.memberId}
+                                            className="p-8 border-2 border-black rounded-none hover:bg-gray-50 transition-colors cursor-pointer group"
+                                            onClick={() => handleViewWishlist(member.memberId)}
+                                        >
+                                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                                                <div className="flex items-center gap-6">
+                                                    <div className="w-16 h-16 bg-black flex items-center justify-center text-white text-2xl font-black rounded-full">
+                                                        {member.nickname.charAt(0)}
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="text-xl font-black">{member.nickname}</h3>
+                                                        <p className="text-muted-foreground text-sm mt-1">
+                                                            위시리스트 보기
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <h3 className="text-xl font-black">{member.nickname}</h3>
-                                                    <p className="text-muted-foreground text-sm mt-1">
-                                                        위시리스트 보기
-                                                    </p>
+                                                <div className="flex items-center gap-3">
+                                                    <AddFriendButton
+                                                        targetUserId={member.memberId}
+                                                        targetNickname={member.nickname}
+                                                    />
+                                                    <Button className="border-2 border-black bg-transparent text-black hover:bg-black hover:text-white rounded-none font-bold py-6 px-10 transition-all">
+                                                        보러가기
+                                                        <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" strokeWidth={1.5} />
+                                                    </Button>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-3">
-                                                <AddFriendButton
-                                                    targetUserId={member.memberId}
-                                                    targetNickname={member.nickname}
-                                                />
-                                                <Button className="border-2 border-black bg-transparent text-black hover:bg-black hover:text-white rounded-none font-bold py-6 px-10 transition-all">
-                                                    보러가기
-                                                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" strokeWidth={1.5} />
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    </Card>
-                                ))}
+                                        </Card>
+                                    ))}
                             </div>
                         )}
                     </div>
@@ -146,14 +152,16 @@ export default function DiscoverPage() {
                                     <Skeleton className="h-4 w-16" />
                                 </div>
                             ))
-                        ) : publicMembers && publicMembers.length > 0 ? (
-                            publicMembers.map((member) => (
-                                <MemberCard
-                                    key={member.memberId}
-                                    nickname={member.nickname}
-                                    onClick={() => handleViewWishlist(member.memberId)}
-                                />
-                            ))
+                        ) : publicMembers && publicMembers.filter(m => m.memberId.toString() !== me?.id?.toString()).length > 0 ? (
+                            publicMembers
+                                .filter(m => m.memberId.toString() !== me?.id?.toString())
+                                .map((member) => (
+                                    <MemberCard
+                                        key={member.memberId}
+                                        nickname={member.nickname}
+                                        onClick={() => handleViewWishlist(member.memberId)}
+                                    />
+                                ))
                         ) : (
                             <div className="w-full py-12 text-center border-2 border-dashed border-gray-100 bg-gray-50/50">
                                 <p className="text-sm font-bold text-gray-300">공개 위시리스트가 없습니다.</p>
@@ -167,7 +175,7 @@ export default function DiscoverPage() {
                     <div className="p-10 bg-black text-white group cursor-pointer overflow-hidden relative">
                         <div className="relative z-10">
                             <h3 className="text-2xl font-black mb-2">My Wishlist</h3>
-                            <p className="text-gray-400 text-sm mb-6">내가 받고 싶은 선물을 등록해보세요.</p>
+                            <p className="text-gray-400 text-sm mb-6">나의 위시리스트를 확인하세요.</p>
                             <Button
                                 className="bg-white text-black hover:bg-gray-200 rounded-none font-bold"
                                 onClick={() => router.push('/wishlist')}

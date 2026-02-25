@@ -1,5 +1,6 @@
 import { MemberPublic } from './member';
 import { Product } from './product';
+import { PageInfo } from './api';
 
 /**
  * Wishlist visibility settings
@@ -11,11 +12,12 @@ export type WishlistVisibility = 'PUBLIC' | 'FRIENDS_ONLY' | 'PRIVATE';
 
 /**
  * Wish item status
- * - AVAILABLE: Can create funding
- * - IN_FUNDING: Funding in progress
- * - FUNDED: Funding completed
+ * - PENDING: Not yet started
+ * - IN_PROGRESS: Funding in progress
+ * - REQUESTED_CONFIRM: Awaiting recipient acceptance
+ * - COMPLETED: Funding accepted/completed
  */
-export type WishItemStatus = 'AVAILABLE' | 'IN_FUNDING' | 'FUNDED';
+export type WishItemStatus = 'PENDING' | 'IN_PROGRESS' | 'REQUESTED_CONFIRM' | 'COMPLETED';
 
 /**
  * Wish item in a wishlist
@@ -40,6 +42,7 @@ export interface Wishlist {
     visibility: WishlistVisibility;
     items: WishItem[];
     itemCount: number;
+    page?: PageInfo;
 }
 
 /**
@@ -82,4 +85,14 @@ export interface PublicWishlist {
     memberId: string;
     nickname: string;
     items: PublicWishlistItem[];
+}
+
+/**
+ * Query parameters for wishlist list
+ */
+export interface WishlistQueryParams {
+    category?: string;
+    status?: WishItemStatus | '';
+    page?: number;
+    size?: number;
 }

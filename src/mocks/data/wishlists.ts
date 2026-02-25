@@ -1,38 +1,10 @@
 import { members } from './members';
 import { products } from './products';
+import { WishItem, Wishlist } from '@/types/wishlist';
 
 export type WishlistVisibility = 'PUBLIC' | 'FRIENDS_ONLY' | 'PRIVATE';
 
-export type WishItemStatus = 'AVAILABLE' | 'IN_FUNDING' | 'FUNDED';
-
-export interface WishItem {
-  id: string;
-  wishlistId: string;
-  productId: string;
-  product: {
-    id: string;
-    name: string;
-    price: number;
-    imageUrl: string;
-    status: 'PENDING' | 'ON_SALE' | 'REJECTED' | 'DISCONTINUED';
-  };
-  status: WishItemStatus;
-  fundingId: string | null;
-  createdAt: string;
-}
-
-export interface Wishlist {
-  id: string;
-  memberId: string;
-  member: {
-    id: string;
-    nickname: string | null;
-    avatarUrl: string | null;
-  };
-  visibility: WishlistVisibility;
-  items: WishItem[];
-  itemCount: number;
-}
+export type WishItemStatus = 'PENDING' | 'IN_PROGRESS' | 'REQUESTED_CONFIRM' | 'COMPLETED';
 
 const now = new Date();
 
@@ -51,7 +23,7 @@ export const myWishlist: Wishlist = {
       wishlistId: 'wishlist-1',
       productId: products[0].id,
       product: products[0],
-      status: 'AVAILABLE',
+      status: 'PENDING',
       fundingId: null,
       createdAt: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000).toISOString(),
     },
@@ -60,7 +32,7 @@ export const myWishlist: Wishlist = {
       wishlistId: 'wishlist-1',
       productId: products[1].id,
       product: products[1],
-      status: 'IN_FUNDING',
+      status: 'IN_PROGRESS',
       fundingId: 'funding-2',
       createdAt: new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000).toISOString(),
     },
@@ -69,12 +41,21 @@ export const myWishlist: Wishlist = {
       wishlistId: 'wishlist-1',
       productId: products[5].id,
       product: products[5],
-      status: 'AVAILABLE',
+      status: 'PENDING',
       fundingId: null,
       createdAt: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString(),
     },
+    ...Array.from({ length: 47 }, (_, i) => ({
+      id: `wish-item-extra-${i}`,
+      wishlistId: 'wishlist-1',
+      productId: products[(i % 10)].id,
+      product: products[(i % 10)],
+      status: 'PENDING' as WishItemStatus,
+      fundingId: null,
+      createdAt: new Date(now.getTime() - (i + 15) * 24 * 60 * 60 * 1000).toISOString(),
+    })),
   ],
-  itemCount: 3,
+  itemCount: 50,
 };
 
 export const friendsWishlists: Wishlist[] = [
@@ -93,7 +74,7 @@ export const friendsWishlists: Wishlist[] = [
         wishlistId: 'wishlist-2',
         productId: products[2].id,
         product: products[2],
-        status: 'AVAILABLE',
+        status: 'PENDING',
         fundingId: null,
         createdAt: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString(),
       },
@@ -102,7 +83,7 @@ export const friendsWishlists: Wishlist[] = [
         wishlistId: 'wishlist-2',
         productId: products[3].id,
         product: products[3],
-        status: 'IN_FUNDING',
+        status: 'IN_PROGRESS',
         fundingId: 'funding-1',
         createdAt: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000).toISOString(),
       },
@@ -111,7 +92,7 @@ export const friendsWishlists: Wishlist[] = [
         wishlistId: 'wishlist-2',
         productId: products[4].id,
         product: products[4],
-        status: 'AVAILABLE',
+        status: 'PENDING',
         fundingId: null,
         createdAt: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000).toISOString(),
       },
@@ -133,7 +114,7 @@ export const friendsWishlists: Wishlist[] = [
         wishlistId: 'wishlist-3',
         productId: products[6].id,
         product: products[6],
-        status: 'AVAILABLE',
+        status: 'PENDING',
         fundingId: null,
         createdAt: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString(),
       },
@@ -142,7 +123,7 @@ export const friendsWishlists: Wishlist[] = [
         wishlistId: 'wishlist-3',
         productId: products[7].id,
         product: products[7],
-        status: 'AVAILABLE',
+        status: 'PENDING',
         fundingId: null,
         createdAt: new Date(now.getTime() - 4 * 24 * 60 * 60 * 1000).toISOString(),
       },
@@ -164,7 +145,7 @@ export const friendsWishlists: Wishlist[] = [
         wishlistId: 'wishlist-4',
         productId: products[8].id,
         product: products[8],
-        status: 'AVAILABLE',
+        status: 'PENDING',
         fundingId: null,
         createdAt: new Date(now.getTime() - 6 * 24 * 60 * 60 * 1000).toISOString(),
       },
@@ -186,7 +167,7 @@ export const friendsWishlists: Wishlist[] = [
         wishlistId: 'wishlist-5',
         productId: products[9].id,
         product: products[9],
-        status: 'AVAILABLE',
+        status: 'PENDING',
         fundingId: null,
         createdAt: new Date(now.getTime() - 8 * 24 * 60 * 60 * 1000).toISOString(),
       },
@@ -195,7 +176,7 @@ export const friendsWishlists: Wishlist[] = [
         wishlistId: 'wishlist-5',
         productId: products[0].id,
         product: products[0],
-        status: 'AVAILABLE',
+        status: 'PENDING',
         fundingId: null,
         createdAt: new Date(now.getTime() - 9 * 24 * 60 * 60 * 1000).toISOString(),
       },
