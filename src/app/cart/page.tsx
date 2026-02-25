@@ -288,7 +288,7 @@ export default function CartPage() {
                                                     "text-sm font-medium transition-all line-clamp-2 leading-relaxed",
                                                     isAvailable ? "hover:underline" : "text-muted-foreground"
                                                 )}>
-                                                    {productName}
+                                                    {productName || '상품 정보 없음'}
                                                 </h3>
 
                                                 {/* Unavailable message */}
@@ -445,7 +445,7 @@ export default function CartPage() {
                                         <div className="relative w-20 h-24 bg-secondary flex-shrink-0 overflow-hidden">
                                             <Image
                                                 src={funding?.product?.imageUrl || "/images/placeholder-product.svg"}
-                                                alt={productName}
+                                                alt={productName || "상품"}
                                                 fill
                                                 className={cn("object-cover", !isAvailable && "grayscale")}
                                                 onError={(e) => {
@@ -472,7 +472,7 @@ export default function CartPage() {
                                                     <p className={cn(
                                                         "text-sm line-clamp-2",
                                                         !isAvailable && "text-muted-foreground"
-                                                    )}>{productName}</p>
+                                                    )}>{productName || '상품 정보 없음'}</p>
                                                 </div>
                                                 <button
                                                     onClick={() => handleRemove(item.id)}

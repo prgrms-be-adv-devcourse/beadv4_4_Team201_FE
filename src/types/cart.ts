@@ -25,7 +25,9 @@ export interface CartItem {
     targetType: 'FUNDING' | 'FUNDING_PENDING';
     targetId: string;
     receiverId: string | null;
-    productName: string;
+    receiverNickname: string | null;
+    imageKey: string | null;
+    productName: string | null;
     productPrice: number;
     contributionAmount: number;
     amount: number; // For backward compatibility / UI consistency
