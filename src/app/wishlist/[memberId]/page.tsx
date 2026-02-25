@@ -109,22 +109,24 @@ export default function PublicWishlistPage({ params }: { params: Promise<{ membe
     };
 
     const handleParticipateFunding = async (fundingId: string) => {
+        console.log('handleParticipateFunding called with:', fundingId);
         if (!user) {
+            console.log('User not logged in, redirecting');
             router.push('/auth/login');
             return;
         }
 
         const loadingToast = toast.loading('펀딩 정보를 불러오는 중...');
         try {
-            console.log('Fetching funding details for:', fundingId);
+            console.log('Fetching funding details for id:', fundingId);
             const funding = await getFunding(fundingId);
-            console.log('Funding details fetched:', funding);
+            console.log('Successfully fetched funding:', funding);
 
             setSelectedFunding(funding);
             setIsParticipateOpen(true);
             toast.dismiss(loadingToast);
         } catch (error) {
-            console.error('Failed to fetch funding:', error);
+            console.error('API Error during handleParticipateFunding:', error);
             toast.error('펀딩 정보를 불러오는데 실패했습니다.', { id: loadingToast });
         }
     };
@@ -297,7 +299,14 @@ export default function PublicWishlistPage({ params }: { params: Promise<{ membe
                                         item={item}
                                         onViewFunding={() => item.fundingId && handleViewFunding(item.fundingId)}
                                         onStartFunding={() => handleStartFunding(item)}
-                                        onParticipate={() => item.fundingId && handleParticipateFunding(item.fundingId)}
+                                        onParticipate={() => {
+                                            if (item.fundingId) {
+                                                handleParticipateFunding(item.fundingId);
+                                            } else {
+                                                console.error('Missing fundingId for IN_PROGRESS item:', item);
+                                                toast.error('참여할 수 있는 펀딩 정보를 찾을 수 없습니다.');
+                                            }
+                                        }}
                                     />
                                 ))}
                             </div>
