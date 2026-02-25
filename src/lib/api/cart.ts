@@ -177,7 +177,7 @@ export async function updateCartItem(itemId: string, data: CartItemUpdateRequest
     amount: data.amount!,
   };
 
-  await apiClient.patch<void>('/api/v2/carts/items', request);
+  await apiClient.patch<void>('/api/v2/carts/items', [request]);
 }
 
 /**
