@@ -193,11 +193,11 @@ export default function CartPage() {
     if (isLoading) {
         return (
             <AppShell headerVariant="main" showBottomNav>
-                <div className="max-w-7xl mx-auto px-4 lg:px-8 py-8 lg:py-12">
-                    <Skeleton className="h-7 w-24 mb-8 lg:mb-12" />
+                <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 md:py-12">
+                    <Skeleton className="h-7 w-24 mb-8 md:mb-12" />
                     {/* Mobile skeleton */}
-                    <div className="lg:hidden space-y-0">
-                        <div className="flex items-center justify-between py-4 border-b border-foreground">
+                    <div className="md:hidden space-y-0">
+                        <div className="sticky top-[56px] z-30 bg-white flex items-center justify-between py-4 border-b border-foreground">
                             <Skeleton className="h-5 w-32" />
                             <Skeleton className="h-4 w-16" />
                         </div>
@@ -218,8 +218,8 @@ export default function CartPage() {
                         ))}
                     </div>
                     {/* Desktop skeleton */}
-                    <div className="hidden lg:block">
-                        <div className="grid grid-cols-8 gap-4 border-b border-foreground pb-3">
+                    <div className="hidden md:block">
+                        <div className="sticky top-[124px] z-30 bg-white grid grid-cols-8 gap-4 border-b border-foreground pb-3 pt-4">
                             <Skeleton className="col-span-1 h-4 w-4" />
                             <Skeleton className="col-span-5 h-4 w-20" />
                             <Skeleton className="col-span-2 h-4 w-16 mx-auto" />
@@ -247,7 +247,7 @@ export default function CartPage() {
     if (isError) {
         return (
             <AppShell headerVariant="main" showBottomNav>
-                <div className="max-w-7xl mx-auto px-4 lg:px-8 py-8 lg:py-12">
+                <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 md:py-12">
                     <h1 className="text-xl lg:text-2xl font-medium tracking-tight mb-8">장바구니</h1>
                     <InlineError
                         message="장바구니를 불러오는데 실패했습니다."
@@ -263,9 +263,9 @@ export default function CartPage() {
 
     return (
         <AppShell headerVariant="main" showBottomNav>
-            <div className="max-w-7xl mx-auto px-4 lg:px-8 py-8 lg:py-12">
+            <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 md:py-12">
                 {/* Page Title - 29cm Style */}
-                <h1 className="text-xl lg:text-2xl font-medium tracking-tight mb-8 lg:mb-12">장바구니</h1>
+                <h1 className="text-xl lg:text-2xl font-medium tracking-tight mb-8 md:mb-12">장바구니</h1>
 
                 {!hasItems ? (
                     /* Empty State - 29cm Minimal Style */
@@ -282,9 +282,9 @@ export default function CartPage() {
                 ) : (
                     <>
                         {/* Cart Table - Desktop (29cm Style) */}
-                        <div className="hidden lg:block">
+                        <div className="hidden md:block">
                             {/* Table Header */}
-                            <div className="grid grid-cols-8 gap-4 border-b border-foreground pb-3 text-xs text-muted-foreground">
+                            <div className="sticky top-[124px] z-30 bg-white grid grid-cols-8 gap-4 border-b border-foreground pb-3 pt-4 text-xs text-muted-foreground">
                                 <div className="col-span-1 flex items-center">
                                     <Checkbox
                                         checked={allSelected}
@@ -418,17 +418,17 @@ export default function CartPage() {
                                                     </span>
                                                 </div>
                                                 {isAvailable && (
-                                                    <div className="flex flex-col gap-1">
+                                                    <div className="flex flex-col gap-1 shrink-0">
                                                         <button
                                                             onClick={() => toggleEdit(item.id, item.amount)}
-                                                            className="text-[11px] text-foreground border border-border rounded-sm px-2 py-0.5 hover:bg-secondary transition-colors shrink-0"
+                                                            className="text-[11px] text-foreground border border-border rounded-sm px-2 py-0.5 hover:bg-secondary transition-colors shrink-0 whitespace-nowrap"
                                                         >
                                                             {editingItemIds.has(item.id) ? '저장' : '수정'}
                                                         </button>
                                                         {editingItemIds.has(item.id) && (
                                                             <button
                                                                 onClick={() => handleCancelEdit(item.id)}
-                                                                className="text-[11px] text-muted-foreground border border-border rounded-sm px-2 py-0.5 hover:bg-secondary transition-colors shrink-0"
+                                                                className="text-[11px] text-muted-foreground border border-border rounded-sm px-2 py-0.5 hover:bg-secondary transition-colors shrink-0 whitespace-nowrap"
                                                             >
                                                                 취소
                                                             </button>
@@ -464,9 +464,9 @@ export default function CartPage() {
                         </div>
 
                         {/* Mobile Cart - 29cm Style */}
-                        <div className="lg:hidden">
+                        <div className="md:hidden">
                             {/* Mobile Header */}
-                            <div className="flex items-center justify-between py-4 border-b border-foreground">
+                            <div className="sticky top-[56px] z-30 bg-white flex items-center justify-between py-4 border-b border-foreground">
                                 <div className="flex items-center gap-2">
                                     <Checkbox
                                         checked={allSelected}
@@ -563,10 +563,10 @@ export default function CartPage() {
                                             )}
 
                                             {/* Amount Input */}
-                                            <div className="flex items-center justify-between mt-3">
-                                                <span className="text-xs text-muted-foreground">참여 금액</span>
-                                                <div className="flex items-center gap-2">
-                                                    <div className="flex items-center justify-end w-24">
+                                            <div className="flex items-center justify-end gap-1 mt-4">
+                                                <span className="text-xs text-foreground shrink-0">참여 금액</span>
+                                                <div className="flex items-center gap-1.5">
+                                                    <div className="flex items-center justify-end">
                                                         <input
                                                             type="text"
                                                             value={editingItemIds.has(item.id) ? (tempAmounts[item.id] || '') : item.amount.toLocaleString()}
@@ -589,17 +589,17 @@ export default function CartPage() {
                                                         <span className="text-sm">원</span>
                                                     </div>
                                                     {isAvailable && (
-                                                        <div className="flex gap-1">
+                                                        <div className="flex gap-1 shrink-0">
                                                             <button
                                                                 onClick={() => toggleEdit(item.id, item.amount)}
-                                                                className="text-[11px] text-foreground border border-border rounded-sm px-2 py-0.5 hover:bg-secondary transition-colors shrink-0 ml-1"
+                                                                className="text-[11px] text-foreground border border-border rounded-sm px-2 py-0.5 hover:bg-secondary transition-colors shrink-0 ml-1 whitespace-nowrap"
                                                             >
                                                                 {editingItemIds.has(item.id) ? '저장' : '수정'}
                                                             </button>
                                                             {editingItemIds.has(item.id) && (
                                                                 <button
                                                                     onClick={() => handleCancelEdit(item.id)}
-                                                                    className="text-[11px] text-muted-foreground border border-border rounded-sm px-2 py-0.5 hover:bg-secondary transition-colors shrink-0"
+                                                                    className="text-[11px] text-muted-foreground border border-border rounded-sm px-2 py-0.5 hover:bg-secondary transition-colors shrink-0 whitespace-nowrap"
                                                                 >
                                                                     취소
                                                                 </button>
@@ -617,7 +617,7 @@ export default function CartPage() {
                         {/* Order Summary - 29cm Style */}
                         <div className="border-t border-foreground mt-8 lg:mt-12 pt-8 lg:pt-10">
                             {/* Summary Grid */}
-                            <div className="grid grid-cols-3 gap-4 text-center mb-8 lg:mb-12">
+                            <div className="grid grid-cols-3 gap-4 text-center mb-8 md:mb-12">
                                 <div>
                                     <p className="text-xs text-muted-foreground mb-2">총 참여 금액</p>
                                     <p className="text-xl lg:text-2xl font-medium tracking-tight">
@@ -626,12 +626,12 @@ export default function CartPage() {
                                 </div>
                                 <div className="relative">
                                     {/* Plus/Equal symbols */}
-                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 text-muted-foreground hidden lg:block">+</div>
+                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 text-muted-foreground hidden md:block">+</div>
                                     <p className="text-xs text-muted-foreground mb-2">수수료</p>
                                     <p className="text-xl lg:text-2xl font-medium tracking-tight">
                                         0<span className="text-sm lg:text-base font-normal">원</span>
                                     </p>
-                                    <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 text-muted-foreground hidden lg:block">=</div>
+                                    <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 text-muted-foreground hidden md:block">=</div>
                                 </div>
                                 <div>
                                     <p className="text-xs text-muted-foreground mb-2">총 결제 금액</p>

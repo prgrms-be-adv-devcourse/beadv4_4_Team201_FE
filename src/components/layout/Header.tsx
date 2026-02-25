@@ -93,7 +93,7 @@ export function Header({
 
         if (variant === 'detail') {
             return (
-                <div className="flex w-full items-center justify-between h-14 px-4 bg-white/80 backdrop-blur-md sticky top-0 z-50">
+                <div className="flex w-full items-center justify-between h-14 px-4 bg-white/80 backdrop-blur-md">
                     <div className="flex items-center gap-3">
                         {hasBack && (
                             <button onClick={handleBack} className="p-1 hover:opacity-60">
@@ -120,7 +120,7 @@ export function Header({
 
         // Default Main Header (Mobile View)
         return (
-            <div className="flex md:hidden w-full items-center justify-between h-14 px-4 bg-white sticky top-0 z-50 border-b">
+            <div className="flex md:hidden w-full items-center justify-between h-14 px-4 bg-white border-b">
                 <Link href="/" className="text-2xl font-bold tracking-tighter">
                     Giftify
                 </Link>
@@ -136,44 +136,40 @@ export function Header({
 
     return (
         <>
-            {/* Desktop 3-Row Header */}
-            {variant === 'main' && (
-                <header className={cn('hidden md:block w-full bg-white z-50 sticky top-0', className)}>
-                    <div className="border-b border-gray-100">
-                        {/* Row 1: Top Bar */}
-                        <div className="max-w-screen-2xl mx-auto px-8 h-10 flex items-center justify-between">
-                            <Link href="/" className="text-lg font-bold tracking-widest">
-                                Giftify
-                            </Link>
-                            <DesktopTopNav />
+            <header className={cn('sticky top-0 z-50 w-full bg-white', className)}>
+                {/* Desktop 3-Row Header */}
+                {variant === 'main' && (
+                    <div className="hidden md:block">
+                        <div className="border-b border-gray-100">
+                            {/* Row 1: Top Bar */}
+                            <div className="max-w-screen-2xl mx-auto px-8 h-10 flex items-center justify-between">
+                                <Link href="/" className="text-lg font-bold tracking-widest">
+                                    Giftify
+                                </Link>
+                                <DesktopTopNav />
+                            </div>
+                        </div>
+
+                        <div className="bg-white/95 backdrop-blur-sm">
+                            {/* Row 2: Main Nav */}
+                            <div className="max-w-screen-2xl mx-auto px-8 pt-6 pb-6 flex items-center justify-between">
+                                <DesktopMainNav />
+                                <button
+                                    onClick={() => setIsSearchOpen(true)}
+                                    className="hover:opacity-60 transition-opacity"
+                                >
+                                    <Search className="w-8 h-8" strokeWidth={1.5} />
+                                </button>
+                            </div>
                         </div>
                     </div>
+                )}
 
-                    <div className="bg-white/95 backdrop-blur-sm">
-                        {/* Row 2: Main Nav */}
-                        <div className="max-w-screen-2xl mx-auto px-8 pt-6 pb-6 flex items-center justify-between">
-                            <DesktopMainNav />
-                            <button
-                                onClick={() => setIsSearchOpen(true)}
-                                className="hover:opacity-60 transition-opacity"
-                            >
-                                <Search className="w-8 h-8" strokeWidth={1.5} />
-                            </button>
-                        </div>
-                    </div>
-                </header>
-            )}
-
-            {/* Mobile / Variant Header */}
-            <div className="md:hidden">
-                {renderSimpleContent()}
-            </div>
-            {variant !== 'main' && (
-                <div className="hidden md:block">
+                {/* Mobile / Variant Header */}
+                <div className={cn(variant === 'main' && 'md:hidden')}>
                     {renderSimpleContent()}
                 </div>
-            )}
-
+            </header>
 
             <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
         </>
@@ -189,7 +185,7 @@ function DesktopTopNav() {
     // so `data` will be undefined if not logged in.
     const { data: cart } = useCart();
     const { data: wallet } = useWallet();
-    
+
     // Safety check: only show count if user exists
     const cartCount = user && cart ? cart.items.length : 0;
 
