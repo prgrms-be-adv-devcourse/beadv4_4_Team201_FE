@@ -15,6 +15,7 @@ import { useFunding } from '@/features/funding/hooks/useFunding';
 import { InlineError } from '@/components/common/InlineError';
 import { Button } from '@/components/ui/button';
 import { Users } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function FundingDetailPage() {
     const params = useParams();
@@ -164,7 +165,19 @@ export default function FundingDetailPage() {
                     open={participateModalOpen}
                     onOpenChange={setParticipateModalOpen}
                     funding={funding}
-                    onSuccess={(mode) => router.push(mode === 'cart' ? '/cart' : '/checkout')}
+                    onSuccess={(mode) => {
+                        if (mode === 'cart') {
+                            toast.success('장바구니에 담겼습니다.', {
+                                description: '결제를 진행하시겠습니까?',
+                                action: {
+                                    label: '장바구니 확인',
+                                    onClick: () => router.push('/cart')
+                                }
+                            });
+                        } else {
+                            router.push('/checkout');
+                        }
+                    }}
                 />
 
                 {/* Participants Modal */}

@@ -84,7 +84,6 @@ export function CreateFundingModal({
             },
             {
                 onSuccess: () => {
-                    toast.success('장바구니에 담겼습니다. 결제를 진행해주세요.');
                     onOpenChange(false);
                     onSuccess();
                     setAmount(0);

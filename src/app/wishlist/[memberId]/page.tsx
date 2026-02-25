@@ -376,7 +376,15 @@ export default function PublicWishlistPage({ params }: { params: Promise<{ membe
                     open={isStartFundingOpen}
                     onOpenChange={setIsStartFundingOpen}
                     wishItem={selectedItem}
-                    onSuccess={() => router.push('/cart')}
+                    onSuccess={() => {
+                        toast.success('장바구니에 담겼습니다.', {
+                            description: '상품이 장바구니에 추가되었습니다.',
+                            action: {
+                                label: '장바구니 확인',
+                                onClick: () => router.push('/cart')
+                            }
+                        });
+                    }}
                 />
             )}
             {selectedFunding && (
@@ -384,7 +392,15 @@ export default function PublicWishlistPage({ params }: { params: Promise<{ membe
                     open={isParticipateOpen}
                     onOpenChange={setIsParticipateOpen}
                     funding={selectedFunding}
-                    onSuccess={() => router.push('/cart')}
+                    onSuccess={() => {
+                        toast.success('장바구니에 담겼습니다.', {
+                            description: '펀딩 참여가 장바구니에 추가되었습니다.',
+                            action: {
+                                label: '장바구니 확인',
+                                onClick: () => router.push('/cart')
+                            }
+                        });
+                    }}
                 />
             )}
             <Footer />
