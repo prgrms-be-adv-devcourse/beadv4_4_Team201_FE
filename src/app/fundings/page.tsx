@@ -27,9 +27,9 @@ export default function FundingsPage() {
 
     const { data, isLoading } = useQuery({
         queryKey: ['fundings', statusFilter],
-        queryFn: () => getFundings({ 
+        queryFn: () => getFundings({
             status: statusFilter === 'ALL' ? undefined : statusFilter as FundingStatus,
-            size: 20 
+            size: 20
         }),
     });
 
@@ -55,11 +55,11 @@ export default function FundingsPage() {
                                     선물의 즐거움
                                 </h1>
                                 <p className="text-sm md:text-base text-muted-foreground max-w-md">
-                                    친구나 지인을 위해 진행되는 따뜻한 펀딩들을 확인해보세요. 
+                                    친구나 지인을 위해 진행되는 따뜻한 펀딩들을 확인해보세요.
                                     작은 정성이 모여 큰 감동이 됩니다.
                                 </p>
                             </div>
-                            
+
                             {/* Stats Preview */}
                             <div className="flex gap-8 md:gap-12 pb-2">
                                 <div className="space-y-1">
@@ -78,37 +78,26 @@ export default function FundingsPage() {
                 {/* Filter & List Section */}
                 <section className="max-w-screen-xl mx-auto px-6 md:px-12 py-12">
                     {/* Toolbar */}
-                    <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-6">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-6 min-h-[44px]">
                         {/* Status Tabs (29cm Style) */}
-                        <div className="flex items-center gap-6 overflow-x-auto no-scrollbar pb-1">
+                        <div className="flex items-center gap-6 overflow-x-auto no-scrollbar pb-1 -mb-1">
                             {STATUS_FILTERS.map((filter) => (
                                 <button
                                     key={filter.value}
                                     onClick={() => setStatusFilter(filter.value)}
                                     className={cn(
-                                        "text-sm font-bold tracking-tight transition-colors relative whitespace-nowrap",
-                                        statusFilter === filter.value 
-                                            ? "text-black" 
+                                        "text-sm font-bold tracking-tight transition-colors relative whitespace-nowrap h-8",
+                                        statusFilter === filter.value
+                                            ? "text-black"
                                             : "text-muted-foreground hover:text-gray-400"
                                     )}
                                 >
                                     {filter.label}
                                     {statusFilter === filter.value && (
-                                        <span className="absolute -bottom-2 left-0 right-0 h-0.5 bg-black" />
+                                        <span className="absolute -bottom-[2px] left-0 right-0 h-0.5 bg-black" />
                                     )}
                                 </button>
                             ))}
-                        </div>
-
-                        {/* Search & Layout Toggle (Visual only for now) */}
-                        <div className="flex items-center gap-3">
-                            <Button variant="outline" size="sm" className="h-9 px-3 border-black rounded-none font-bold text-xs">
-                                <Filter className="w-3.5 h-3.5 mr-2" strokeWidth={1.5} />
-                                필터
-                            </Button>
-                            <Button variant="ghost" size="icon" className="h-9 w-9">
-                                <Search className="w-4 h-4" strokeWidth={1.5} />
-                            </Button>
                         </div>
                     </div>
 
@@ -149,8 +138,8 @@ export default function FundingsPage() {
                             title="펀딩이 없습니다"
                             description="현재 선택한 카테고리에 해당하는 펀딩이 없습니다. 다른 필터를 선택해보세요."
                             action={
-                                <Button 
-                                    variant="outline" 
+                                <Button
+                                    variant="outline"
                                     onClick={() => router.push('/explore')}
                                     className="border-black rounded-none font-bold text-xs"
                                 >
