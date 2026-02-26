@@ -123,16 +123,77 @@ export function parseCartItemId(itemId: string): { targetType: BackendTargetType
   return { targetType, targetId };
 }
 
+// --- Enrichment Types ---
+
+interface BackendWishlistItemMinimal {
+  id: number;
+  productId: number;
+}
+
+interface BackendFundingResponseMinimal {
+  fundingId: number;
+  productId: number;
+}
+
 // --- API Functions ---
 
 /**
  * 내 장바구니 조회
  * @endpoint GET /api/v2/carts
  * @note client.ts가 RsData wrapper를 자동 언래핑하므로 BackendCartResponse를 직접 받음
+ * @note product.id를 채우기 위해 위시리스트/펀딩 API를 병렬 추가 호출
  */
 export async function getCart(): Promise<Cart> {
   const response = await apiClient.get<BackendCartResponse>('/api/v2/carts');
-  return mapBackendCart(response);
+
+  const pendingItems = response.items.filter(i => i.targetType === 'FUNDING_PENDING');
+  const fundingItems = response.items.filter(i => i.targetType === 'FUNDING');
+
+  // wishlistItemId → productId 맵, fundingId → productId 맵
+  const productIdMap = new Map<string, string>();
+
+  try {
+    await Promise.all([
+      // FUNDING_PENDING: GET /api/wishlist/items/me 단 1회 호출
+      (async () => {
+        if (pendingItems.length === 0) return;
+        const wishlistItems = await apiClient.get<BackendWishlistItemMinimal[]>('/api/wishlist/items/me');
+        for (const wi of wishlistItems) {
+          productIdMap.set(`FUNDING_PENDING::${wi.id}`, wi.productId.toString());
+        }
+      })(),
+      // FUNDING: 각 fundingId마다 병렬 호출
+      (async () => {
+        if (fundingItems.length === 0) return;
+        const fundingDetails = await Promise.all(
+          fundingItems.map(fi =>
+            apiClient.get<BackendFundingResponseMinimal>(`/api/v2/fundings/${fi.targetId}`)
+          )
+        );
+        for (const fd of fundingDetails) {
+          productIdMap.set(`FUNDING::${fd.fundingId}`, fd.productId.toString());
+        }
+      })(),
+    ]);
+  } catch {
+    // 보강 실패 시 cart는 정상 반환 (product.id만 비어있음)
+  }
+
+  const cart = mapBackendCart(response);
+  cart.items = cart.items.map(item => {
+    const [, targetType, targetId] = item.id.split('::');
+    const productId = productIdMap.get(`${targetType}::${targetId}`);
+    if (!productId) return item;
+    return {
+      ...item,
+      funding: {
+        ...item.funding,
+        product: { ...item.funding.product, id: productId },
+      },
+    };
+  });
+
+  return cart;
 }
 
 /**

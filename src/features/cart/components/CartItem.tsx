@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { handleImageError } from '@/lib/image';
 import { Progress } from '@/components/ui/progress';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -23,6 +24,11 @@ interface CartItemProps {
 export function CartItem({ item, onUpdateAmount, onToggleSelect, onRemove }: CartItemProps) {
     const { funding, amount, selected, targetType, productName, status, statusMessage } = item;
     const isAvailable = status === 'AVAILABLE';
+
+    const productId = funding.product?.id;
+    const fundingId = funding.id;
+    const hasFundingPage = targetType === 'FUNDING' && fundingId;
+    const productLinkHref = productId ? `/products/${productId}` : null;
 
     const progressPercent = (funding.targetAmount > 0)
         ? ((item.currentAmount || 0) / funding.targetAmount) * 100
@@ -53,15 +59,31 @@ export function CartItem({ item, onUpdateAmount, onToggleSelect, onRemove }: Car
                 className="mt-1"
             />
 
-            <div className="relative aspect-square h-24 w-24 shrink-0 bg-secondary overflow-hidden">
-                <Image
-                    src={funding.product?.imageUrl || "/images/placeholder-product.svg"}
-                    alt={productName || "상품 이미지"}
-                    fill
-                    className={cn("object-cover", !isAvailable && "grayscale")}
-                    onError={handleImageError}
-                />
-            </div>
+            {/* 상품 이미지 - 상품 페이지 링크 */}
+            {productLinkHref ? (
+                <Link
+                    href={productLinkHref}
+                    className="relative aspect-square h-24 w-24 shrink-0 bg-secondary overflow-hidden hover:opacity-80 transition-opacity"
+                >
+                    <Image
+                        src={funding.product?.imageUrl || "/images/placeholder-product.svg"}
+                        alt={productName || "상품 이미지"}
+                        fill
+                        className={cn("object-cover", !isAvailable && "grayscale")}
+                        onError={handleImageError}
+                    />
+                </Link>
+            ) : (
+                <div className="relative aspect-square h-24 w-24 shrink-0 bg-secondary overflow-hidden">
+                    <Image
+                        src={funding.product?.imageUrl || "/images/placeholder-product.svg"}
+                        alt={productName || "상품 이미지"}
+                        fill
+                        className={cn("object-cover", !isAvailable && "grayscale")}
+                        onError={handleImageError}
+                    />
+                </div>
+            )}
 
             <div className="flex flex-1 flex-col gap-2 min-w-0">
                 {/* Recipient & Title */}
@@ -78,12 +100,25 @@ export function CartItem({ item, onUpdateAmount, onToggleSelect, onRemove }: Car
                                 {funding.recipient.nickname || '알 수 없음'}
                             </span>
                         </div>
-                        <h3 className={cn(
-                            "text-sm font-medium line-clamp-2",
-                            !isAvailable && "text-muted-foreground"
-                        )}>
-                            {productName}
-                        </h3>
+                        {/* 상품명 - 상품 페이지 링크 */}
+                        {productLinkHref ? (
+                            <Link
+                                href={productLinkHref}
+                                className={cn(
+                                    "text-sm font-medium line-clamp-2 hover:underline",
+                                    !isAvailable && "text-muted-foreground"
+                                )}
+                            >
+                                {productName}
+                            </Link>
+                        ) : (
+                            <h3 className={cn(
+                                "text-sm font-medium line-clamp-2",
+                                !isAvailable && "text-muted-foreground"
+                            )}>
+                                {productName}
+                            </h3>
+                        )}
                     </div>
                     <button
                         onClick={() => onRemove(item.id)}
@@ -131,6 +166,16 @@ export function CartItem({ item, onUpdateAmount, onToggleSelect, onRemove }: Car
                         <span className="text-sm ml-1">원</span>
                     </div>
                 </div>
+
+                {/* 펀딩 바로가기 - 진행 중인 펀딩 아이템에만 표시 */}
+                {hasFundingPage && (
+                    <Link
+                        href={`/fundings/${fundingId}`}
+                        className="self-start text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground transition-colors"
+                    >
+                        펀딩 바로가기 →
+                    </Link>
+                )}
             </div>
         </div>
     );
