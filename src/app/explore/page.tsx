@@ -31,8 +31,8 @@ export default function DiscoverPage() {
         setSearchedNickname(trimmed || undefined);
     };
 
-    const handleViewWishlist = (memberId: string) => {
-        router.push(`/wishlist/${memberId}`);
+    const handleViewProfile = (memberId: string) => {
+        router.push(`/u/${memberId}`);
     };
 
     return (
@@ -98,7 +98,7 @@ export default function DiscoverPage() {
                                         <Card
                                             key={member.memberId}
                                             className="p-8 border-2 border-black rounded-none hover:bg-gray-50 transition-colors cursor-pointer group"
-                                            onClick={() => handleViewWishlist(member.memberId)}
+                                            onClick={() => handleViewProfile(member.memberId)}
                                         >
                                             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                                                 <div className="flex items-center gap-6">
@@ -108,7 +108,7 @@ export default function DiscoverPage() {
                                                     <div>
                                                         <h3 className="text-xl font-black">{member.nickname}</h3>
                                                         <p className="text-muted-foreground text-sm mt-1">
-                                                            위시리스트 보기
+                                                            프로필 보기
                                                         </p>
                                                     </div>
                                                 </div>
@@ -159,7 +159,7 @@ export default function DiscoverPage() {
                                     <MemberCard
                                         key={member.memberId}
                                         nickname={member.nickname}
-                                        onClick={() => handleViewWishlist(member.memberId)}
+                                        onClick={() => handleViewProfile(member.memberId)}
                                     />
                                 ))
                         ) : (

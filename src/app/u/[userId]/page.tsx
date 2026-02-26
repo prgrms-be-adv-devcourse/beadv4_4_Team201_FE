@@ -8,7 +8,7 @@ import { UserHomeHero } from '@/features/user-home/components/UserHomeHero';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FundingCard } from '@/components/common/FundingCard';
 import { useProfile } from '@/features/profile/hooks/useProfile';
-
+import { useMember } from '@/features/member/hooks/useMember';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { InlineError } from '@/components/common/InlineError';
 import { Loader2 } from 'lucide-react';
@@ -18,7 +18,31 @@ import { AddFriendButton } from '@/features/friend/components/AddFriendButton';
 
 export function UserHomeContent({ userId }: { userId: string }) {
     const { user: auth0User } = useAuth();
-    const { data: profile, isLoading: isProfileLoading, isError: isProfileError, error: profileError, refetch: refetchProfile } = useProfile();
+
+    // Fetch current user profile always for comparison/ownership checks
+    const { data: myProfile, isLoading: isMyProfileLoading } = useProfile();
+
+    // Determine if it's the current user
+    const isMe = userId === 'me' || (myProfile?.id?.toString() === userId?.toString());
+
+    // Fetch the specific user profile if not me
+    const {
+        data: memberProfile,
+        isLoading: isMemberLoading,
+        isError: isMemberError,
+        error: memberError,
+        refetch: refetchMember
+    } = useMember(userId);
+
+    // If userId is 'me', we use myProfile and its loading state
+    // If userId is an ID, we check if it matches myProfile.id
+    // If it matches, we use myProfile. If not, we use memberProfile.
+    const profile = isMe ? myProfile : memberProfile;
+    const isProfileLoading = isMe ? isMyProfileLoading : (isMemberLoading || isMyProfileLoading);
+    const isProfileError = isMe ? false : isMemberError; // Simplified error handling
+    const profileError = isMe ? null : memberError;
+    const refetchProfile = isMe ? () => { } : refetchMember;
+
     const isFundingsLoading = false;
     const fundingsResponse = { items: [] };
 
@@ -28,11 +52,11 @@ export function UserHomeContent({ userId }: { userId: string }) {
             id: profile.id.toString(),
             nickname: profile.nickname || 'Unknown',
             description: "안녕하세요. 취향을 공유하는 펀딩을 만듭니다.",
-            avatarUrl: auth0User?.picture || profile.avatarUrl || '/images/placeholder-product.svg',
+            avatarUrl: isMe && auth0User?.picture ? auth0User.picture : (profile.avatarUrl || '/images/placeholder-product.svg'),
             coverImageUrl: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1600&q=80',
             followerCount: 0,
         };
-    }, [profile, auth0User]);
+    }, [profile, auth0User, isMe]);
 
     const fundings: Funding[] = [];
 

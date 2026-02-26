@@ -9,6 +9,17 @@ import { useSendFriendRequest, useRemoveFriend } from '../hooks/useFriendMutatio
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useProfile } from '@/features/profile/hooks/useProfile';
 import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 type FriendStatus = 'self' | 'friend' | 'not_friend' | 'sent_request' | 'received_request';
 
@@ -59,9 +70,7 @@ export function AddFriendButton({ targetUserId, targetNickname, variant = 'defau
     });
   };
 
-  const handleRemove = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
+  const onRemoveConfirm = () => {
     if (!friend?.friendshipId) {
       toast.error('친구 삭제를 위한 정보가 부족합니다');
       return;
@@ -77,22 +86,45 @@ export function AddFriendButton({ targetUserId, targetNickname, variant = 'defau
 
   if (status === 'friend') {
     return (
-      <Button
-        variant="outline"
-        size={isCompact ? 'sm' : 'default'}
-        onClick={handleRemove}
-        disabled={!friend?.friendshipId || isPending}
-        className={isCompact ? 'h-7 text-xs' : ''}
-      >
-        {isPending ? (
-          <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={1.5} />
-        ) : (
-          <>
-            <UserMinus className="h-3.5 w-3.5 mr-1" strokeWidth={1.5} />
-            친구
-          </>
-        )}
-      </Button>
+      <AlertDialog>
+        <AlertDialogTrigger asChild onClick={(e) => e.stopPropagation()}>
+          <Button
+            variant="outline"
+            size={isCompact ? 'sm' : 'default'}
+            disabled={!friend?.friendshipId || isPending}
+            className={isCompact ? 'h-7 text-xs' : ''}
+          >
+            {isPending ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={1.5} />
+            ) : (
+              <>
+                <UserMinus className="h-3.5 w-3.5 mr-1" strokeWidth={1.5} />
+                친구
+              </>
+            )}
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+          <AlertDialogHeader>
+            <AlertDialogTitle>친구 삭제</AlertDialogTitle>
+            <AlertDialogDescription>
+              {targetNickname || '사용자'}님을 친구 목록에서 삭제하시겠습니까?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={(e) => e.stopPropagation()}>취소</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={(e) => {
+                e.stopPropagation();
+                onRemoveConfirm();
+              }}
+            >
+              삭제
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     );
   }
 
