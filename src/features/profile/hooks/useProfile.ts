@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query/keys';
-import { getMe, updateMe } from '@/lib/api/members';
+import { getMe, updateMe, getMember } from '@/lib/api/members';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import type { MemberUpdateRequest } from '@/types/member';
 import { toast } from 'sonner';
@@ -42,5 +42,17 @@ export function useUpdateProfile() {
     onError: (error: Error) => {
       toast.error(`프로필 업데이트 실패: ${error.message}`);
     },
+  });
+}
+
+/**
+ * Hook to fetch a member's public profile
+ * @param memberId - The ID of the member
+ */
+export function usePublicProfile(memberId: string) {
+  return useQuery({
+    queryKey: ['member', memberId],
+    queryFn: () => getMember(memberId),
+    enabled: !!memberId,
   });
 }

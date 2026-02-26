@@ -6,6 +6,7 @@ import {
   getParticipatedFunding,
   getMyParticipatedFundings,
   getMyReceivedFundings,
+  getFriendInProgressFundings,
 } from '@/lib/api/fundings';
 import type { FundingQueryParams } from '@/types/funding';
 
@@ -111,5 +112,18 @@ export function useMyReceivedFundings(params?: FundingQueryParams) {
       return getMyReceivedFundings(params);
     },
     enabled: !!user,
+  });
+}
+
+/**
+ * Hook to fetch fundings of a specific friend
+ * @param friendId - The ID of the friend
+ * @param params - Query parameters (status, page, size)
+ */
+export function useFriendInProgressFundings(friendId: string, params?: FundingQueryParams) {
+  return useQuery({
+    queryKey: ['friendFundings', friendId, params],
+    queryFn: () => getFriendInProgressFundings(friendId, params),
+    enabled: !!friendId,
   });
 }
