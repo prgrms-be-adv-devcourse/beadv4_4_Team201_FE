@@ -11,6 +11,14 @@ import { InlineError } from '@/components/common/InlineError';
 import { useMyParticipatedFundings } from '@/features/funding/hooks/useFunding';
 import type { FundingStatus } from '@/types/funding';
 
+const PARTICIPATED_STATUS_FILTERS: { label: string; value: FundingStatus | 'all' }[] = [
+    { label: '전체', value: 'all' },
+    { label: '진행 중', value: 'IN_PROGRESS' },
+    { label: '달성', value: 'ACHIEVED' },
+    { label: '완료', value: 'ACCEPTED' },
+    { label: '만료', value: 'EXPIRED' },
+];
+
 export default function ParticipatedFundingsPage() {
     const [status, setStatus] = useState<FundingStatus | undefined>(undefined);
 
@@ -27,11 +35,12 @@ export default function ParticipatedFundingsPage() {
                 <Tabs defaultValue="all" onValueChange={(value) => {
                     setStatus(value === 'all' ? undefined : value as FundingStatus);
                 }}>
-                    <TabsList className="w-full grid grid-cols-4">
-                        <TabsTrigger value="all">전체</TabsTrigger>
-                        <TabsTrigger value="IN_PROGRESS">진행중</TabsTrigger>
-                        <TabsTrigger value="ACHIEVED">달성</TabsTrigger>
-                        <TabsTrigger value="ACCEPTED">완료</TabsTrigger>
+                    <TabsList className="w-full grid grid-cols-5">
+                        {PARTICIPATED_STATUS_FILTERS.map((filter) => (
+                            <TabsTrigger key={filter.value} value={filter.value} className="text-xs">
+                                {filter.label}
+                            </TabsTrigger>
+                        ))}
                     </TabsList>
 
                     <TabsContent value="all" className="mt-4 space-y-4">
@@ -44,6 +53,9 @@ export default function ParticipatedFundingsPage() {
                         <FundingList data={data} isLoading={isLoading} isError={isError} onRetry={() => refetch()} />
                     </TabsContent>
                     <TabsContent value="ACCEPTED" className="mt-4 space-y-4">
+                        <FundingList data={data} isLoading={isLoading} isError={isError} onRetry={() => refetch()} />
+                    </TabsContent>
+                    <TabsContent value="EXPIRED" className="mt-4 space-y-4">
                         <FundingList data={data} isLoading={isLoading} isError={isError} onRetry={() => refetch()} />
                     </TabsContent>
                 </Tabs>

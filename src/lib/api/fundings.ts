@@ -62,6 +62,7 @@ interface BackendMyFundingSummary {
   currentAmount: number;
   achievementRate: number;
   daysRemaining: number;
+  deadline?: string;
 }
 
 /**
@@ -186,7 +187,7 @@ function mapBackendMyFundingSummary(backend: BackendMyFundingSummary): Funding {
     currentAmount: backend.currentAmount,
     status: mapFundingStatus(backend.status),
     participantCount: 0,
-    expiresAt: "",
+    expiresAt: backend.deadline || "",
     createdAt: "",
     achievementRate: backend.achievementRate,
     daysRemaining: backend.daysRemaining,
