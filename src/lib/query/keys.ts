@@ -13,6 +13,7 @@ export const queryKeys = {
   fundings: ['fundings'] as const,
   funding: (id: string) => ['fundings', id] as const,
   myFunding: (id: string) => ['fundings', 'my', id] as const,
+  friendFunding: (friendId: string, id: string) => ['fundings', 'friend', friendId, id] as const,
   myParticipatedFundings: ['fundings', 'participated'] as const,
   myReceivedFundings: ['fundings', 'received'] as const,
 

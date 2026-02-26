@@ -436,6 +436,22 @@ export async function getFriendsFundings(
 }
 
 /**
+ * 특정 친구의 펀딩 단건 조회
+ * @endpoint GET /api/v2/fundings/friend/{friendId}/{id}
+ */
+export async function getFriendFundingDetail(friendId: string, fundingId: string): Promise<FundingDetail> {
+  const backend = await apiClient.get<BackendFundingResponse>(
+    `/api/v2/fundings/friend/${friendId}/${fundingId}`
+  );
+  const funding = mapBackendFunding(backend);
+  return {
+    ...funding,
+    participants: [],
+    myParticipation: null,
+  };
+}
+
+/**
  * 친구의 진행 중인 펀딩 단건 조회
  * @endpoint GET /api/v2/fundings/friends/{id}
  */
