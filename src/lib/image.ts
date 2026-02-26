@@ -1,16 +1,32 @@
 export const DEFAULT_PRODUCT_IMAGES: Record<string, string> = {
   electronics: '/images/cat-electronics.png',
+  electronic: '/images/cat-electronics.png',
   fashion: '/images/cat-fashion.png',
   beauty: '/images/cat-beauty.png',
   home: '/images/cat-home.png',
   living: '/images/cat-home.png',
   sports: '/images/cat-outdoor.png',
+  sport: '/images/cat-outdoor.png',
   outdoor: '/images/cat-outdoor.png',
   books: '/images/placeholder-product.svg',
+  book: '/images/placeholder-product.svg',
   foods: '/images/cat-foods.png',
+  food: '/images/cat-foods.png',
   toys: '/images/cat-toy.png',
+  toy: '/images/cat-toy.png',
   pet: '/images/cat-pet.png',
+  pets: '/images/cat-pet.png',
   kitchen: '/images/cat-kitchen.png',
+  // Korean mappings for safety
+  '전자기기': '/images/cat-electronics.png',
+  '뷰티': '/images/cat-beauty.png',
+  '패션': '/images/cat-fashion.png',
+  '리빙': '/images/cat-home.png',
+  '식품': '/images/cat-foods.png',
+  '완구': '/images/cat-toy.png',
+  '아웃도어': '/images/cat-outdoor.png',
+  '반려동물': '/images/cat-pet.png',
+  '주방': '/images/cat-kitchen.png',
   default: '/images/placeholder-product.svg',
 };
 
@@ -23,7 +39,14 @@ export function getDefaultProductImage(category?: string | null): string {
 }
 
 export function resolveImageUrl(imageKey?: string | null, category?: string | null): string {
-  if (!imageKey) return getDefaultProductImage(category);
+  if (!imageKey || imageKey === 'null' || imageKey === 'undefined') {
+    return getDefaultProductImage(category);
+  }
+
+  // If it's already a full URL or a local path starting with /images, return as is
+  if (imageKey.startsWith('http') || imageKey.startsWith('/')) {
+    return imageKey;
+  }
 
   // Demo images are served as static files from /public/images/demo/
   if (imageKey.startsWith('demo/')) {
@@ -31,7 +54,11 @@ export function resolveImageUrl(imageKey?: string | null, category?: string | nu
   }
 
   const baseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL;
-  if (!baseUrl) return getDefaultProductImage(category);
+  if (!baseUrl) {
+    // If no base URL is defined, and it's not a special path, 
+    // we can't resolve it to a full URL, so return fallback
+    return getDefaultProductImage(category);
+  }
 
   return `${baseUrl.replace(/\/+$/, '')}/${imageKey.replace(/^\/+/, '')}`;
 }
