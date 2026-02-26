@@ -309,6 +309,8 @@ export default function CartPage() {
                             {cart.items.map((item) => {
                                 const { funding, productName } = item;
                                 const isAvailable = item.status === 'AVAILABLE';
+                                const productHref = funding.product?.id ? `/products/${funding.product.id}` : null;
+                                const fundingHref = (!item.isNewFunding && funding.id) ? `/fundings/${funding.id}` : null;
 
                                 return (
                                     <div
@@ -330,21 +332,39 @@ export default function CartPage() {
 
                                         {/* Item Info - 29cm Style */}
                                         <div className="col-span-5 flex gap-4">
-                                            <div className="relative w-[100px] h-[130px] bg-secondary flex-shrink-0 overflow-hidden">
-                                                <Image
-                                                    src={funding?.product?.imageUrl || "/images/placeholder-product.svg"}
-                                                    alt={productName || "상품 이미지"}
-                                                    fill
-                                                    className={cn(
-                                                        "object-cover transition-opacity",
-                                                        isAvailable ? "hover:opacity-80" : "grayscale"
-                                                    )}
-                                                    onError={(e) => {
-                                                        const target = e.target as HTMLImageElement;
-                                                        target.src = "/images/placeholder-product.svg";
-                                                    }}
-                                                />
-                                            </div>
+                                            {productHref ? (
+                                                <Link href={productHref} className="relative w-[100px] h-[130px] bg-secondary flex-shrink-0 overflow-hidden block">
+                                                    <Image
+                                                        src={funding?.product?.imageUrl || "/images/placeholder-product.svg"}
+                                                        alt={productName || "상품 이미지"}
+                                                        fill
+                                                        className={cn(
+                                                            "object-cover transition-opacity",
+                                                            isAvailable ? "hover:opacity-80" : "grayscale"
+                                                        )}
+                                                        onError={(e) => {
+                                                            const target = e.target as HTMLImageElement;
+                                                            target.src = "/images/placeholder-product.svg";
+                                                        }}
+                                                    />
+                                                </Link>
+                                            ) : (
+                                                <div className="relative w-[100px] h-[130px] bg-secondary flex-shrink-0 overflow-hidden">
+                                                    <Image
+                                                        src={funding?.product?.imageUrl || "/images/placeholder-product.svg"}
+                                                        alt={productName || "상품 이미지"}
+                                                        fill
+                                                        className={cn(
+                                                            "object-cover transition-opacity",
+                                                            isAvailable ? "hover:opacity-80" : "grayscale"
+                                                        )}
+                                                        onError={(e) => {
+                                                            const target = e.target as HTMLImageElement;
+                                                            target.src = "/images/placeholder-product.svg";
+                                                        }}
+                                                    />
+                                                </div>
+                                            )}
                                             <div className="flex flex-col justify-start min-w-0 py-1">
                                                 {/* Recipient Info */}
                                                 <div className="flex items-center gap-2 mb-2">
@@ -358,12 +378,21 @@ export default function CartPage() {
                                                         {funding.recipient.nickname || '알 수 없음'}님에게
                                                     </span>
                                                 </div>
-                                                <h3 className={cn(
-                                                    "text-sm font-medium transition-all line-clamp-2 leading-relaxed",
-                                                    isAvailable ? "hover:underline" : "text-muted-foreground"
-                                                )}>
-                                                    {productName || '상품 정보 없음'}
-                                                </h3>
+                                                {productHref ? (
+                                                    <Link href={productHref} className={cn(
+                                                        "text-sm font-medium transition-all line-clamp-2 leading-relaxed hover:underline",
+                                                        !isAvailable && "text-muted-foreground"
+                                                    )}>
+                                                        {productName || '상품 정보 없음'}
+                                                    </Link>
+                                                ) : (
+                                                    <h3 className={cn(
+                                                        "text-sm font-medium line-clamp-2 leading-relaxed",
+                                                        !isAvailable && "text-muted-foreground"
+                                                    )}>
+                                                        {productName || '상품 정보 없음'}
+                                                    </h3>
+                                                )}
 
                                                 {/* Unavailable message */}
                                                 {!isAvailable && (
@@ -386,6 +415,16 @@ export default function CartPage() {
                                                         </>
                                                     )}
                                                 </div>
+
+                                                {/* 펀딩 바로가기 */}
+                                                {fundingHref && (
+                                                    <Link
+                                                        href={fundingHref}
+                                                        className="mt-2 self-start text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground transition-colors"
+                                                    >
+                                                        펀딩 바로가기 →
+                                                    </Link>
+                                                )}
                                             </div>
                                         </div>
 
@@ -490,6 +529,8 @@ export default function CartPage() {
                             {cart.items.map((item) => {
                                 const { funding, productName } = item;
                                 const isAvailable = item.status === 'AVAILABLE';
+                                const productHref = funding.product?.id ? `/products/${funding.product.id}` : null;
+                                const fundingHref = (!item.isNewFunding && funding.id) ? `/fundings/${funding.id}` : null;
 
                                 return (
                                     <div
@@ -506,18 +547,33 @@ export default function CartPage() {
                                             }
                                             className="mt-1"
                                         />
-                                        <div className="relative w-20 h-24 bg-secondary flex-shrink-0 overflow-hidden">
-                                            <Image
-                                                src={funding?.product?.imageUrl || "/images/placeholder-product.svg"}
-                                                alt={productName || "상품"}
-                                                fill
-                                                className={cn("object-cover", !isAvailable && "grayscale")}
-                                                onError={(e) => {
-                                                    const target = e.target as HTMLImageElement;
-                                                    target.src = "/images/placeholder-product.svg";
-                                                }}
-                                            />
-                                        </div>
+                                        {productHref ? (
+                                            <Link href={productHref} className="relative w-20 h-24 bg-secondary flex-shrink-0 overflow-hidden block hover:opacity-80 transition-opacity">
+                                                <Image
+                                                    src={funding?.product?.imageUrl || "/images/placeholder-product.svg"}
+                                                    alt={productName || "상품"}
+                                                    fill
+                                                    className={cn("object-cover", !isAvailable && "grayscale")}
+                                                    onError={(e) => {
+                                                        const target = e.target as HTMLImageElement;
+                                                        target.src = "/images/placeholder-product.svg";
+                                                    }}
+                                                />
+                                            </Link>
+                                        ) : (
+                                            <div className="relative w-20 h-24 bg-secondary flex-shrink-0 overflow-hidden">
+                                                <Image
+                                                    src={funding?.product?.imageUrl || "/images/placeholder-product.svg"}
+                                                    alt={productName || "상품"}
+                                                    fill
+                                                    className={cn("object-cover", !isAvailable && "grayscale")}
+                                                    onError={(e) => {
+                                                        const target = e.target as HTMLImageElement;
+                                                        target.src = "/images/placeholder-product.svg";
+                                                    }}
+                                                />
+                                            </div>
+                                        )}
                                         <div className="flex-1 min-w-0">
                                             <div className="flex justify-between items-start mb-1">
                                                 <div className="min-w-0">
@@ -533,10 +589,19 @@ export default function CartPage() {
                                                             {funding.recipient.nickname}님에게
                                                         </span>
                                                     </div>
-                                                    <p className={cn(
-                                                        "text-sm line-clamp-2",
-                                                        !isAvailable && "text-muted-foreground"
-                                                    )}>{productName || '상품 정보 없음'}</p>
+                                                    {productHref ? (
+                                                        <Link href={productHref} className={cn(
+                                                            "text-sm line-clamp-2 hover:underline",
+                                                            !isAvailable && "text-muted-foreground"
+                                                        )}>
+                                                            {productName || '상품 정보 없음'}
+                                                        </Link>
+                                                    ) : (
+                                                        <p className={cn(
+                                                            "text-sm line-clamp-2",
+                                                            !isAvailable && "text-muted-foreground"
+                                                        )}>{productName || '상품 정보 없음'}</p>
+                                                    )}
                                                     <div className="flex items-center gap-2 mt-1">
                                                         <span className="text-xs font-medium text-foreground">{formatPrice(item.productPrice)}</span>
                                                         {!item.isNewFunding && (
@@ -545,6 +610,15 @@ export default function CartPage() {
                                                             </span>
                                                         )}
                                                     </div>
+                                                    {/* 펀딩 바로가기 */}
+                                                    {fundingHref && (
+                                                        <Link
+                                                            href={fundingHref}
+                                                            className="mt-1 text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground transition-colors"
+                                                        >
+                                                            펀딩 바로가기 →
+                                                        </Link>
+                                                    )}
                                                 </div>
                                                 <button
                                                     onClick={() => handleRemove(item.id)}
