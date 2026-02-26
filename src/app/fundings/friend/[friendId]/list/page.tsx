@@ -8,133 +8,149 @@ import { FundingCard } from '@/components/common/FundingCard';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useFriendInProgressFundings } from '@/features/funding/hooks/useFunding';
-import { usePublicProfile } from '@/features/profile/hooks/useProfile';
-import { FundingStatus } from '@/types/funding';
-import { Sparkles } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Sparkles, Users, Gift } from 'lucide-react';
 import { EmptyState } from '@/components/common/EmptyState';
-
-const STATUS_FILTERS: { label: string; value: FundingStatus | 'ALL' }[] = [
-    { label: '전체', value: 'ALL' },
-    { label: '진행중', value: 'IN_PROGRESS' },
-    { label: '달성완료', value: 'ACHIEVED' },
-];
+import { ParticipateModal } from '@/features/funding/components/ParticipateModal';
+import { toast } from 'sonner';
+import { getFunding } from '@/lib/api/fundings';
+import type { Funding } from '@/types/funding';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 
 export function FriendFundingsContent({ friendId }: { friendId: string }) {
     const router = useRouter();
-    const [statusFilter, setStatusFilter] = useState<FundingStatus | 'ALL'>('ALL');
+    const { user } = useAuth();
+    const [selectedFunding, setSelectedFunding] = useState<Funding | null>(null);
+    const [isParticipateOpen, setIsParticipateOpen] = useState(false);
 
-    // Fetch friend's fundings using the API we connected
     const { data, isLoading } = useFriendInProgressFundings(friendId, {
-        status: statusFilter === 'ALL' ? undefined : statusFilter as FundingStatus,
-        size: 20
+        size: 20,
     });
 
     const fundings = data?.items || [];
-    const nickname = data?.items[0].receiverNickname || '친구';
+    const nickname = data?.items[0]?.receiverNickname || '친구';
+    const totalCount = data?.page.totalElements ?? fundings.length;
 
     const handleFundingClick = (id: string) => {
         router.push(`/fundings/${id}`);
     };
 
+    const handleParticipateFunding = async (fundingId: string) => {
+        if (!user) {
+            router.push('/auth/login');
+            return;
+        }
+
+        const loadingToast = toast.loading('펀딩 정보를 불러오는 중...');
+        try {
+            const funding = await getFunding(fundingId);
+            setSelectedFunding(funding);
+            setIsParticipateOpen(true);
+            toast.dismiss(loadingToast);
+        } catch (error) {
+            toast.error('펀딩 정보를 불러오는데 실패했습니다.', { id: loadingToast });
+        }
+    };
+
     return (
-        <AppShell headerTitle={`${nickname}님의 펀딩`} headerVariant="detail">
-            <main className="min-h-screen bg-white">
-                {/* Hero Section */}
-                <section className="bg-gray-50 py-12 md:py-16 border-b border-border">
-                    <div className="max-w-screen-xl mx-auto px-6 md:px-12">
-                        <div className="space-y-4">
-                            <p className="text-xs font-bold tracking-widest text-muted-foreground uppercase">
-                                Friend's Fundings
-                            </p>
-                            <h1 className="text-3xl md:text-4xl font-black tracking-tighter leading-none">
-                                {nickname}님의 <br />
-                                진행 중인 펀딩
-                            </h1>
-                            <p className="text-sm text-muted-foreground max-w-md">
-                                {nickname}님을 위해 진행 중인 따뜻한 펀딩들을 확인하고 마음을 전해보세요.
-                            </p>
-                        </div>
-                    </div>
-                </section>
-
-                {/* Filter & List Section */}
-                <section className="max-w-screen-xl mx-auto px-6 md:px-12 py-10">
-                    {/* Toolbar */}
-                    <div className="flex items-center gap-6 overflow-x-auto no-scrollbar pb-1 mb-8">
-                        {STATUS_FILTERS.map((filter) => (
-                            <button
-                                key={filter.value}
-                                onClick={() => setStatusFilter(filter.value)}
-                                className={cn(
-                                    "text-sm font-bold tracking-tight transition-colors relative whitespace-nowrap h-8",
-                                    statusFilter === filter.value
-                                        ? "text-black"
-                                        : "text-muted-foreground hover:text-gray-400"
-                                )}
-                            >
-                                {filter.label}
-                                {statusFilter === filter.value && (
-                                    <span className="absolute -bottom-[2px] left-0 right-0 h-0.5 bg-black" />
-                                )}
-                            </button>
-                        ))}
-                    </div>
-
-                    {/* Content Grid */}
-                    {isLoading ? (
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-12">
-                            {[...Array(4)].map((_, i) => (
-                                <div key={i} className="space-y-4">
-                                    <Skeleton className="aspect-[4/5] w-full bg-gray-100 rounded-none" />
-                                    <div className="space-y-2">
-                                        <Skeleton className="h-4 w-3/4" />
-                                        <Skeleton className="h-3 w-1/2" />
+        <>
+            <AppShell>
+                <main className="min-h-screen bg-white">
+                    <div className="max-w-screen-xl mx-auto px-6 md:px-12 py-10">
+                        {/* Hero Section */}
+                        <section className="bg-card border border-border rounded-xl p-8 mb-10">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                                <div>
+                                    <div className="flex items-center gap-3 mb-3">
+                                        <Users className="h-5 w-5 text-foreground" aria-hidden="true" />
+                                        <h1 className="text-2xl font-semibold tracking-tight">
+                                            {nickname}님의 진행 중인 펀딩
+                                        </h1>
+                                    </div>
+                                    <div className="flex items-center gap-3 flex-wrap">
+                                        <p className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium border border-emerald-200">
+                                            <Gift className="h-3 w-3" aria-hidden="true" />
+                                            <span>
+                                                총 <strong className="font-semibold">{totalCount}</strong>개의 펀딩
+                                            </span>
+                                        </p>
                                     </div>
                                 </div>
-                            ))}
-                        </div>
-                    ) : fundings.length > 0 ? (
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-12">
-                            {fundings.map((funding) => (
-                                <FundingCard
-                                    key={funding.id}
-                                    funding={funding}
-                                    onClick={() => handleFundingClick(funding.id)}
-                                    variant="carousel"
-                                    className="w-full"
-                                />
-                            ))}
-                        </div>
-                    ) : (
-                        <EmptyState
-                            icon={<Sparkles className="h-8 w-8 text-muted-foreground" strokeWidth={1} />}
-                            title="펀딩이 없습니다"
-                            description={`${nickname}님이 진행 중인 펀딩이 없습니다.`}
-                            action={
-                                <Button
-                                    variant="outline"
-                                    onClick={() => router.push(`/wishlist/${friendId}`)}
-                                    className="border-black rounded-none font-bold text-xs"
-                                >
-                                    위시리스트 보러가기
-                                </Button>
-                            }
-                        />
-                    )}
+                            </div>
+                        </section>
 
-                    {/* Pagination Placeholder */}
-                    {!isLoading && data?.page.hasNext && (
-                        <div className="mt-24 flex justify-center">
-                            <Button variant="outline" className="h-12 px-12 border-black rounded-none font-bold">
-                                MORE
-                            </Button>
-                        </div>
-                    )}
-                </section>
-            </main>
-            <Footer />
-        </AppShell>
+                        {/* Content Grid */}
+                        {isLoading ? (
+                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-12">
+                                {[...Array(4)].map((_, i) => (
+                                    <div key={i} className="space-y-4">
+                                        <Skeleton className="aspect-[4/5] w-full bg-gray-100 rounded-none" />
+                                        <div className="space-y-2">
+                                            <Skeleton className="h-4 w-3/4" />
+                                            <Skeleton className="h-3 w-1/2" />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : fundings.length > 0 ? (
+                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-12">
+                                {fundings.map((funding) => (
+                                    <FundingCard
+                                        key={funding.id}
+                                        funding={funding}
+                                        onClick={() => handleFundingClick(funding.id)}
+                                        onAddToCart={() => handleParticipateFunding(funding.id)}
+                                        variant="carousel"
+                                        className="w-full"
+                                    />
+                                ))}
+                            </div>
+                        ) : (
+                            <EmptyState
+                                icon={<Sparkles className="h-8 w-8 text-muted-foreground" strokeWidth={1} />}
+                                title="펀딩이 없습니다"
+                                description={`${nickname}님이 진행 중인 펀딩이 없습니다.`}
+                                action={
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => router.push(`/wishlist/${friendId}`)}
+                                        className="border-black rounded-none font-bold text-xs"
+                                    >
+                                        위시리스트 보러가기
+                                    </Button>
+                                }
+                            />
+                        )}
+
+                        {/* Pagination Placeholder */}
+                        {!isLoading && data?.page.hasNext && (
+                            <div className="mt-24 flex justify-center">
+                                <Button variant="outline" className="h-12 px-12 border-black rounded-none font-bold">
+                                    MORE
+                                </Button>
+                            </div>
+                        )}
+                    </div>
+                </main>
+                <Footer />
+            </AppShell>
+
+            {selectedFunding && (
+                <ParticipateModal
+                    open={isParticipateOpen}
+                    onOpenChange={setIsParticipateOpen}
+                    funding={selectedFunding}
+                    onSuccess={() => {
+                        toast.success('장바구니에 담겼습니다.', {
+                            description: '펀딩 참여가 장바구니에 추가되었습니다.',
+                            action: {
+                                label: '장바구니 확인',
+                                onClick: () => router.push('/cart')
+                            }
+                        });
+                    }}
+                />
+            )}
+        </>
     );
 }
 

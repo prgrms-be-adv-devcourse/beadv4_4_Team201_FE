@@ -3,10 +3,10 @@
 import Image from 'next/image';
 import { handleImageError } from '@/lib/image';
 import { differenceInDays, parseISO } from 'date-fns';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { FundingProgress } from './FundingProgress';
 import { cn } from '@/lib/utils';
 import type { FundingStatus } from '@/types/funding';
+import { ShoppingCart } from 'lucide-react';
 
 export type { FundingStatus };
 
@@ -23,13 +23,9 @@ export interface FundingCardProps {
         currentAmount: number;
         status: FundingStatus;
         expiresAt: string;
-        participantCount: number;
-        recipient: {
-            nickname: string | null;
-            avatarUrl?: string | null;
-        };
     };
     onClick?: () => void;
+    onAddToCart?: () => void;
     className?: string;
 }
 
@@ -37,33 +33,40 @@ export function FundingCard({
     variant = 'carousel',
     funding,
     onClick,
+    onAddToCart,
     className,
 }: FundingCardProps) {
     const isCarousel = variant === 'carousel';
     const percentage = Math.round((funding.currentAmount / funding.targetAmount) * 100);
     const daysLeft = differenceInDays(parseISO(funding.expiresAt), new Date());
-    const recipientNickname = funding.recipient.nickname || '알 수 없음';
+
+    const handleCartClick = (e: React.MouseEvent) => {
+        e.stopPropagation(); // Prevent card click event from firing
+        onAddToCart?.();
+    };
 
     const getStatusLabel = () => {
+        const baseClasses = "inline-flex items-center justify-center px-2 py-1 rounded-md text-xs font-bold whitespace-nowrap";
+
         if (funding.status === 'ACHIEVED') {
-            return <span className="text-xs font-medium text-foreground">달성</span>;
+            return <span className={cn(baseClasses, "bg-green-500 text-white")}>달성</span>;
         }
         if (funding.status === 'ACCEPTED') {
-            return <span className="text-xs font-medium text-foreground">수락</span>;
+            return <span className={cn(baseClasses, "bg-blue-500 text-white")}>수락</span>;
         }
         if (funding.status === 'REFUSED') {
-            return <span className="text-xs text-muted-foreground">거절</span>;
+            return <span className={cn(baseClasses, "bg-red-500 text-white")}>거절</span>;
         }
         if (funding.status === 'CLOSED') {
-            return <span className="text-xs text-muted-foreground">종료</span>;
+            return <span className={cn(baseClasses, "bg-gray-400 text-white")}>종료</span>;
         }
         if (funding.status === 'EXPIRED' || Number.isNaN(daysLeft) || daysLeft < 0) {
-            return <span className="text-xs text-muted-foreground">만료</span>;
+            return <span className={cn(baseClasses, "bg-gray-400 text-white")}>만료</span>;
         }
         if (daysLeft === 0) {
-            return <span className="text-xs font-medium text-foreground">D-Day</span>;
+            return <span className={cn(baseClasses, "bg-primary text-primary-foreground")}>D-Day</span>;
         }
-        return <span className="text-xs text-muted-foreground">D-{daysLeft}</span>;
+        return <span className={cn(baseClasses, "bg-primary text-primary-foreground")}>D-{daysLeft}</span>;
     };
 
     if (isCarousel) {
@@ -102,22 +105,27 @@ export function FundingCard({
                             size="sm"
                         />
                         <div className="flex items-center justify-between text-xs">
-                            <span className="text-muted-foreground">
-                                {funding.currentAmount.toLocaleString()}원
-                            </span>
-                            <span className="font-medium">{percentage}%</span>
+                            <div className="flex flex-col gap-0.5">
+                                <span className="font-bold text-foreground">
+                                    {funding.currentAmount.toLocaleString()}원
+                                </span>
+                                <span className="text-[10px] text-muted-foreground">
+                                    목표 {funding.targetAmount.toLocaleString()}원
+                                </span>
+                            </div>
+                            <span className="font-bold text-primary">{percentage}%</span>
                         </div>
                     </div>
 
-                    {funding.recipient.nickname && (
-                        <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
-                            <Avatar className="h-5 w-5">
-                                <AvatarImage src={funding.recipient.avatarUrl || undefined} alt={recipientNickname} />
-                                <AvatarFallback className="text-[10px]">{recipientNickname[0]}</AvatarFallback>
-                            </Avatar>
-                            <span className="text-xs text-muted-foreground">
-                                @{recipientNickname} · {funding.participantCount}명
-                            </span>
+                    {onAddToCart && (
+                        <div className="mt-3"> {/* Removed pt-3 border-t border-border */}
+                             <button
+                                onClick={handleCartClick}
+                                className="w-full py-1.5 bg-black text-white rounded text-[10px] font-bold hover:bg-black/80 transition-colors flex items-center justify-center gap-1"
+                            >
+                                <ShoppingCart className="h-3 w-3" strokeWidth={2} />
+                                장바구니 담기
+                            </button>
                         </div>
                     )}
                 </div>
@@ -146,18 +154,31 @@ export function FundingCard({
 
             <div className="flex flex-1 flex-col justify-between pl-4">
                 <div>
-                    {funding.recipient.nickname && (
-                        <p className="mt-0.5 text-xs text-muted-foreground">
-                            {funding.recipient.nickname}님을 위한 펀딩
-                        </p>
-                    )}
+                    {/* Recipient nickname was here, now removed */}
                     <h3 className="text-sm font-medium line-clamp-1">{funding.product?.name}</h3>
-                    <p className="mt-0.5 text-xs text-muted-foreground">
-                        {funding.targetAmount.toLocaleString()}원 목표
-                    </p>
+                    <div className="flex flex-col mt-0.5">
+                        <span className="text-sm font-bold text-foreground">
+                            {funding.currentAmount.toLocaleString()}원
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                            목표 {funding.targetAmount.toLocaleString()}원
+                        </span>
+                    </div>
                 </div>
 
-                <div className="flex items-center justify-between">
+                {onAddToCart && (
+                    <div className="mt-2">
+                        <button
+                            onClick={handleCartClick}
+                            className="w-full py-1.5 bg-black text-white rounded text-[10px] font-bold hover:bg-black/80 transition-colors flex items-center justify-center gap-1"
+                        >
+                            <ShoppingCart className="h-3 w-3" strokeWidth={2} />
+                            장바구니 담기
+                        </button>
+                    </div>
+                )}
+
+                <div className="flex items-center justify-between mt-2">
                     <FundingProgress
                         current={funding.currentAmount}
                         target={funding.targetAmount}
@@ -165,7 +186,7 @@ export function FundingCard({
                         className="w-full max-w-[100px]"
                     />
                     <div className="ml-3 flex items-center gap-2 text-xs">
-                        <span className="font-medium">{percentage}%</span>
+                        <span className="font-bold text-primary">{percentage}%</span>
                         {getStatusLabel()}
                     </div>
                 </div>
