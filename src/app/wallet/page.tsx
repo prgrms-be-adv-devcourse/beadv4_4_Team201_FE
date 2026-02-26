@@ -22,7 +22,9 @@ export default function WalletPage() {
     const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
     const { data: wallet, isLoading: isLoadingWallet, error: walletError, refetch: refetchWallet } = useWallet();
     const { data: historyData, isLoading: isLoadingHistory, error: historyError, refetch: refetchHistory } = useWalletHistory({
-        type: filterType
+        type: filterType,
+        page: 0,
+        size: 20
     });
 
     // Redirect to login if not authenticated

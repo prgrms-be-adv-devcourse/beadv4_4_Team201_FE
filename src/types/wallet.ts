@@ -7,7 +7,13 @@ import { PaginatedResponse } from './api';
  * - SETTLEMENT_CLAWBACK: Member settlement clawback (deduction)
  * - CANCEL_REFUND: Order cancellation refund (income)
  */
-export type TransactionType = 'ORDER_DEDUCT' | 'SETTLEMENT_PAYOUT' | 'SETTLEMENT_CLAWBACK' | 'CANCEL_REFUND';
+export type TransactionType =
+    | 'CHARGE'
+    | 'WITHDRAW'
+    | 'ORDER_DEDUCT'
+    | 'SETTLEMENT_PAYOUT'
+    | 'SETTLEMENT_CLAWBACK'
+    | 'CANCEL_REFUND';
 
 /**
  * Wallet information

@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
+import { ArrowUpCircle, ArrowDownCircle, AlertCircle } from 'lucide-react';
 import type { WalletTransaction, TransactionType } from '@/types/wallet';
 
 interface TransactionHistoryProps {
@@ -9,6 +9,8 @@ interface TransactionHistoryProps {
 }
 
 const TRANSACTION_ICONS = {
+    CHARGE: ArrowUpCircle,
+    WITHDRAW: ArrowDownCircle,
     ORDER_DEDUCT: ArrowDownCircle,
     SETTLEMENT_PAYOUT: ArrowUpCircle,
     SETTLEMENT_CLAWBACK: ArrowDownCircle,
@@ -16,6 +18,8 @@ const TRANSACTION_ICONS = {
 };
 
 const TRANSACTION_LABELS = {
+    CHARGE: '캐시 충전',
+    WITHDRAW: '출금',
     ORDER_DEDUCT: '주문 차감',
     SETTLEMENT_PAYOUT: '정산 입금',
     SETTLEMENT_CLAWBACK: '정산 환수',
@@ -56,12 +60,12 @@ export function TransactionHistory({ transactions, filterType, onFilterChange }:
                         >
                             전체
                         </button>
-                        {(['ORDER_DEDUCT', 'SETTLEMENT_PAYOUT', 'SETTLEMENT_CLAWBACK', 'CANCEL_REFUND'] as TransactionType[]).map((type) => (
+                        {(['CHARGE', 'WITHDRAW', 'ORDER_DEDUCT', 'SETTLEMENT_PAYOUT', 'SETTLEMENT_CLAWBACK', 'CANCEL_REFUND'] as TransactionType[]).map((type) => (
                             <button
                                 key={type}
                                 onClick={() => onFilterChange(type)}
                                 className={cn(
-                                    "px-3 py-1 text-xs transition-opacity",
+                                    "px-3 py-1 text-xs transition-opacity whitespace-nowrap",
                                     filterType === type
                                         ? "font-medium text-foreground"
                                         : "text-muted-foreground hover:text-foreground"
@@ -82,8 +86,8 @@ export function TransactionHistory({ transactions, filterType, onFilterChange }:
             ) : (
                 <div className="divide-y divide-border">
                     {transactions.map((tx) => {
-                        const Icon = TRANSACTION_ICONS[tx.type];
-                        const isPositive = tx.type === 'SETTLEMENT_PAYOUT' || tx.type === 'CANCEL_REFUND';
+                        const Icon = TRANSACTION_ICONS[tx.type] || AlertCircle;
+                        const isPositive = ['CHARGE', 'SETTLEMENT_PAYOUT', 'CANCEL_REFUND'].includes(tx.type);
 
                         return (
                             <div key={tx.id} className="flex items-center gap-4 py-4">
