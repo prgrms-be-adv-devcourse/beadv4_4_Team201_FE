@@ -1,13 +1,12 @@
 'use client';
 
 import { Header, HeaderVariant } from './Header';
-import { BottomNav } from './BottomNav';
 import { cn } from '@/lib/utils';
 
 interface AppShellProps {
     children: React.ReactNode;
     showHeader?: boolean;
-    showBottomNav?: boolean;
+    showBottomNav?: boolean; // Deprecated, to be removed
     headerVariant?: HeaderVariant;
     headerTitle?: string;
     hasBack?: boolean;
@@ -19,7 +18,7 @@ interface AppShellProps {
 export function AppShell({
     children,
     showHeader = true,
-    showBottomNav = false,
+    // showBottomNav = false, // Removed
     headerVariant = 'main',
     headerTitle,
     hasBack,
@@ -42,15 +41,11 @@ export function AppShell({
             <main
                 className={cn(
                     'flex-1',
-                    // BottomNav height is h-14 (3.5rem) + safe area
-                    showBottomNav && 'pb-14 md:pb-0',
                     className
                 )}
             >
                 {children}
             </main>
-
-            {showBottomNav && <BottomNav />}
         </div>
     );
 }
