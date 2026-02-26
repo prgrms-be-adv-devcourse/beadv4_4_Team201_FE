@@ -16,6 +16,7 @@ import { InlineError } from '@/components/common/InlineError';
 import { Button } from '@/components/ui/button';
 import { Users } from 'lucide-react';
 import { toast } from 'sonner';
+import { resolveImageUrl } from '@/lib/image';
 
 export default function FundingDetailPage() {
     const params = useParams();
@@ -82,7 +83,7 @@ export default function FundingDetailPage() {
                 {/* Product Image */}
                 <div className="relative aspect-square w-full bg-secondary md:aspect-video">
                     <Image
-                        src={funding.product?.imageUrl || "/images/placeholder-product.svg"}
+                        src={resolveImageUrl(funding.product?.imageUrl, funding.product?.category)}
                         alt={funding.product?.name || "상품 이미지"}
                         fill
                         className="object-cover"

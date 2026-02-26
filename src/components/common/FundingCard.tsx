@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { handleImageError } from '@/lib/image';
+import { handleImageError, resolveImageUrl } from '@/lib/image';
 import { differenceInDays, parseISO } from 'date-fns';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { FundingProgress } from './FundingProgress';
@@ -19,6 +19,7 @@ export interface FundingCardProps {
             name: string;
             imageUrl: string;
             price: number;
+            category?: string;
         };
         targetAmount: number;
         currentAmount: number;
@@ -86,7 +87,7 @@ export function FundingCard({
                 {/* Image */}
                 <div className="relative aspect-[4/5] w-full bg-secondary overflow-hidden">
                     <Image
-                        src={funding.product.imageUrl}
+                        src={resolveImageUrl(funding.product.imageUrl, funding.product.category)}
                         alt={funding.product.name}
                         fill
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -156,7 +157,7 @@ export function FundingCard({
         >
             <div className="relative h-20 w-20 shrink-0 bg-secondary overflow-hidden">
                 <Image
-                    src={funding.product.imageUrl}
+                    src={resolveImageUrl(funding.product.imageUrl, funding.product.category)}
                     alt={funding.product.name}
                     fill
                     className="object-cover"

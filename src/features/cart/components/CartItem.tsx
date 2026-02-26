@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { handleImageError } from '@/lib/image';
+import { handleImageError, resolveImageUrl } from '@/lib/image';
 import { Progress } from '@/components/ui/progress';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Trash2, AlertCircle } from 'lucide-react';
@@ -55,7 +55,7 @@ export function CartItem({ item, onUpdateAmount, onToggleSelect, onRemove }: Car
 
             <div className="relative aspect-square h-24 w-24 shrink-0 bg-secondary overflow-hidden">
                 <Image
-                    src={funding.product?.imageUrl || "/images/placeholder-product.svg"}
+                    src={resolveImageUrl(funding.product?.imageUrl, funding.product?.category)}
                     alt={productName || "상품 이미지"}
                     fill
                     className={cn("object-cover", !isAvailable && "grayscale")}

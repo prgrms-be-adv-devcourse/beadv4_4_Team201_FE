@@ -14,6 +14,7 @@ import { useWishlistItem } from '@/features/wishlist/hooks/useWishlistItem';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { formatCurrency } from '@/lib/utils/format';
+import { resolveImageUrl } from '@/lib/image';
 
 const CATEGORIES = [
   { label: '전체', value: '' },
@@ -88,8 +89,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   }
 
   const images = product.images?.length > 0
-    ? product.images
-    : [product.imageUrl || '/images/placeholder-product.svg'];
+    ? product.images.map(img => resolveImageUrl(img, product.category))
+    : [resolveImageUrl(product.imageUrl, product.category)];
 
   const productCategory = product.category?.toLowerCase() || '';
 
@@ -110,7 +111,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                     <Link
                       href={cat.value ? `/products?category=${cat.value}` : '/products'}
                       className={cn(
-                        'text-xs transition-opacity hover:opacity-60 text-left w-full block',
+                        'text-xs transition-opacity hover:opacity-60 text-left w-full block py-1',
                         productCategory === cat.value ? 'font-black text-black underline underline-offset-4' : 'text-gray-400 font-medium'
                       )}
                     >

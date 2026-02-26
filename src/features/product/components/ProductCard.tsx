@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { handleImageError } from '@/lib/image';
+import { handleImageError, resolveImageUrl } from '@/lib/image';
 import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query/keys';
 import { getProduct } from '@/lib/api/products';
@@ -49,7 +49,7 @@ export function ProductCard({ product, onClick, className }: ProductCardProps) {
       {/* Product Image */}
       <div className="relative aspect-square w-full overflow-hidden bg-gray-100 mb-3">
         <Image
-          src={product.imageUrl || '/images/placeholder-product.svg'}
+          src={resolveImageUrl(product.imageUrl, product.category)}
           alt={product.name}
           fill
           className="object-cover transition-transform duration-500 group-hover:scale-105"

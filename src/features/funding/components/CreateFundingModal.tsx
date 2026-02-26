@@ -19,6 +19,7 @@ import { useWallet } from '@/features/wallet/hooks/useWallet';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCreateFunding } from '@/features/funding/hooks/useFundingMutations';
+import { resolveImageUrl } from '@/lib/image';
 
 interface CreateFundingModalProps {
     open: boolean;
@@ -29,6 +30,7 @@ interface CreateFundingModalProps {
             name: string;
             price: number;
             imageUrl: string;
+            category?: string;
         };
     };
     /** 장바구니에 추가 성공 시 호출 (checkout으로 이동 권장) */
@@ -110,7 +112,7 @@ export function CreateFundingModal({
                         <div className="flex gap-3">
                             <div className="relative w-16 h-16 rounded-md overflow-hidden flex-shrink-0">
                                 <Image
-                                    src={wishItem.product.imageUrl || '/images/placeholder-product.svg'}
+                                    src={resolveImageUrl(wishItem.product.imageUrl, wishItem.product.category)}
                                     alt={wishItem.product.name}
                                     fill
                                     className="object-cover"
