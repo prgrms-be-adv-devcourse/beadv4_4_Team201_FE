@@ -35,7 +35,8 @@ export function AddToCartButton({
 
         try {
             await addToCartMutation.mutateAsync({
-                wishItemId: productId,
+                targetType: 'FUNDING_PENDING',
+                targetId: productId,
                 amount: 10000,
             });
 
