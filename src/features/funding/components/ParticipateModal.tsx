@@ -23,14 +23,24 @@ import type { Funding } from '@/types/funding';
 interface ParticipateModalProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    funding: Pick<Funding, 'id' | 'product' | 'recipient' | 'currentAmount' | 'targetAmount'>;
+    wishItemId: string;
+    product: {
+        name: string;
+        imageUrl: string;
+        price: number;
+    };
+    recipient: {
+        nickname: string;
+    };
     onSuccess: (mode: 'cart' | 'checkout') => void;
 }
 
 export function ParticipateModal({
     open,
     onOpenChange,
-    funding,
+    wishItemId,
+    product,
+    recipient,
     onSuccess
 }: ParticipateModalProps) {
     const [amount, setAmount] = useState(0);
@@ -41,10 +51,9 @@ export function ParticipateModal({
         if (open) {
             setAmount(0);
         }
-    }, [open, funding.id]);
+    }, [open, wishItemId]);
 
     const participateFunding = useParticipateFunding();
-    const remainingAmount = funding.targetAmount - funding.currentAmount;
 
     const handleSubmit = () => {
         if (amount < 1000) {
@@ -52,14 +61,9 @@ export function ParticipateModal({
             return;
         }
 
-        if (amount > remainingAmount) {
-            toast.error(`남은 금액은 ${remainingAmount.toLocaleString()}원 입니다.`);
-            return;
-        }
-
         participateFunding.mutate(
             {
-                fundingId: funding.id,
+                wishItemId,
                 amount,
             },
             {
@@ -87,16 +91,16 @@ export function ParticipateModal({
                     <div className="flex items-center gap-3">
                         <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-secondary">
                             <Image
-                                src={funding.product.imageUrl}
-                                alt={funding.product.name}
+                                src={product.imageUrl}
+                                alt={product.name}
                                 fill
                                 className="object-cover"
                             />
                         </div>
                         <div className="min-w-0 flex-1">
-                            <p className="text-sm font-medium truncate">{funding.product.name}</p>
-                            <p className="text-xs text-muted-foreground">for @{funding.recipient.nickname}</p>
-                            <p className="text-sm font-bold mt-1">₩{funding.product.price.toLocaleString()}</p>
+                            <p className="text-sm font-medium truncate">{product.name}</p>
+                            <p className="text-xs text-muted-foreground">for @{recipient.nickname}</p>
+                            <p className="text-sm font-bold mt-1">₩{product.price.toLocaleString()}</p>
                         </div>
                     </div>
 
@@ -106,22 +110,30 @@ export function ParticipateModal({
                         value={amount}
                         onChange={setAmount}
                         minAmount={1000}
-                        maxAmount={remainingAmount}
                         walletBalance={wallet?.balance}
                     />
 
-                    <div className="text-sm text-muted-foreground space-y-1">
-                        <div className="flex justify-between">
-                            <span>남은 목표 금액</span>
-                            <span className="font-medium">₩{remainingAmount.toLocaleString()}</span>
-                        </div>
-                        {wallet && (
-                            <div className="flex justify-between">
-                                <span>내 지갑 잔액</span>
-                                <span className="font-medium">₩{wallet.balance.toLocaleString()}</span>
-                            </div>
-                        )}
+                    <div className="grid gap-2">
+                        <label className="flex items-center gap-2 text-sm leading-none font-medium text-muted-foreground" htmlFor="message">
+                            메시지 (선택)
+                            <span className="ml-2 text-xs text-muted-foreground">0/500</span>
+                        </label>
+                        <textarea
+                            className="flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                            id="message"
+                            placeholder="친구들에게 전할 말을 적어주세요. (준비 중인 기능입니다.)"
+                            maxLength={500}
+                            rows={3}
+                            disabled
+                        />
                     </div>
+
+                    {wallet && (
+                        <div className="flex justify-between text-sm text-muted-foreground">
+                            <span>내 지갑 잔액</span>
+                            <span className="font-medium">₩{wallet.balance.toLocaleString()}</span>
+                        </div>
+                    )}
 
                     <DialogFooter>
                         <Button

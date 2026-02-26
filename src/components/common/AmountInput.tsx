@@ -130,11 +130,6 @@ export function AmountInput({
                 )}
             </div>
 
-            {maxAmount && (
-                <p className="text-xs text-muted-foreground text-right">
-                    남은 목표 금액: {maxAmount.toLocaleString()}원
-                </p>
-            )}
         </div>
     );
 }

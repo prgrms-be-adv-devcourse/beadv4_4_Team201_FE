@@ -158,6 +158,13 @@ export function CreateFundingModal({
                         />
                     </div>
 
+                    {wallet && (
+                        <div className="flex justify-between text-sm text-muted-foreground">
+                            <span>내 지갑 잔액</span>
+                            <span className="font-medium">₩{wallet.balance.toLocaleString()}</span>
+                        </div>
+                    )}
+
                     <DialogFooter>
                         <Button type="submit" disabled={createFunding.isPending} className="w-full">
                             {createFunding.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

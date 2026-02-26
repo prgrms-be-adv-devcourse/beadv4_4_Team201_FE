@@ -10,11 +10,15 @@ import { useWallet } from '@/features/wallet/hooks/useWallet';
 import { Wallet } from 'lucide-react';
 import { formatPrice } from '@/lib/format';
 import { ChargeModal } from '@/features/wallet/components/ChargeModal';
+import { useMyWishlist } from '@/features/wishlist/hooks/useWishlist';
+import { ProductCard } from '@/features/product/components/ProductCard';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ProfilePage() {
     const { isAuthenticated, isSeller: isSellerFromAuth } = useAuth();
     const { data: member } = useProfile();
     const { data: wallet } = useWallet();
+    const { data: wishlist, isLoading: isWishlistLoading } = useMyWishlist({ page: 0, size: 4 });
     const [isChargeModalOpen, setIsChargeModalOpen] = useState(false);
 
     // Auth0 claims 또는 백엔드 member.role 중 하나라도 SELLER이면 판매자
@@ -80,26 +84,40 @@ export default function ProfilePage() {
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-4">
                             <h2 className="text-base font-medium">나의 좋아요</h2>
-                            <span className="text-xs text-muted-foreground">0 item(s)</span>
+                            <span className="text-xs text-muted-foreground">{wishlist?.itemCount ?? 0} item(s)</span>
                         </div>
                         <Link href="/wishlist" className="text-xs text-muted-foreground hover:text-foreground">
                             더보기 ›
                         </Link>
                     </div>
 
-                    {/* Product/Brand Tabs */}
-                    <div className="flex gap-6 mb-6 border-b border-border">
-                        <button className="pb-3 text-sm font-medium border-b-2 border-foreground -mb-px">
-                            Product
-                        </button>
-                        <button className="pb-3 text-sm text-muted-foreground hover:text-foreground">
-                            Brand
-                        </button>
-                    </div>
 
-                    <div className="text-center py-12 border border-border">
-                        <p className="text-sm text-muted-foreground">좋아요한 상품이 없습니다.</p>
-                    </div>
+                    {isWishlistLoading ? (
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 px-0.5">
+                            {[1, 2, 3, 4].map((i) => (
+                                <div key={i} className="space-y-3">
+                                    <Skeleton className="aspect-square w-full" />
+                                    <div className="space-y-2">
+                                        <Skeleton className="h-3 w-full" />
+                                        <Skeleton className="h-3 w-1/2" />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : wishlist?.items && wishlist.items.length > 0 ? (
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 px-0.5">
+                            {wishlist.items.map((item) => (
+                                <ProductCard
+                                    key={item.id}
+                                    product={item.product}
+                                />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-12 border border-border">
+                            <p className="text-sm text-muted-foreground">좋아요한 상품이 없습니다.</p>
+                        </div>
+                    )}
                 </section>
 
                 {/* Mobile Menu */}

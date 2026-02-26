@@ -28,8 +28,8 @@ export function useAddToCart() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.cart });
       // Also invalidate the specific funding
-      if (variables.fundingId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.funding(variables.fundingId) });
+      if (variables.targetType === 'FUNDING') {
+        queryClient.invalidateQueries({ queryKey: queryKeys.funding(variables.targetId) });
       }
     },
   });
