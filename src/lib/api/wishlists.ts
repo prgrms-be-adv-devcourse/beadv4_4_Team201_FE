@@ -89,6 +89,7 @@ function transformWishlist(data: any): Wishlist {
       };
     }
 
+    const category = item.category || item.productCategory || '';
     // Otherwise, it's a flat style, transform it
     return {
       id: (item.wishlistItemId || item.id || '').toString(),
@@ -98,11 +99,11 @@ function transformWishlist(data: any): Wishlist {
         id: (item.productId || '').toString(),
         name: item.productName || item.name || '',
         price: item.price || 0,
-        imageUrl: resolveImageUrl(item.imageKey || item.imageUrl || item.productImageUrl),
+        imageUrl: resolveImageUrl(item.imageKey || item.imageUrl || item.productImageUrl, category),
         status: 'ON_SALE' as const,
         brandName: item.brandName || item.sellerNickname || '',
         sellerNickname: item.sellerNickname || '',
-        category: item.category || item.productCategory || '',
+        category: category,
         isSoldout: item.isSoldout || false,
         isActive: item.isActive !== false,
       },

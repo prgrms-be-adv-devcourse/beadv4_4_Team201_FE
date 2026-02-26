@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { resolveImageUrl, handleImageError } from '@/lib/image';
 import { Badge } from '@/components/ui/badge';
 import { FundingProgress } from './FundingProgress';
 import { Gift, ChevronRight, Trash2 } from 'lucide-react';
@@ -28,6 +29,7 @@ export interface WishItemCardProps {
             name: string;
             imageUrl: string;
             price: number;
+            category?: string;
         };
         status: WishItemStatus;
         // For IN_FUNDING
@@ -62,10 +64,11 @@ export function WishItemCard({
                 {/* Image */}
                 <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-md bg-secondary">
                     <Image
-                        src={item.product.imageUrl}
+                        src={resolveImageUrl(item.product.imageUrl, item.product.category)}
                         alt={item.product.name}
                         fill
                         className={cn('object-cover', isFunded && 'grayscale')}
+                        onError={handleImageError}
                     />
                 </div>
 

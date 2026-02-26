@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Heart } from 'lucide-react';
 import { formatPrice } from '@/lib/format';
+import { resolveImageUrl } from '@/lib/image';
 import { cn } from '@/lib/utils';
 
 interface CuratedProduct {
@@ -10,6 +11,7 @@ interface CuratedProduct {
     brandName: string;
     price: number;
     imageUrl: string;
+    category?: string;
     editorial?: string; // Editor's comment
 }
 
@@ -33,7 +35,7 @@ export function CuratedProductCard({
                         aspectRatio === 'portrait' ? 'aspect-[3/4]' : 'aspect-square'
                     )}>
                         <Image
-                            src={product.imageUrl}
+                            src={resolveImageUrl(product.imageUrl, product.category)}
                             alt={product.name}
                             fill
                             className="object-cover transition-transform duration-700 group-hover:scale-105"

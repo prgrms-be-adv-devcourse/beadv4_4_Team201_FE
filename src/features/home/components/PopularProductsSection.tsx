@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { handleImageError } from '@/lib/image';
+import { handleImageError, resolveImageUrl } from '@/lib/image';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -15,7 +15,7 @@ interface PopularProductsSectionProps {
     subtitle?: string;
 }
 
-export function PopularProductsSection({ 
+export function PopularProductsSection({
     products,
     title = '인기 상품',
     subtitle = 'Popular'
@@ -50,39 +50,39 @@ export function PopularProductsSection({
                 </div>
 
                 <div className="px-8 flex flex-col">
-                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 border-t border-l border-border">
-                    {displayProducts.map((product) => (
-                        <Link
-                            key={product.id}
-                            href={`/products/${product.id}`}
-                            className="group bg-white border-r border-b border-border"
-                            onMouseEnter={() => handlePrefetch(product.id)}
-                        >
-                            {/* Image */}
-                            <div className="relative aspect-[4/5] w-full overflow-hidden">
-                                <Image
-                                    src={product.imageUrl}
-                                    alt={product.name}
-                                    fill
-                                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                                    sizes="(max-width: 768px) 50vw, 15vw"
-                                    onError={handleImageError}
-                                />
-                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
-                            </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 border-t border-l border-border">
+                        {displayProducts.map((product) => (
+                            <Link
+                                key={product.id}
+                                href={`/products/${product.id}`}
+                                className="group bg-white border-r border-b border-border"
+                                onMouseEnter={() => handlePrefetch(product.id)}
+                            >
+                                {/* Image */}
+                                <div className="relative aspect-[4/5] w-full overflow-hidden">
+                                    <Image
+                                        src={resolveImageUrl(product.imageUrl, product.category)}
+                                        alt={product.name}
+                                        fill
+                                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                                        sizes="(max-width: 768px) 50vw, 15vw"
+                                        onError={handleImageError}
+                                    />
+                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
+                                </div>
 
-                            {/* Info */}
-                            <div className="p-3">
-                                <h3 className="text-[11px] font-medium line-clamp-2 min-h-[2rem] group-hover:opacity-60 transition-opacity leading-tight">
-                                    {product.name}
-                                </h3>
-                                <p className="text-xs font-black mt-1 tracking-tight">
-                                    {product.price.toLocaleString()}원
-                                </p>
-                            </div>
-                        </Link>
-                    ))}
-                  </div>
+                                {/* Info */}
+                                <div className="p-3">
+                                    <h3 className="text-[11px] font-medium line-clamp-2 min-h-[2rem] group-hover:opacity-60 transition-opacity leading-tight">
+                                        {product.name}
+                                    </h3>
+                                    <p className="text-xs font-black mt-1 tracking-tight">
+                                        {product.price.toLocaleString()}원
+                                    </p>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
                 </div>
             </div>
         </section>
