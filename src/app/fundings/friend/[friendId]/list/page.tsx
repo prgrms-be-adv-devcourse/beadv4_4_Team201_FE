@@ -34,21 +34,13 @@ export function FriendFundingsContent({ friendId }: { friendId: string }) {
         router.push(`/fundings/friend/${friendId}/${id}`);
     };
 
-    const handleParticipateFunding = async (fundingId: string) => {
+    const handleParticipateFunding = (funding: Funding) => {
         if (!user) {
             router.push('/auth/login');
             return;
         }
-
-        const loadingToast = toast.loading('펀딩 정보를 불러오는 중...');
-        try {
-            const funding = await getFunding(fundingId);
-            setSelectedFunding(funding);
-            setIsParticipateOpen(true);
-            toast.dismiss(loadingToast);
-        } catch {
-            toast.error('펀딩 정보를 불러오는데 실패했습니다.', { id: loadingToast });
-        }
+        setSelectedFunding(funding);
+        setIsParticipateOpen(true);
     };
 
     return (
@@ -98,7 +90,7 @@ export function FriendFundingsContent({ friendId }: { friendId: string }) {
                                         key={funding.id}
                                         funding={funding}
                                         onClick={() => handleFundingClick(funding.id)}
-                                        onAddToCart={() => handleParticipateFunding(funding.id)}
+                                        onAddToCart={() => handleParticipateFunding(funding)}
                                         variant="carousel"
                                         className="w-full"
                                     />
@@ -137,7 +129,15 @@ export function FriendFundingsContent({ friendId }: { friendId: string }) {
                 <ParticipateModal
                     open={isParticipateOpen}
                     onOpenChange={setIsParticipateOpen}
-                    funding={selectedFunding}
+                    wishItemId={selectedFunding.wishItemId}
+                    product={{
+                        name: selectedFunding.product.name,
+                        imageUrl: selectedFunding.product.imageUrl || '',
+                        price: selectedFunding.product.price
+                    }}
+                    recipient={{
+                        nickname: selectedFunding.recipient.nickname || selectedFunding.receiverNickname || '알 수 없음'
+                    }}
                     onSuccess={() => {
                         toast.success('장바구니에 담겼습니다.', {
                             description: '펀딩 참여가 장바구니에 추가되었습니다.',

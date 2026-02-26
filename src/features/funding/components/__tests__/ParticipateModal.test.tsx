@@ -1,7 +1,6 @@
 import { render, screen } from '@/test/test-utils';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ParticipateModal } from '../ParticipateModal';
-import type { Funding } from '@/types/funding';
 
 vi.mock('@/components/ui/dialog', () => ({
     Dialog: ({ open, children }: any) => (open ? <div>{children}</div> : null),
@@ -24,6 +23,8 @@ vi.mock('sonner', () => ({
     toast: {
         success: vi.fn(),
         error: vi.fn(),
+        loading: vi.fn(),
+        dismiss: vi.fn(),
     },
 }));
 
@@ -42,20 +43,16 @@ vi.mock('@/features/wallet/hooks/useWallet', () => ({
 }));
 
 describe('ParticipateModal Component', () => {
-    const mockFunding: Funding = {
-        id: 'f1',
+    const mockProps = {
         wishItemId: 'wi-1',
-        organizerId: 'user-2',
-        organizer: { id: 'user-2', nickname: 'Jane', avatarUrl: '' },
-        recipientId: 'user-1',
-        recipient: { id: 'user-1', nickname: 'John', avatarUrl: '' },
-        product: { id: 'p1', name: 'Test Funding Item', price: 100000, imageUrl: '/test-img.jpg', status: 'ON_SALE' as const },
-        targetAmount: 100000,
-        currentAmount: 50000,
-        status: 'IN_PROGRESS',
-        participantCount: 3,
-        expiresAt: '2026-02-28T00:00:00Z',
-        createdAt: '2026-01-01T00:00:00Z',
+        product: {
+            name: 'Test Funding Item',
+            price: 100000,
+            imageUrl: '/test-img.jpg',
+        },
+        recipient: {
+            nickname: 'John',
+        },
     };
 
     const mockOnOpenChange = vi.fn();
@@ -70,13 +67,13 @@ describe('ParticipateModal Component', () => {
             <ParticipateModal
                 open={true}
                 onOpenChange={mockOnOpenChange}
-                funding={mockFunding}
+                {...mockProps}
                 onSuccess={mockOnSuccess}
             />
         );
 
-        expect(screen.getByText('펀딩 참여하기')).toBeInTheDocument();
-        expect(screen.getAllByText('Test Funding Item')).toHaveLength(2);
+        expect(screen.getByText('장바구니 담기')).toBeInTheDocument();
+        expect(screen.getByText('Test Funding Item')).toBeInTheDocument();
         expect(screen.getByAltText('Test Funding Item')).toBeInTheDocument();
         expect(screen.getByText('for @John')).toBeInTheDocument();
         expect(screen.getByText('₩100,000')).toBeInTheDocument();
@@ -87,7 +84,7 @@ describe('ParticipateModal Component', () => {
             <ParticipateModal
                 open={true}
                 onOpenChange={mockOnOpenChange}
-                funding={mockFunding}
+                {...mockProps}
                 onSuccess={mockOnSuccess}
             />
         );
@@ -96,49 +93,33 @@ describe('ParticipateModal Component', () => {
         expect(screen.getByText('₩120,000')).toBeInTheDocument();
     });
 
-    it('GIVEN funding progress, THEN it should display remaining amount', () => {
+    it('GIVEN modal is open, THEN it should show message textarea (disabled)', () => {
         render(
             <ParticipateModal
                 open={true}
                 onOpenChange={mockOnOpenChange}
-                funding={mockFunding}
+                {...mockProps}
                 onSuccess={mockOnSuccess}
             />
         );
 
-        expect(screen.getByText('남은 목표 금액')).toBeInTheDocument();
-        expect(screen.getByText('₩50,000')).toBeInTheDocument();
+        expect(screen.getByText('메시지 (선택)')).toBeInTheDocument();
+        const textarea = screen.getByPlaceholderText(/친구들에게 전할 말을 적어주세요/);
+        expect(textarea).toBeInTheDocument();
+        expect(textarea).toBeDisabled();
     });
 
-    it('GIVEN modal is open, THEN it should show two CTA buttons', () => {
+    it('GIVEN modal is open, THEN it should show "장바구니 담기" button', () => {
         render(
             <ParticipateModal
                 open={true}
                 onOpenChange={mockOnOpenChange}
-                funding={mockFunding}
+                {...mockProps}
                 onSuccess={mockOnSuccess}
             />
         );
 
-        const cartBtn = screen.getByRole('button', { name: /장바구니에 담기/i });
-        const checkoutBtn = screen.getByRole('button', { name: /바로 결제하기/i });
+        const cartBtn = screen.getByRole('button', { name: /장바구니 담기/i });
         expect(cartBtn).toBeInTheDocument();
-        expect(checkoutBtn).toBeInTheDocument();
-    });
-
-    it('GIVEN user enters 0 amount, THEN both CTA buttons should be disabled', () => {
-        render(
-            <ParticipateModal
-                open={true}
-                onOpenChange={mockOnOpenChange}
-                funding={mockFunding}
-                onSuccess={mockOnSuccess}
-            />
-        );
-
-        const cartBtn = screen.getByRole('button', { name: /장바구니에 담기/i });
-        const checkoutBtn = screen.getByRole('button', { name: /바로 결제하기/i });
-        expect(cartBtn).toBeDisabled();
-        expect(checkoutBtn).toBeDisabled();
     });
 });
