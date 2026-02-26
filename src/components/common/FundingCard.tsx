@@ -135,7 +135,7 @@ export function FundingCard({
                                     <AvatarFallback className="text-[10px]">{recipientNickname[0]}</AvatarFallback>
                                 </Avatar>
                                 <span className="text-xs text-muted-foreground">
-                                    @{recipientNickname} · {funding.participantCount}명
+                                    @{recipientNickname}
                                 </span>
                             </div>
                         )

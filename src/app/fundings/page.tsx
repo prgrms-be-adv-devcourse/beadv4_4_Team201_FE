@@ -7,12 +7,16 @@ import { Footer } from '@/components/layout/Footer';
 import { FundingCard } from '@/components/common/FundingCard';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getFundings } from '@/lib/api/fundings';
+import { getFundings, getFunding } from '@/lib/api/fundings';
 import { FundingStatus } from '@/types/funding';
+import type { Funding } from '@/types/funding';
 import { Sparkles, Search, Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { EmptyState } from '@/components/common/EmptyState';
+import { ParticipateModal } from '@/features/funding/components/ParticipateModal';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import { toast } from 'sonner';
 
 const STATUS_FILTERS: { label: string; value: FundingStatus | 'ALL' }[] = [
     { label: '전체', value: 'ALL' },
@@ -23,7 +27,10 @@ const STATUS_FILTERS: { label: string; value: FundingStatus | 'ALL' }[] = [
 
 export default function FundingsPage() {
     const router = useRouter();
+    const { user } = useAuth();
     const [statusFilter, setStatusFilter] = useState<FundingStatus | 'ALL'>('ALL');
+    const [selectedFunding, setSelectedFunding] = useState<Funding | null>(null);
+    const [isParticipateOpen, setIsParticipateOpen] = useState(false);
 
     const { data, isLoading } = useQuery({
         queryKey: ['fundings', statusFilter],
@@ -39,7 +46,24 @@ export default function FundingsPage() {
         router.push(`/fundings/${id}`);
     };
 
+    const handleParticipateFunding = async (fundingId: string) => {
+        if (!user) {
+            router.push('/auth/login');
+            return;
+        }
+        const loadingToast = toast.loading('펀딩 정보를 불러오는 중...');
+        try {
+            const funding = await getFunding(fundingId);
+            setSelectedFunding(funding);
+            setIsParticipateOpen(true);
+            toast.dismiss(loadingToast);
+        } catch {
+            toast.error('펀딩 정보를 불러오는데 실패했습니다.', { id: loadingToast });
+        }
+    };
+
     return (
+        <>
         <AppShell headerTitle="펀딩 탐색" headerVariant="main">
             <main className="min-h-screen bg-white">
                 {/* Hero Section */}
@@ -119,15 +143,10 @@ export default function FundingsPage() {
                             {fundings.map((funding) => (
                                 <FundingCard
                                     key={funding.id}
-                                    funding={{
-                                        ...funding,
-                                        recipient: {
-                                            nickname: funding.recipient?.nickname || null,
-                                            avatarUrl: funding.recipient?.avatarUrl || null
-                                        }
-                                    }}
+                                    funding={funding}
                                     onClick={() => handleFundingClick(funding.id)}
-                                    variant="carousel" // Use carousel variant for grid as it shows full details
+                                    onAddToCart={funding.status === 'IN_PROGRESS' ? () => handleParticipateFunding(funding.id) : undefined}
+                                    variant="carousel"
                                     className="w-full"
                                 />
                             ))}
@@ -161,5 +180,23 @@ export default function FundingsPage() {
             </main>
             <Footer />
         </AppShell>
+
+        {selectedFunding && (
+            <ParticipateModal
+                open={isParticipateOpen}
+                onOpenChange={setIsParticipateOpen}
+                funding={selectedFunding}
+                onSuccess={() => {
+                    toast.success('장바구니에 담겼습니다.', {
+                        description: '펀딩 참여가 장바구니에 추가되었습니다.',
+                        action: {
+                            label: '장바구니 확인',
+                            onClick: () => router.push('/cart')
+                        }
+                    });
+                }}
+            />
+        )}
+        </>
     );
 }
