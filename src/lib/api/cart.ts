@@ -140,27 +140,10 @@ export async function getCart(): Promise<Cart> {
  * @endpoint POST /api/v2/carts
  */
 export async function addCartItem(data: CartItemCreateRequest): Promise<void> {
-  // CartItemCreateRequest를 BackendCartItemRequest로 변환
-  let targetType: BackendTargetType;
-  let targetId: number;
-  let amount: number;
-
-  if (data.fundingId) {
-    targetType = 'FUNDING';
-    targetId = parseInt(data.fundingId, 10);
-    amount = data.amount;
-  } else if (data.wishItemId) {
-    targetType = 'FUNDING_PENDING';
-    targetId = parseInt(data.wishItemId, 10);
-    amount = data.amount || 0;
-  } else {
-    throw new Error('fundingId or wishItemId is required');
-  }
-
   const request: BackendCartItemRequest = {
-    targetType,
-    targetId,
-    amount,
+    targetType: data.targetType,
+    targetId: parseInt(data.targetId, 10),
+    amount: data.amount,
   };
 
   await apiClient.post<void>('/api/v2/carts', request);

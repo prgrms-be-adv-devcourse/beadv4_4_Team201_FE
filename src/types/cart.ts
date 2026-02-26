@@ -41,8 +41,8 @@ export interface CartItem {
 }
 
 export interface CartItemCreateRequest {
-    fundingId?: string;
-    wishItemId?: string;
+    targetType: 'FUNDING' | 'FUNDING_PENDING';
+    targetId: string;
     amount: number;
 }
 

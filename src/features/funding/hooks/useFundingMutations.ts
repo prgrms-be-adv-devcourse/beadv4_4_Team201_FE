@@ -30,7 +30,8 @@ export function useCreateFunding() {
     }) => {
       // 장바구니에 FUNDING_PENDING 타입으로 추가
       await addCartItem({
-        wishItemId,
+        targetType: 'FUNDING_PENDING',
+        targetId: wishItemId,
         amount,
       });
 
@@ -55,17 +56,17 @@ export function useParticipateFunding() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ fundingId, amount }: { fundingId: string; amount: number }) => {
+    mutationFn: async ({ wishItemId, amount }: { wishItemId: string; amount: number }) => {
       // 장바구니에 FUNDING 타입으로 추가
       await addCartItem({
-        fundingId,
+        targetType: 'FUNDING',
+        targetId: wishItemId,
         amount,
       });
 
-      return { fundingId, amount };
+      return { wishItemId, amount };
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.funding(variables.fundingId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.cart });
     },
   });

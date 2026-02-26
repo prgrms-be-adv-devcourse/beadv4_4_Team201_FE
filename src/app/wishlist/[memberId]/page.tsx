@@ -87,7 +87,6 @@ export default function PublicWishlistPage({ params }: { params: Promise<{ membe
     const [activeCategory, setActiveCategory] = useState('');
     const [activeStatus, setActiveStatus] = useState<string>('');
     const [selectedItem, setSelectedItem] = useState<WishItem | null>(null);
-    const [selectedFunding, setSelectedFunding] = useState<Funding | null>(null);
     const [isStartFundingOpen, setIsStartFundingOpen] = useState(false);
     const [isParticipateOpen, setIsParticipateOpen] = useState(false);
 
@@ -109,27 +108,13 @@ export default function PublicWishlistPage({ params }: { params: Promise<{ membe
         setIsStartFundingOpen(true);
     };
 
-    const handleParticipateFunding = async (fundingId: string) => {
-        console.log('handleParticipateFunding called with:', fundingId);
+    const handleParticipateFunding = (item: WishItem) => {
         if (!user) {
-            console.log('User not logged in, redirecting');
             router.push('/auth/login');
             return;
         }
-
-        const loadingToast = toast.loading('펀딩 정보를 불러오는 중...');
-        try {
-            console.log('Fetching funding details for id:', fundingId);
-            const funding = await getFunding(fundingId);
-            console.log('Successfully fetched funding:', funding);
-
-            setSelectedFunding(funding);
-            setIsParticipateOpen(true);
-            toast.dismiss(loadingToast);
-        } catch (error) {
-            console.error('API Error during handleParticipateFunding:', error);
-            toast.error('펀딩 정보를 불러오는데 실패했습니다.', { id: loadingToast });
-        }
+        setSelectedItem(item);
+        setIsParticipateOpen(true);
     };
 
     // Client-side filtering
@@ -323,14 +308,7 @@ export default function PublicWishlistPage({ params }: { params: Promise<{ membe
                                         item={item}
                                         onViewFunding={() => item.fundingId && handleViewFunding(item.fundingId)}
                                         onStartFunding={() => handleStartFunding(item)}
-                                        onParticipate={() => {
-                                            if (item.fundingId) {
-                                                handleParticipateFunding(item.fundingId);
-                                            } else {
-                                                console.error('Missing fundingId for IN_PROGRESS item:', item);
-                                                toast.error('참여할 수 있는 펀딩 정보를 찾을 수 없습니다.');
-                                            }
-                                        }}
+                                        onParticipate={() => handleParticipateFunding(item)}
                                     />
                                 ))}
                             </div>
@@ -387,11 +365,19 @@ export default function PublicWishlistPage({ params }: { params: Promise<{ membe
                     }}
                 />
             )}
-            {selectedFunding && (
+            {selectedItem && (
                 <ParticipateModal
                     open={isParticipateOpen}
                     onOpenChange={setIsParticipateOpen}
-                    funding={selectedFunding}
+                    wishItemId={selectedItem.id}
+                    product={{
+                        name: selectedItem.product.name,
+                        imageUrl: selectedItem.product.imageUrl,
+                        price: selectedItem.product.price
+                    }}
+                    recipient={{
+                        nickname: wishlist?.member?.nickname || '알 수 없음'
+                    }}
                     onSuccess={() => {
                         toast.success('장바구니에 담겼습니다.', {
                             description: '펀딩 참여가 장바구니에 추가되었습니다.',
