@@ -14,7 +14,7 @@ import { useUpdateCartItem, useUpdateCartItems, useRemoveCartItems, useToggleCar
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { Skeleton } from '@/components/ui/skeleton';
 import { InlineError } from '@/components/common/InlineError';
-import { Gift, Loader2, AlertCircle, X } from 'lucide-react';
+import { Gift, Loader2, AlertCircle, X, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatPrice } from '@/lib/format';
 import { cn } from '@/lib/utils';
@@ -418,12 +418,13 @@ export default function CartPage() {
 
                                                 {/* 펀딩 바로가기 */}
                                                 {fundingHref && (
-                                                    <Link
-                                                        href={fundingHref}
-                                                        className="mt-2 self-start text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground transition-colors"
+                                                    <button
+                                                        onClick={() => router.push(fundingHref!)}
+                                                        className="mt-2 w-full py-1.5 border border-border rounded text-[10px] font-medium hover:bg-secondary transition-colors flex items-center justify-center gap-1"
                                                     >
-                                                        펀딩 바로가기 →
-                                                    </Link>
+                                                        <ExternalLink className="h-3 w-3" strokeWidth={1.5} />
+                                                        펀딩 보러가기
+                                                    </button>
                                                 )}
                                             </div>
                                         </div>
@@ -612,12 +613,13 @@ export default function CartPage() {
                                                     </div>
                                                     {/* 펀딩 바로가기 */}
                                                     {fundingHref && (
-                                                        <Link
-                                                            href={fundingHref}
-                                                            className="mt-1 text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground transition-colors"
+                                                        <button
+                                                            onClick={() => router.push(fundingHref!)}
+                                                            className="mt-1 w-full py-1.5 border border-border rounded text-[10px] font-medium hover:bg-secondary transition-colors flex items-center justify-center gap-1"
                                                         >
-                                                            펀딩 바로가기 →
-                                                        </Link>
+                                                            <ExternalLink className="h-3 w-3" strokeWidth={1.5} />
+                                                            펀딩 보러가기
+                                                        </button>
                                                     )}
                                                 </div>
                                                 <button

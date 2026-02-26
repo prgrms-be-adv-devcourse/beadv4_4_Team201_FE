@@ -149,8 +149,9 @@ export async function getCart(): Promise<Cart> {
   const pendingItems = response.items.filter(i => i.targetType === 'FUNDING_PENDING');
   const fundingItems = response.items.filter(i => i.targetType === 'FUNDING');
 
-  // wishlistItemId → productId 맵, fundingId → productId 맵
+  // targetId → productId 맵, targetId → 실제 fundingId 맵
   const productIdMap = new Map<string, string>();
+  const actualFundingIdMap = new Map<string, string>();
 
   try {
     await Promise.all([
@@ -162,16 +163,18 @@ export async function getCart(): Promise<Cart> {
           productIdMap.set(`FUNDING_PENDING::${wi.id}`, wi.productId.toString());
         }
       })(),
-      // FUNDING: 각 fundingId마다 병렬 호출
+      // FUNDING: 각 targetId마다 병렬 호출 후 targetId 기준으로 키 저장
       (async () => {
         if (fundingItems.length === 0) return;
-        const fundingDetails = await Promise.all(
+        const fundingResults = await Promise.all(
           fundingItems.map(fi =>
             apiClient.get<BackendFundingResponseMinimal>(`/api/v2/fundings/${fi.targetId}`)
+              .then(fd => ({ targetId: fi.targetId, fd }))
           )
         );
-        for (const fd of fundingDetails) {
-          productIdMap.set(`FUNDING::${fd.fundingId}`, fd.productId.toString());
+        for (const { targetId, fd } of fundingResults) {
+          productIdMap.set(`FUNDING::${targetId}`, fd.productId.toString());
+          actualFundingIdMap.set(`FUNDING::${targetId}`, fd.fundingId.toString());
         }
       })(),
     ]);
@@ -183,12 +186,14 @@ export async function getCart(): Promise<Cart> {
   cart.items = cart.items.map(item => {
     const [, targetType, targetId] = item.id.split('::');
     const productId = productIdMap.get(`${targetType}::${targetId}`);
-    if (!productId) return item;
+    const actualFundingId = actualFundingIdMap.get(`${targetType}::${targetId}`);
+    if (!productId && !actualFundingId) return item;
     return {
       ...item,
       funding: {
         ...item.funding,
-        product: { ...item.funding.product, id: productId },
+        id: actualFundingId || item.funding.id,
+        product: productId ? { ...item.funding.product, id: productId } : item.funding.product,
       },
     };
   });
