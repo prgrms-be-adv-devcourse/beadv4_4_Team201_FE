@@ -2,11 +2,12 @@ import { PaginatedResponse } from './api';
 
 /**
  * Transaction type enumeration
- * - CHARGE: Wallet charge (deposit)
- * - PAYMENT: Payment (withdrawal)
- * - WITHDRAW: Withdrawal to bank account
+ * - ORDER_DEDUCT: Order payment deduction
+ * - SETTLEMENT_PAYOUT: Member settlement payout (income)
+ * - SETTLEMENT_CLAWBACK: Member settlement clawback (deduction)
+ * - CANCEL_REFUND: Order cancellation refund (income)
  */
-export type TransactionType = 'CHARGE' | 'PAYMENT' | 'WITHDRAW';
+export type TransactionType = 'ORDER_DEDUCT' | 'SETTLEMENT_PAYOUT' | 'SETTLEMENT_CLAWBACK' | 'CANCEL_REFUND';
 
 /**
  * Wallet information

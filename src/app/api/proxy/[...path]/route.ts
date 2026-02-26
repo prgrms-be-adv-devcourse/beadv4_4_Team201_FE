@@ -46,9 +46,9 @@ async function proxyRequest(req: NextRequest, path: string[], method: string) {
   if (accessToken) {
     headers['Authorization'] = `Bearer ${accessToken}`;
   }
-  const idempotencyKey = req.headers.get('Idempotency-Key');
+  const idempotencyKey = req.headers.get('X-Idempotency-Key') || req.headers.get('Idempotency-Key');
   if (idempotencyKey) {
-    headers['Idempotency-Key'] = idempotencyKey;
+    headers['X-Idempotency-Key'] = idempotencyKey;
   }
 
   const body = ['GET', 'HEAD'].includes(method) ? undefined : await req.text();

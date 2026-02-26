@@ -133,7 +133,7 @@ export async function placeOrder(
   const backendRequest = {
     items: request.items.map(item => ({
       ...item,
-      amount: { amount: item.amount },
+      amount: item.amount,
     })),
     method: request.method,
   };
