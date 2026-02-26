@@ -165,14 +165,14 @@ export default function FundingDetailPage() {
                 <ParticipateModal
                     open={participateModalOpen}
                     onOpenChange={setParticipateModalOpen}
-                    wishItemId={funding.wishlistItemId.toString()}
+                    wishItemId={funding.wishItemId}
                     product={{
-                        name: funding.productName,
-                        imageUrl: resolveImageUrl(funding.imageKey),
-                        price: funding.productPrice
+                        name: funding.product.name,
+                        imageUrl: funding.product.imageUrl,
+                        price: funding.product.price
                     }}
                     recipient={{
-                        nickname: funding.recipient.nickname
+                        nickname: funding.recipient.nickname || '알 수 없음'
                     }}
                     onSuccess={(mode) => {
                         if (mode === 'cart') {

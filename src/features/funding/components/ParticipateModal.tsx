@@ -113,8 +113,23 @@ export function ParticipateModal({
                         walletBalance={wallet?.balance}
                     />
 
+                    <div className="grid gap-2">
+                        <label className="flex items-center gap-2 text-sm leading-none font-medium text-muted-foreground" htmlFor="message">
+                            메시지 (선택)
+                            <span className="ml-2 text-xs text-muted-foreground">0/500</span>
+                        </label>
+                        <textarea
+                            className="flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                            id="message"
+                            placeholder="친구들에게 전할 말을 적어주세요. (준비 중인 기능입니다.)"
+                            maxLength={500}
+                            rows={3}
+                            disabled
+                        />
+                    </div>
+
                     {wallet && (
-                        <div className="flex justify-between">
+                        <div className="flex justify-between text-sm text-muted-foreground">
                             <span>내 지갑 잔액</span>
                             <span className="font-medium">₩{wallet.balance.toLocaleString()}</span>
                         </div>
