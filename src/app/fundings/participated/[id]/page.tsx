@@ -69,7 +69,7 @@ export default function ParticipatedFundingDetailPage() {
         <AppShell headerTitle="참여한 펀딩" headerVariant="detail" hasBack showBottomNav={false}>
             <div className="p-4 space-y-6 pb-24">
                 {/* 상품 이미지 */}
-                <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-secondary">
+                <div className="relative w-full aspect-square max-h-[300px] max-w-[300px] mx-auto rounded-xl overflow-hidden bg-secondary">
                     <Image
                         src={resolveImageUrl(funding.imageKey)}
                         alt={funding.product?.name || '상품 이미지'}
