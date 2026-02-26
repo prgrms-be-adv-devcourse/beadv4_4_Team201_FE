@@ -30,6 +30,8 @@ export const DEFAULT_PRODUCT_IMAGES: Record<string, string> = {
   default: '/images/placeholder-product.svg',
 };
 
+export const PLACEHOLDER_IMAGE = DEFAULT_PRODUCT_IMAGES.default;
+
 export function getDefaultProductImage(category?: string | null): string {
   if (!category) return DEFAULT_PRODUCT_IMAGES.default;
 
