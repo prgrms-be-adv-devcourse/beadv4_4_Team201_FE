@@ -12,7 +12,7 @@ const mockCart: Cart = {
             id: 'c1',
             cartId: 'cart-1',
             fundingId: 'f1',
-            receiverId: 2,
+            receiverId: '2',
             funding: {
                 id: 'f1',
                 wishItemId: 'wi-1',
@@ -39,8 +39,7 @@ const mockCart: Cart = {
 };
 
 const mockWallet: Wallet = {
-    id: 'w1',
-    memberId: 'user-1',
+    walletId: 1,
     balance: 500000,
 };
 
