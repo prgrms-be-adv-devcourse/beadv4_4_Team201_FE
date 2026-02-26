@@ -9,9 +9,10 @@ interface TransactionFiltersProps {
 
 const FILTER_OPTIONS = [
     { value: undefined, label: '전체' },
-    { value: 'CHARGE' as TransactionType, label: '충전' },
-    { value: 'PAYMENT' as TransactionType, label: '사용' },
-    { value: 'REFUND' as TransactionType, label: '환불' },
+    { value: 'ORDER_DEDUCT' as TransactionType, label: '주문 차감' },
+    { value: 'SETTLEMENT_PAYOUT' as TransactionType, label: '정산 입금' },
+    { value: 'SETTLEMENT_CLAWBACK' as TransactionType, label: '정산 환수' },
+    { value: 'CANCEL_REFUND' as TransactionType, label: '취소 환불' },
 ];
 
 export function TransactionFilters({ selectedType, onTypeChange }: TransactionFiltersProps) {

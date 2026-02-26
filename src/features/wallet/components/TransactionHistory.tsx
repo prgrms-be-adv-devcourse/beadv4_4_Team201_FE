@@ -9,15 +9,17 @@ interface TransactionHistoryProps {
 }
 
 const TRANSACTION_ICONS = {
-    CHARGE: ArrowUpCircle,
-    PAYMENT: ArrowDownCircle,
-    WITHDRAW: ArrowDownCircle,
+    ORDER_DEDUCT: ArrowDownCircle,
+    SETTLEMENT_PAYOUT: ArrowUpCircle,
+    SETTLEMENT_CLAWBACK: ArrowDownCircle,
+    CANCEL_REFUND: ArrowUpCircle,
 };
 
 const TRANSACTION_LABELS = {
-    CHARGE: '충전',
-    PAYMENT: '사용',
-    WITHDRAW: '출금',
+    ORDER_DEDUCT: '주문 차감',
+    SETTLEMENT_PAYOUT: '정산 입금',
+    SETTLEMENT_CLAWBACK: '정산 환수',
+    CANCEL_REFUND: '취소 환불',
 };
 
 /**
@@ -54,7 +56,7 @@ export function TransactionHistory({ transactions, filterType, onFilterChange }:
                         >
                             전체
                         </button>
-                        {(['CHARGE', 'PAYMENT', 'WITHDRAW'] as TransactionType[]).map((type) => (
+                        {(['ORDER_DEDUCT', 'SETTLEMENT_PAYOUT', 'SETTLEMENT_CLAWBACK', 'CANCEL_REFUND'] as TransactionType[]).map((type) => (
                             <button
                                 key={type}
                                 onClick={() => onFilterChange(type)}
@@ -81,7 +83,7 @@ export function TransactionHistory({ transactions, filterType, onFilterChange }:
                 <div className="divide-y divide-border">
                     {transactions.map((tx) => {
                         const Icon = TRANSACTION_ICONS[tx.type];
-                        const isPositive = tx.type === 'CHARGE';
+                        const isPositive = tx.type === 'SETTLEMENT_PAYOUT' || tx.type === 'CANCEL_REFUND';
 
                         return (
                             <div key={tx.id} className="flex items-center gap-4 py-4">

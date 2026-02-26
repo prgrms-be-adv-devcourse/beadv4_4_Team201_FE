@@ -32,7 +32,7 @@ async function request<T>(endpoint: string, config: RequestConfig = {}): Promise
     }
 
     if (idempotencyKey) {
-        defaultHeaders['Idempotency-Key'] = idempotencyKey;
+        defaultHeaders['X-Idempotency-Key'] = idempotencyKey;
     }
 
     const response = await fetch(`${BASE_URL}${endpoint}`, {
