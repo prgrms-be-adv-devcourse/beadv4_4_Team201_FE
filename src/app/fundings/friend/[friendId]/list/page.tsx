@@ -31,7 +31,7 @@ export function FriendFundingsContent({ friendId }: { friendId: string }) {
     const totalCount = data?.page.totalElements ?? fundings.length;
 
     const handleFundingClick = (id: string) => {
-        router.push(`/fundings/${id}`);
+        router.push(`/fundings/friend/${friendId}/${id}`);
     };
 
     const handleParticipateFunding = async (fundingId: string) => {
