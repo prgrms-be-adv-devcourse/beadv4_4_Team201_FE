@@ -22,7 +22,7 @@ const PAYMENT_METHOD_LABELS: Record<string, string> = {
     POINT: '포인트',
 };
 
-type Phase = 'processing' | 'fetching' | 'success';
+type Phase = 'processing' | 'fetching' | 'success' | 'error';
 
 function CheckoutCompleteContent() {
     const router = useRouter();
