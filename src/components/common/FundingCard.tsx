@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { FundingProgress } from './FundingProgress';
 import { cn } from '@/lib/utils';
 import type { FundingStatus } from '@/types/funding';
+import { ShoppingCart } from 'lucide-react';
 
 export type { FundingStatus };
 
@@ -30,6 +31,7 @@ export interface FundingCardProps {
         };
     };
     onClick?: () => void;
+    onAddToCart?: () => void;
     className?: string;
 }
 
@@ -37,12 +39,18 @@ export function FundingCard({
     variant = 'carousel',
     funding,
     onClick,
+    onAddToCart,
     className,
 }: FundingCardProps) {
     const isCarousel = variant === 'carousel';
     const percentage = Math.round((funding.currentAmount / funding.targetAmount) * 100);
     const daysLeft = differenceInDays(parseISO(funding.expiresAt), new Date());
     const recipientNickname = funding.recipient.nickname || '알 수 없음';
+
+    const handleCartClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        onAddToCart?.();
+    };
 
     const getStatusLabel = () => {
         if (funding.status === 'ACHIEVED') {
@@ -109,16 +117,28 @@ export function FundingCard({
                         </div>
                     </div>
 
-                    {funding.recipient.nickname && (
-                        <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
-                            <Avatar className="h-5 w-5">
-                                <AvatarImage src={funding.recipient.avatarUrl || undefined} alt={recipientNickname} />
-                                <AvatarFallback className="text-[10px]">{recipientNickname[0]}</AvatarFallback>
-                            </Avatar>
-                            <span className="text-xs text-muted-foreground">
-                                @{recipientNickname} · {funding.participantCount}명
-                            </span>
+                    {onAddToCart ? (
+                        <div className="mt-3">
+                            <button
+                                onClick={handleCartClick}
+                                className="w-full py-1.5 bg-black text-white rounded text-[10px] font-bold hover:bg-black/80 transition-colors flex items-center justify-center gap-1"
+                            >
+                                <ShoppingCart className="h-3 w-3" strokeWidth={2} />
+                                장바구니 담기
+                            </button>
                         </div>
+                    ) : (
+                        funding.recipient.nickname && (
+                            <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
+                                <Avatar className="h-5 w-5">
+                                    <AvatarImage src={funding.recipient.avatarUrl || undefined} alt={recipientNickname} />
+                                    <AvatarFallback className="text-[10px]">{recipientNickname[0]}</AvatarFallback>
+                                </Avatar>
+                                <span className="text-xs text-muted-foreground">
+                                    @{recipientNickname}
+                                </span>
+                            </div>
+                        )
                     )}
                 </div>
             </div>
@@ -146,7 +166,7 @@ export function FundingCard({
 
             <div className="flex flex-1 flex-col justify-between pl-4">
                 <div>
-                    {funding.recipient.nickname && (
+                    {!onAddToCart && funding.recipient.nickname && (
                         <p className="mt-0.5 text-xs text-muted-foreground">
                             {funding.recipient.nickname}님을 위한 펀딩
                         </p>
@@ -156,6 +176,18 @@ export function FundingCard({
                         {funding.targetAmount.toLocaleString()}원 목표
                     </p>
                 </div>
+
+                {onAddToCart && (
+                    <div className="my-2">
+                        <button
+                            onClick={handleCartClick}
+                            className="w-full py-1.5 bg-black text-white rounded text-[10px] font-bold hover:bg-black/80 transition-colors flex items-center justify-center gap-1"
+                        >
+                            <ShoppingCart className="h-3 w-3" strokeWidth={2} />
+                            장바구니 담기
+                        </button>
+                    </div>
+                )}
 
                 <div className="flex items-center justify-between">
                     <FundingProgress
