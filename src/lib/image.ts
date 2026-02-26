@@ -1,36 +1,18 @@
 export const DEFAULT_PRODUCT_IMAGES: Record<string, string> = {
   electronics: '/images/cat-electronics.png',
-  electronic: '/images/cat-electronics.png',
   fashion: '/images/cat-fashion.png',
   beauty: '/images/cat-beauty.png',
   home: '/images/cat-home.png',
   living: '/images/cat-home.png',
-  sports: '/images/cat-outdoor.png',
-  sport: '/images/cat-outdoor.png',
-  outdoor: '/images/cat-outdoor.png',
-  books: '/images/placeholder-product.svg',
-  book: '/images/placeholder-product.svg',
+  sports: 'https://images.unsplash.com/photo-1461896704190-3213c9381024?auto=format&fit=crop&q=80&w=800',
+  outdoor: 'https://images.unsplash.com/photo-1461896704190-3213c9381024?auto=format&fit=crop&q=80&w=800',
+  books: 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?auto=format&fit=crop&q=80&w=800',
   foods: '/images/cat-foods.png',
-  food: '/images/cat-foods.png',
-  toys: '/images/cat-toy.png',
-  toy: '/images/cat-toy.png',
-  pet: '/images/cat-pet.png',
-  pets: '/images/cat-pet.png',
-  kitchen: '/images/cat-kitchen.png',
-  // Korean mappings for safety
-  '전자기기': '/images/cat-electronics.png',
-  '뷰티': '/images/cat-beauty.png',
-  '패션': '/images/cat-fashion.png',
-  '리빙': '/images/cat-home.png',
-  '식품': '/images/cat-foods.png',
-  '완구': '/images/cat-toy.png',
-  '아웃도어': '/images/cat-outdoor.png',
-  '반려동물': '/images/cat-pet.png',
-  '주방': '/images/cat-kitchen.png',
+  toys: 'https://images.unsplash.com/photo-1532330393533-443990a51d10?auto=format&fit=crop&q=80&w=800',
+  pet: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&q=80&w=800',
+  kitchen: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&q=80&w=800',
   default: '/images/placeholder-product.svg',
 };
-
-export const PLACEHOLDER_IMAGE = DEFAULT_PRODUCT_IMAGES.default;
 
 export function getDefaultProductImage(category?: string | null): string {
   if (!category) return DEFAULT_PRODUCT_IMAGES.default;
@@ -41,14 +23,7 @@ export function getDefaultProductImage(category?: string | null): string {
 }
 
 export function resolveImageUrl(imageKey?: string | null, category?: string | null): string {
-  if (!imageKey || imageKey === 'null' || imageKey === 'undefined') {
-    return getDefaultProductImage(category);
-  }
-
-  // If it's already a full URL or a local path starting with /images, return as is
-  if (imageKey.startsWith('http') || imageKey.startsWith('/')) {
-    return imageKey;
-  }
+  if (!imageKey) return getDefaultProductImage(category);
 
   // Demo images are served as static files from /public/images/demo/
   if (imageKey.startsWith('demo/')) {
@@ -56,11 +31,7 @@ export function resolveImageUrl(imageKey?: string | null, category?: string | nu
   }
 
   const baseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL;
-  if (!baseUrl) {
-    // If no base URL is defined, and it's not a special path, 
-    // we can't resolve it to a full URL, so return fallback
-    return getDefaultProductImage(category);
-  }
+  if (!baseUrl) return getDefaultProductImage(category);
 
   return `${baseUrl.replace(/\/+$/, '')}/${imageKey.replace(/^\/+/, '')}`;
 }
