@@ -71,8 +71,7 @@ export default function FriendFundingDetailPage({ params }: PageProps) {
                 <div className="flex flex-col min-h-[calc(100vh-3.5rem)] pb-28">
                     {/* Product Image — 319.94×319.94 square */}
                     <div
-                        className="relative w-full bg-secondary overflow-hidden"
-                        style={{ height: '319.94px' }}
+                        className="relative w-full aspect-square max-h-[300px] max-w-[300px] mx-auto bg-secondary overflow-hidden"
                     >
                         <Image
                             src={funding.product.imageUrl || '/images/placeholder-product.svg'}

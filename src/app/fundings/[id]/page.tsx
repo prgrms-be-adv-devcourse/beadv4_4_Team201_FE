@@ -81,7 +81,7 @@ export default function FundingDetailPage() {
         >
             <div className="flex flex-col min-h-[calc(100vh-3.5rem)]">
                 {/* Product Image */}
-                <div className="relative aspect-square w-full bg-secondary md:aspect-video">
+                <div className="relative aspect-square max-h-[300px] max-w-[300px] mx-auto w-full bg-secondary md:aspect-square">
                     <Image
                         src={resolveImageUrl(funding.product?.imageUrl, funding.product?.category)}
                         alt={funding.product?.name || "상품 이미지"}
