@@ -22,18 +22,8 @@ import type { CartItem } from '@/types/cart';
 async function resolveOrderItem(item: CartItem): Promise<PlaceOrderItemRequest> {
     const orderItemType: OrderItemType = 'FUNDING_GIFT';
 
-    let wishlistItemId: number;
-
-    if (item.targetType === 'FUNDING_PENDING') {
-        wishlistItemId = parseInt(item.targetId, 10);
-    } else {
-        if (item.funding.wishItemId) {
-            wishlistItemId = parseInt(item.funding.wishItemId, 10);
-        } else {
-            const funding = await getFunding(item.targetId);
-            wishlistItemId = parseInt(funding.wishItemId, 10);
-        }
-    }
+    // targetId is already the wishlistItemId
+    const wishlistItemId = parseInt(item.targetId, 10);
 
     const receiverId = item.receiverId
         ? parseInt(item.receiverId, 10)
