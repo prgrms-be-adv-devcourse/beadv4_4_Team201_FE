@@ -173,7 +173,7 @@ export async function getCart(): Promise<Cart> {
           )
         );
         for (const { targetId, fd } of fundingResults) {
-          productIdMap.set(`FUNDING::${targetId}`, fd.productId.toString());
+          productIdMap.set(`FUNDING::${fd.fundingId}`, fd.productId.toString());
           actualFundingIdMap.set(`FUNDING::${targetId}`, fd.fundingId.toString());
         }
       })(),
