@@ -472,6 +472,26 @@ export async function getFriendFriendFundings(
   return mapPageResponse(response, mapBackendFunding);
 }
 
+/**
+ * 특정 친구의 진행 중인 펀딩 리스트 조회
+ * @endpoint GET /api/v2/fundings/friend/{friendId}/list
+ */
+export async function getFriendInProgressFundings(
+  friendId: string,
+  params?: PageParams,
+): Promise<FundingListResponse> {
+  const queryParams = new URLSearchParams();
+  if (params?.page !== undefined) queryParams.append("page", params.page.toString());
+  if (params?.size !== undefined) queryParams.append("size", params.size.toString());
+
+  const queryString = queryParams.toString();
+  const endpoint = queryString
+    ? `/api/v2/fundings/friend/${friendId}/list?${queryString}`
+    : `/api/v2/fundings/friend/${friendId}/list`;
+
+  const response = await apiClient.get<BackendPageResponse<BackendFundingResponse>>(endpoint);
+  return mapPageResponse(response, mapBackendFunding);
+}
 
 
 /**
