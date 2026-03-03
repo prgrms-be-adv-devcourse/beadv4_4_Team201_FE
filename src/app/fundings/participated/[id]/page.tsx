@@ -55,6 +55,9 @@ export default function ParticipatedFundingDetailPage() {
             : 0
     );
 
+    // 달성률이 0보다 크지만 소수점 등으로 인해 0%로 보일 수 있는 경우 최소 1% 표시
+    const displayProgress = (funding.currentAmount > 0 && progressPercent < 1) ? 1 : Math.round(progressPercent);
+
     const statusLabel: Record<string, string> = {
         IN_PROGRESS: '진행 중',
         ACHIEVED: '달성 완료',
@@ -105,7 +108,7 @@ export default function ParticipatedFundingDetailPage() {
                 <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                         <span className="font-medium text-primary">
-                            {Math.round(progressPercent)}% 달성
+                            {displayProgress}% 달성
                         </span>
                         {funding.daysRemaining !== undefined && (
                             <span className="flex items-center gap-1 text-muted-foreground">

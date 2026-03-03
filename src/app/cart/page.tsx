@@ -14,7 +14,7 @@ import { useUpdateCartItem, useUpdateCartItems, useRemoveCartItems, useToggleCar
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { Skeleton } from '@/components/ui/skeleton';
 import { InlineError } from '@/components/common/InlineError';
-import { Gift, Loader2, AlertCircle, X } from 'lucide-react';
+import { Gift, Loader2, AlertCircle, X, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatPrice } from '@/lib/format';
 import { cn } from '@/lib/utils';
@@ -189,6 +189,21 @@ export default function CartPage() {
         router.push('/checkout');
     };
 
+    const handleViewFunding = (fundingId: string) => {
+        router.push(`/fundings/${fundingId}`);
+    };
+
+    const handleViewProduct = (item: any) => {
+        const productId = item.productId;
+
+        if (!productId) {
+            toast.error('상품 상세 정보를 불러올 수 없습니다.');
+            return;
+        }
+
+        router.push(`/products/${productId}`);
+    };
+
 
     if (isLoading) {
         return (
@@ -330,7 +345,10 @@ export default function CartPage() {
 
                                         {/* Item Info - 29cm Style */}
                                         <div className="col-span-5 flex gap-4">
-                                            <div className="relative w-[100px] h-[130px] bg-secondary flex-shrink-0 overflow-hidden">
+                                            <div
+                                                className="relative w-[100px] h-[130px] bg-secondary flex-shrink-0 overflow-hidden cursor-pointer"
+                                                onClick={() => handleViewProduct(item)}
+                                            >
                                                 <Image
                                                     src={funding?.product?.imageUrl || "/images/placeholder-product.svg"}
                                                     alt={productName || "상품 이미지"}
@@ -345,7 +363,7 @@ export default function CartPage() {
                                                     }}
                                                 />
                                             </div>
-                                            <div className="flex flex-col justify-start min-w-0 py-1">
+                                            <div className="flex flex-col justify-start min-w-0 py-1 flex-1">
                                                 {/* Recipient Info */}
                                                 <div className="flex items-center gap-2 mb-2">
                                                     <Avatar className="h-5 w-5">
@@ -358,10 +376,13 @@ export default function CartPage() {
                                                         {funding.recipient.nickname || '알 수 없음'}님에게
                                                     </span>
                                                 </div>
-                                                <h3 className={cn(
-                                                    "text-sm font-medium transition-all line-clamp-2 leading-relaxed",
-                                                    isAvailable ? "hover:underline" : "text-muted-foreground"
-                                                )}>
+                                                <h3
+                                                    className={cn(
+                                                        "text-sm font-medium transition-all line-clamp-2 leading-relaxed cursor-pointer",
+                                                        isAvailable ? "hover:underline" : "text-muted-foreground"
+                                                    )}
+                                                    onClick={() => handleViewProduct(item)}
+                                                >
                                                     {productName || '상품 정보 없음'}
                                                 </h3>
 
@@ -386,6 +407,22 @@ export default function CartPage() {
                                                         </>
                                                     )}
                                                 </div>
+
+                                                {/* Action Buttons */}
+                                                {item.fundingId && (
+                                                    <div className="mt-4 w-32">
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleViewFunding(item.fundingId!);
+                                                            }}
+                                                            className="w-full py-1.5 border border-border rounded text-[10px] font-medium hover:bg-secondary transition-colors flex items-center justify-center gap-1"
+                                                        >
+                                                            <ExternalLink className="h-3 w-3" strokeWidth={1.5} />
+                                                            펀딩 보러가기
+                                                        </button>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
 
@@ -506,7 +543,10 @@ export default function CartPage() {
                                             }
                                             className="mt-1"
                                         />
-                                        <div className="relative w-20 h-24 bg-secondary flex-shrink-0 overflow-hidden">
+                                        <div
+                                            className="relative w-20 h-24 bg-secondary flex-shrink-0 overflow-hidden cursor-pointer"
+                                            onClick={() => handleViewProduct(item)}
+                                        >
                                             <Image
                                                 src={funding?.product?.imageUrl || "/images/placeholder-product.svg"}
                                                 alt={productName || "상품"}
@@ -520,7 +560,7 @@ export default function CartPage() {
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <div className="flex justify-between items-start mb-1">
-                                                <div className="min-w-0">
+                                                <div className="min-w-0 flex-1">
                                                     {/* Recipient */}
                                                     <div className="flex items-center gap-1.5 mb-1">
                                                         <Avatar className="h-4 w-4">
@@ -533,10 +573,15 @@ export default function CartPage() {
                                                             {funding.recipient.nickname}님에게
                                                         </span>
                                                     </div>
-                                                    <p className={cn(
-                                                        "text-sm line-clamp-2",
-                                                        !isAvailable && "text-muted-foreground"
-                                                    )}>{productName || '상품 정보 없음'}</p>
+                                                    <p
+                                                        className={cn(
+                                                            "text-sm line-clamp-2 cursor-pointer",
+                                                            !isAvailable && "text-muted-foreground"
+                                                        )}
+                                                        onClick={() => handleViewProduct(item)}
+                                                    >
+                                                        {productName || '상품 정보 없음'}
+                                                    </p>
                                                     <div className="flex items-center gap-2 mt-1">
                                                         <span className="text-xs font-medium text-foreground">{formatPrice(item.productPrice)}</span>
                                                         {!item.isNewFunding && (
@@ -545,6 +590,20 @@ export default function CartPage() {
                                                             </span>
                                                         )}
                                                     </div>
+
+                                                    {/* Go to Funding Button (Mobile) */}
+                                                    {item.fundingId && (
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleViewFunding(item.fundingId!);
+                                                            }}
+                                                            className="mt-3 w-full py-1.5 border border-border rounded text-[10px] font-medium hover:bg-secondary transition-colors flex items-center justify-center gap-1"
+                                                        >
+                                                            <ExternalLink className="h-3 w-3" strokeWidth={1.5} />
+                                                            펀딩 보러가기
+                                                        </button>
+                                                    )}
                                                 </div>
                                                 <button
                                                     onClick={() => handleRemove(item.id)}
