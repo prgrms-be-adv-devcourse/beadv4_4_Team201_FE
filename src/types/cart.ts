@@ -32,6 +32,8 @@ export interface CartItem {
     contributionAmount: number;
     currentAmount: number | null;
     amount: number; // For backward compatibility / UI consistency
+    fundingId: string | null; // New field for navigation to funding
+    productId: string; // Required for navigation to product (provided directly by backend V2 API)
     funding: Funding; // Always present for funding types
     selected: boolean;
     isNewFunding: boolean;

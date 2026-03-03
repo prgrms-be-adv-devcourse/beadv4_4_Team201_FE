@@ -14,16 +14,17 @@ import { Separator } from '@/components/ui/separator';
 import { useFunding } from '@/features/funding/hooks/useFunding';
 import { InlineError } from '@/components/common/InlineError';
 import { Button } from '@/components/ui/button';
-import { Users } from 'lucide-react';
-import { toast } from 'sonner';
 import { resolveImageUrl } from '@/lib/image';
+import { Progress } from '@/components/ui/progress';
+import { formatPrice } from '@/lib/format';
+import { Calendar, Gift, TrendingUp, Coins } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function FundingDetailPage() {
     const params = useParams();
     const router = useRouter();
     const id = params.id as string;
     const [participateModalOpen, setParticipateModalOpen] = useState(false);
-    const [participantsModalOpen, setParticipantsModalOpen] = useState(false);
 
     const { data: funding, isLoading, isError, error, refetch } = useFunding(id);
 
@@ -72,90 +73,112 @@ export default function FundingDetailPage() {
         );
     }
 
+    const progressPercent = funding.achievementRate ?? (
+        funding.targetAmount > 0
+            ? (funding.currentAmount / funding.targetAmount) * 100
+            : 0
+    );
+
+    // 달성률이 0보다 크지만 소수점 등으로 인해 0%로 보일 수 있는 경우 최소 1% 표시
+    const displayProgress = (funding.currentAmount > 0 && progressPercent < 1) ? 1 : Math.round(progressPercent);
+
+    const statusLabel: Record<string, string> = {
+        IN_PROGRESS: '진행 중',
+        ACHIEVED: '달성 완료',
+        ACCEPTED: '수락됨',
+        REFUSED: '거절됨',
+        EXPIRED: '기간 만료',
+        CLOSED: '종료됨',
+        PENDING: '대기 중',
+    };
+
     return (
         <AppShell
             headerTitle="펀딩 상세"
             headerVariant="detail"
             hasBack={true}
-            showBottomNav={false} // Detail page often hides bottom nav
+            showBottomNav={false}
         >
-            <div className="flex flex-col min-h-[calc(100vh-3.5rem)]">
+            <div className="flex flex-col min-h-[calc(100vh-3.5rem)] p-4 space-y-6 pb-12">
                 {/* Product Image */}
-                <div className="relative aspect-square max-h-[300px] max-w-[300px] mx-auto w-full bg-secondary md:aspect-square">
+                <div className="relative w-full aspect-square max-h-[300px] max-w-[300px] mx-auto rounded-xl overflow-hidden bg-secondary">
                     <Image
-                        src={resolveImageUrl(funding.product?.imageUrl, funding.product?.category)}
+                        src={resolveImageUrl(funding.product?.imageUrl || funding.imageKey, funding.product?.category)}
                         alt={funding.product?.name || "상품 이미지"}
                         fill
                         className="object-cover"
+                        onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/images/placeholder-product.svg';
+                        }}
                     />
+                    {/* 상태 배지 */}
+                    <span className="absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-medium bg-background/80 backdrop-blur-sm">
+                        {statusLabel[funding.status] ?? funding.status}
+                    </span>
                 </div>
 
-                {/* Content */}
-                <div className="flex-1 p-4 space-y-6 pb-24">
-                    {/* Recipient Info */}
-                    <div className="flex items-center gap-3">
-                        <Avatar>
-                            <AvatarImage src={funding.recipient.avatarUrl || undefined} />
-                            <AvatarFallback>{(funding.recipient.nickname || '알')[0]}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                            <p className="text-sm font-medium text-muted-foreground">To.</p>
-                            <p className="font-bold">{funding.recipient.nickname || '알 수 없음'}</p>
-                        </div>
-                    </div>
+                {/* 상품명 & 수령인 */}
+                <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                        <Gift className="h-3.5 w-3.5" />
+                        {funding.recipient.nickname || funding.receiverNickname || '알 수 없음'}님을 위한 펀딩
+                    </p>
+                    <h1 className="text-lg font-semibold leading-snug">
+                        {funding.product?.name}
+                    </h1>
+                    <p className="text-sm text-muted-foreground">
+                        목표 금액: {formatPrice(funding.targetAmount)}
+                    </p>
+                </div>
 
-                    <div className="rounded-lg bg-secondary/30 p-4">
-                        <p className="text-xs text-muted-foreground mb-1">상품 정보</p>
-                        <p className="font-medium text-sm">{funding.product?.name}</p>
-                        <p className="font-bold">₩{funding.product?.price?.toLocaleString() || 0}</p>
-                    </div>
-
-                    <Separator />
-
-                    {/* Participants Preview */}
-                    <div>
-                        <div className="flex items-center justify-between mb-3">
-                            <h3 className="text-sm font-bold">참여자 목록 ({funding.participantCount})</h3>
-                            {funding.participantCount > 0 && (
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => setParticipantsModalOpen(true)}
-                                >
-                                    <Users className="h-4 w-4 mr-1" strokeWidth={1.5} />
-                                    전체보기
-                                </Button>
-                            )}
-                        </div>
-                        {funding.participantCount > 0 ? (
-                            <div className="flex -space-x-2 overflow-hidden">
-                                {funding.participants.slice(0, 5).map((participant) => (
-                                    <Avatar key={participant.id} className="border-2 border-background w-8 h-8">
-                                        <AvatarImage src={participant.member.avatarUrl || undefined} />
-                                        <AvatarFallback className="text-[10px]">
-                                            {(participant.member.nickname || '알')[0]}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                ))}
-                                {funding.participantCount > 5 && (
-                                    <div className="flex items-center justify-center w-8 h-8 rounded-full border-2 border-background bg-muted text-[10px] font-medium text-muted-foreground">
-                                        +{funding.participantCount - 5}
-                                    </div>
-                                )}
-                            </div>
-                        ) : (
-                            <p className="text-sm text-muted-foreground">아직 참여자가 없습니다.</p>
+                {/* 진행률 */}
+                <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                        <span className="font-medium text-primary">
+                            {displayProgress}% 달성
+                        </span>
+                        {funding.daysRemaining !== undefined && (
+                            <span className="flex items-center gap-1 text-muted-foreground">
+                                <Calendar className="h-3.5 w-3.5" />
+                                D-{funding.daysRemaining}
+                            </span>
                         )}
                     </div>
+                    <Progress value={progressPercent} className="h-2" />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>모인 금액: {formatPrice(funding.currentAmount)}</span>
+                        <span>목표: {formatPrice(funding.targetAmount)}</span>
+                    </div>
                 </div>
 
-                {/* Sticky Action Box or Recipient Actions */}
-                <div className="fixed bottom-0 left-0 right-0 bg-background z-20 md:static">
+                {/* 통계 카드 (참여 유도용) */}
+                <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-secondary/60 rounded-xl p-4 space-y-1">
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <TrendingUp className="h-3.5 w-3.5" />
+                            모인 금액
+                        </div>
+                        <p className="text-base font-semibold">
+                            {formatPrice(funding.currentAmount)}
+                        </p>
+                    </div>
+                    <div className="bg-primary/10 rounded-xl p-4 space-y-1 border border-primary/20">
+                        <div className="flex items-center gap-1.5 text-xs text-primary/70">
+                            <Coins className="h-3.5 w-3.5" />
+                            달성까지 남은 금액
+                        </div>
+                        <p className="text-base font-semibold text-primary">
+                            {formatPrice(Math.max(0, funding.targetAmount - funding.currentAmount))}
+                        </p>
+                    </div>
+                </div>
+
+                {/* Action Box or Recipient Actions */}
+                <div className="mt-4">
                     {funding.status === 'ACHIEVED' ? (
                         <RecipientActionButtons fundingId={funding.id} />
                     ) : (
                         <FundingActionBox
-                            funding={funding}
                             onParticipate={() => setParticipateModalOpen(true)}
                         />
                     )}
@@ -187,13 +210,6 @@ export default function FundingDetailPage() {
                             router.push('/checkout');
                         }
                     }}
-                />
-
-                {/* Participants Modal */}
-                <ParticipantsModal
-                    open={participantsModalOpen}
-                    onOpenChange={setParticipantsModalOpen}
-                    fundingId={funding.id}
                 />
             </div>
         </AppShell>
