@@ -1,4 +1,4 @@
-const fetch = require('node-fetch');
+import fetch from 'node-fetch';
 
 // Environment variables - load from .env.local or set before running
 const AUTH0_DOMAIN = process.env.AUTH0_DOMAIN || '';

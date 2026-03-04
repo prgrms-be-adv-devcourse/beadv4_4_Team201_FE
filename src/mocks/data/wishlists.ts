@@ -1,6 +1,6 @@
 import { members } from './members';
 import { products } from './products';
-import { WishItem, Wishlist } from '@/types/wishlist';
+import { Wishlist } from '@/types/wishlist';
 
 export type WishlistVisibility = 'PUBLIC' | 'FRIENDS_ONLY' | 'PRIVATE';
 

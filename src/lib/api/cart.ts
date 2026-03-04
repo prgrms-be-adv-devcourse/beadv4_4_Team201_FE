@@ -72,7 +72,7 @@ function mapBackendCartItem(item: BackendCartItemResponse, cartId: number): Cart
   return {
     id: `${cartId}::${item.targetType}::${item.targetId}`, // 복합 키 생성
     cartId: cartId.toString(),
-    targetType: item.targetType as any,
+    targetType: item.targetType as 'FUNDING' | 'FUNDING_PENDING',
     targetId: item.targetId.toString(),
     receiverId: item.receiverId?.toString() || null,
     receiverNickname: item.receiverNickname || '',

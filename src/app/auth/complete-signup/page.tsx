@@ -140,7 +140,7 @@ export default function CompleteSignupPage() {
             setProgress((completedFields / totalFields) * 100);
         });
         return () => subscription.unsubscribe();
-    }, [form.watch]);
+    }, [form]);
 
     // Removed member pre-fill effect
 
@@ -164,10 +164,11 @@ export default function CompleteSignupPage() {
             toast.success('프로필 설정이 완료되었습니다!');
             router.push('/');
         },
-        onError: (error: any) => {
+        onError: (error: unknown) => {
             // 409 Conflict means member already exists (created by UserAuthenticatedEvent)
             // Treat this as success and redirect to home
-            if (error?.status === 409 || error?.message?.includes('409')) {
+            const apiError = error as { status?: number; message?: string };
+            if (apiError?.status === 409 || apiError?.message?.includes('409')) {
                 queryClient.invalidateQueries({ queryKey: queryKeys.me });
                 queryClient.invalidateQueries({ queryKey: queryKeys.home });
                 toast.success('프로필 설정이 완료되었습니다!');
@@ -183,7 +184,7 @@ export default function CompleteSignupPage() {
         updateMutation.mutate(values);
     }
 
-    const handleAddressComplete = (data: any) => {
+    const handleAddressComplete = (data: { address: string; addressType: string; bname: string; buildingName: string }) => {
         let fullAddress = data.address;
         let extraAddress = '';
 

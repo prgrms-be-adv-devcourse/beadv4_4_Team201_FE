@@ -35,7 +35,7 @@ interface WalletTransaction {
   createdAt: string;
 }
 
-let walletTransactions: WalletTransaction[] = [
+const walletTransactions: WalletTransaction[] = [
   {
     id: 'tx-1',
     type: 'CHARGE',
@@ -107,7 +107,8 @@ const GET_STORED_SENT_REQUESTS = () => {
 
 let mockFriends = GET_STORED_FRIENDS();
 let mockSentRequests = GET_STORED_SENT_REQUESTS();
-let mockReceivedRequests: any[] = [];
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mockReceivedRequests: any[] = [];
 let cartItems: CartItem[] = [];
 
 export const handlers = [
@@ -346,7 +347,9 @@ export const handlers = [
   http.delete('**/api/v2/friends/:friendshipId', ({ params }) => {
     const { friendshipId } = params;
     const idNum = parseInt(friendshipId as string, 10);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockFriends = mockFriends.filter((f: any) => f.friendshipId !== idNum);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockSentRequests = mockSentRequests.filter((r: any) => r.friendshipId !== idNum);
 
     if (typeof window !== 'undefined') {
@@ -457,6 +460,7 @@ export const handlers = [
     const { visibility } = body as { visibility: string };
 
     // Update the mock data
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     myWishlist.visibility = visibility as any;
 
     return HttpResponse.json({
@@ -588,7 +592,7 @@ export const handlers = [
     const size = parseInt(url.searchParams.get('size') || '10');
     const status = url.searchParams.get('status');
 
-    let sellerProducts = products.map((p, i) => ({
+    const sellerProducts = products.map((p, i) => ({
       id: Number(p.id.replace('product-', '')),
       name: p.name,
       description: `판매자용 상품 설명 ${i + 1}`,
@@ -868,8 +872,11 @@ export const handlers = [
   // ============================================
   http.get('**/api/v2/carts', () => {
     const selectedCount = cartItems.filter((item: any) => item.selected).length;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const totalAmount = cartItems
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .filter((item: any) => item.selected)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .reduce((sum: number, item: any) => sum + item.amount, 0);
 
     return HttpResponse.json({
@@ -967,6 +974,7 @@ export const handlers = [
       selected?: boolean;
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const item = cartItems.find((i: any) => i.id === itemId);
     if (!item) {
       return new HttpResponse(null, { status: 404 });
@@ -980,6 +988,7 @@ export const handlers = [
 
   http.delete('**/api/v2/cart/items/:itemId', ({ params }) => {
     const { itemId } = params;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     cartItems = cartItems.filter((i: any) => i.id !== itemId);
     return new HttpResponse(null, { status: 204 });
   }),

@@ -375,6 +375,7 @@ export async function getMyParticipatedFundings(
     return {
       ...funding,
       myContribution: item.myContribution
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any; // FundingListResponse는 Funding[]을 가지는데, 여기서는 myContribution이 포함된 특수 케이스
   });
 

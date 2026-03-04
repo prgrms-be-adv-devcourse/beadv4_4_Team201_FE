@@ -1,9 +1,7 @@
 import { apiClient } from './client';
 import { resolveImageUrl } from '@/lib/image';
-import type { PageParams } from '@/types/api';
 import type {
   Wishlist,
-  WishItem,
   WishlistVisibility,
   WishItemCreateRequest,
   FriendWishlistListResponse,
@@ -32,7 +30,7 @@ export async function getMyWishlist(params?: WishlistQueryParams): Promise<Wishl
   const queryString = queryParams.toString();
   const endpoint = queryString ? `/api/v2/wishlists/me?${queryString}` : '/api/v2/wishlists/me';
 
-  const response = await apiClient.get<any>(endpoint);
+  const response = await apiClient.get<unknown>(endpoint);
   return transformWishlist(response);
 }
 
@@ -49,7 +47,7 @@ export async function getWishlist(memberId: string, params?: WishlistQueryParams
   const queryString = queryParams.toString();
   const endpoint = queryString ? `/api/v2/wishlists/${memberId}?${queryString}` : `/api/v2/wishlists/${memberId}`;
 
-  const response = await apiClient.get<any>(endpoint);
+  const response = await apiClient.get<unknown>(endpoint);
   return transformWishlist(response);
 }
 
@@ -57,11 +55,14 @@ export async function getWishlist(memberId: string, params?: WishlistQueryParams
  * Transforms backend v2 wishlist response to frontend format.
  * Handles both flat (v2) and nested (v1/mock) item structures.
  */
-function transformWishlist(data: any): Wishlist {
-  if (!data) return data;
+function transformWishlist(data: unknown): Wishlist {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if (!data) return data as any;
 
   const isArray = Array.isArray(data);
-  const rawItems = isArray ? data : (Array.isArray(data.items) ? data.items : (data.items?.content || []));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const dataObj = data as any;
+  const rawItems = isArray ? data : (Array.isArray(dataObj.items) ? dataObj.items : (dataObj.items?.content || []));
 
   const mapStatus = (s: string): WishItemStatus => {
     const status = (s || '').toUpperCase();
@@ -78,6 +79,7 @@ function transformWishlist(data: any): Wishlist {
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const items = rawItems.map((item: any) => {
     // If it's already a WishItem (nested product), return as is
     if (item.product && typeof item.product === 'object' && item.product.id) {
@@ -93,7 +95,7 @@ function transformWishlist(data: any): Wishlist {
     // Otherwise, it's a flat style, transform it
     return {
       id: (item.wishlistItemId || item.id || '').toString(),
-      wishlistId: (item.wishlistId || data.id || '').toString(),
+      wishlistId: (item.wishlistId || dataObj.id || '').toString(),
       productId: (item.productId || '').toString(),
       product: {
         id: (item.productId || '').toString(),
@@ -117,6 +119,7 @@ function transformWishlist(data: any): Wishlist {
     return {
       id: '',
       memberId: '',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       member: { nickname: '친구' } as any,
       visibility: 'PUBLIC',
       items,
@@ -124,19 +127,19 @@ function transformWishlist(data: any): Wishlist {
     };
   }
 
-  const member = data.member || {
-    id: (data.memberId || data.id || '').toString(),
-    nickname: data.nickname || data.memberNickname || '친구',
-    avatarUrl: data.avatarUrl || data.memberAvatarUrl || null
+  const member = dataObj.member || {
+    id: (dataObj.memberId || dataObj.id || '').toString(),
+    nickname: dataObj.nickname || dataObj.memberNickname || '친구',
+    avatarUrl: dataObj.avatarUrl || dataObj.memberAvatarUrl || null
   };
 
   // Improved total elements extraction based on user's specific response format
-  const totalElements = data.items?.totalElements ?? data.totalElements ?? data.itemCount ?? items.length;
+  const totalElements = dataObj.items?.totalElements ?? dataObj.totalElements ?? dataObj.itemCount ?? items.length;
 
   // Map pagination data from items object
-  let page = data.page;
-  if (!page && data.items && typeof data.items === 'object') {
-    const p = data.items;
+  let page = dataObj.page;
+  if (!page && dataObj.items && typeof dataObj.items === 'object') {
+    const p = dataObj.items;
     if ('pageNumber' in p) {
       page = {
         pageNumber: p.pageNumber,
@@ -159,9 +162,9 @@ function transformWishlist(data: any): Wishlist {
   }
 
   return {
-    ...data,
-    id: (data.id || '').toString(),
-    memberId: (data.memberId || '').toString(),
+    ...dataObj,
+    id: (dataObj.id || '').toString(),
+    memberId: (dataObj.memberId || '').toString(),
     member,
     items,
     itemCount: totalElements,
@@ -175,6 +178,7 @@ export async function checkWishlistItemExistence(productId: string): Promise<boo
 }
 
 export async function addWishlistItem(data: WishItemCreateRequest): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const id = 'productId' in data ? data.productId : (data as any).id;
   return apiClient.post<void>(`/api/v2/wishlists/me/items/add?productId=${id}`, {});
 }
@@ -184,7 +188,7 @@ export async function removeWishlistItem(itemId: string): Promise<void> {
 }
 
 export async function updateWishlistVisibility(data: UpdateWishlistSettingsRequest): Promise<Wishlist> {
-  const response = await apiClient.patch<any>('/api/v2/wishlists/me/settings', data);
+  const response = await apiClient.patch<unknown>('/api/v2/wishlists/me/settings', data);
   return transformWishlist(response);
 }
 

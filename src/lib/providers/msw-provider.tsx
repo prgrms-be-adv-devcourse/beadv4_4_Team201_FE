@@ -30,7 +30,7 @@ export function MSWProvider({ children }: { children: React.ReactNode }) {
 
       initMSW();
     }
-  }, []);
+  }, [shouldEnableMSW]);
 
   if (!mswReady) {
     return null;
