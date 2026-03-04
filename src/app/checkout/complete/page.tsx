@@ -114,7 +114,7 @@ function CheckoutCompleteContent() {
 
                 <Button
                     className="w-full h-12 text-base font-bold"
-                    onClick={() => router.push('/')}
+                    onClick={() => { window.location.href = '/'; }}
                 >
                     홈으로 돌아가기
                 </Button>
