@@ -11,7 +11,7 @@ import type { CloudEventEnvelope } from '@/types/notification';
 const SSE_ENDPOINT = '/api/sse/notifications';
 const RECONNECT_DELAY_MS = 3000;
 const MAX_RECONNECT_ATTEMPTS = 10;
-const SSE_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes per server spec
+const SSE_TIMEOUT_MS = 4 * 60 * 1000; // 4 minutes — Edge Runtime 300s limit에 맞춤 (BE 타임아웃 단축 요청 예정)
 
 const NOTIFICATION_EVENT_TYPES = [
   'app.giftify.notification.funding-created',
@@ -77,7 +77,7 @@ export function useNotificationSSE() {
     es.addEventListener('connect', () => {
       reconnectAttempts.current = 0;
 
-      // Server closes connection after 30 minutes; reconnect before that
+      // Vercel Edge Runtime 300s 제한에 맞춰 4분 주기로 선제 재연결
       timeoutTimerRef.current = setTimeout(() => {
         es.close();
         eventSourceRef.current = null;
