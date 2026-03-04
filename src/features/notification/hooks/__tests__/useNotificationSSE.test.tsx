@@ -12,15 +12,17 @@ vi.mock('@/features/auth/hooks/useAuth', () => ({
   useAuth: () => ({ user: { id: 'user-1' } }),
 }));
 
+type EventListener = (...args: unknown[]) => void;
+
 const mockToast = vi.fn();
 vi.mock('sonner', () => ({
-  toast: (...args: any[]) => mockToast(...args),
+  toast: (...args: unknown[]) => mockToast(...args),
 }));
 
 class MockEventSource {
   static instances: MockEventSource[] = [];
   url: string;
-  listeners: Record<string, Function[]> = {};
+  listeners: Record<string, EventListener[]> = {};
   close = vi.fn();
 
   constructor(url: string) {
@@ -28,16 +30,16 @@ class MockEventSource {
     MockEventSource.instances.push(this);
   }
 
-  addEventListener(type: string, listener: Function) {
+  addEventListener(type: string, listener: EventListener) {
     if (!this.listeners[type]) this.listeners[type] = [];
     this.listeners[type].push(listener);
   }
 
-  emit(type: string, data: any) {
+  emit(type: string, data: unknown) {
     this.listeners[type]?.forEach((fn) => fn(data));
   }
 
-  set onerror(_fn: Function) {}
+  set onerror(_fn: EventListener) {}
 }
 
 vi.stubGlobal('EventSource', MockEventSource);
