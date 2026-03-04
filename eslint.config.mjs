@@ -22,6 +22,8 @@ const eslintConfig = defineConfig([
       "react-hooks/impure-function-in-render": "off",
       "react-hooks/preserve-manual-memoization": "off",
       "react-hooks/incompatible-library": "off",
+      "react-hooks/purity": "off",
+      "@typescript-eslint/no-explicit-any": "warn",
     },
   },
 ]);

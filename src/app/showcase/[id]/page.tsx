@@ -1,6 +1,6 @@
 'use client';
 
-import { use } from 'react';
+import { use, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { AppShell } from '@/components/layout/AppShell';
 import { Footer } from '@/components/layout/Footer';
@@ -50,7 +50,7 @@ export function ShowcaseContent({ id }: { id: string }) {
 
     // Creates a fallback mock funding object if real data fails or loading finishes with no data
     // This ensures showcase pages work for mocked IDs from the Special page
-    const funding: Funding | undefined = realFunding || {
+    const mockFunding = useMemo<Funding>(() => ({
         id: id,
         wishItemId: `wi-${id}`,
         organizerId: 'mock-organizer',
@@ -70,7 +70,9 @@ export function ShowcaseContent({ id }: { id: string }) {
         participantCount: 15,
         expiresAt: new Date(Date.now() + 86400000 * 7).toISOString(),
         createdAt: new Date().toISOString()
-    };
+    }), [id]);
+
+    const funding: Funding | undefined = realFunding || mockFunding;
 
     if (isLoading && !realFunding) {
         return (

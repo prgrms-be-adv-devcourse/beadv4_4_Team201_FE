@@ -872,7 +872,6 @@ export const handlers = [
   // ============================================
   http.get('**/api/v2/carts', () => {
     const selectedCount = cartItems.filter((item: any) => item.selected).length;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const totalAmount = cartItems
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .filter((item: any) => item.selected)

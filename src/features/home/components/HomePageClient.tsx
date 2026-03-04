@@ -106,7 +106,7 @@ export function HomePageClient() {
                             />
                             <div className="absolute inset-0 flex flex-col justify-center items-center text-white p-6 text-center">
                                 <span className="text-sm font-bold tracking-widest uppercase mb-2 border-b border-white pb-1">Curation</span>
-                                <h3 className="text-xl md:text-2xl font-semibold">MD's Pick for Him</h3>
+                                <h3 className="text-xl md:text-2xl font-semibold">MD&apos;s Pick for Him</h3>
                             </div>
                         </Link>
 

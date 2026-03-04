@@ -72,7 +72,7 @@ export default function DiscoverPage() {
                     <div className="mb-20 animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <div className="flex items-center gap-2 mb-6">
                             <Users className="w-5 h-5" strokeWidth={1.5} />
-                            <h2 className="text-lg font-black tracking-tight">"{searchedNickname}" 검색 결과</h2>
+                            <h2 className="text-lg font-black tracking-tight">&ldquo;{searchedNickname}&rdquo; 검색 결과</h2>
                         </div>
 
                         {isSearchLoading ? (
@@ -87,7 +87,7 @@ export default function DiscoverPage() {
                             </Card>
                         ) : !searchResults || searchResults.filter(m => m.memberId.toString() !== me?.id?.toString()).length === 0 ? (
                             <Card className="p-12 text-center border-2 border-dashed border-gray-200 rounded-none bg-gray-50">
-                                <p className="font-bold text-gray-400">"{searchedNickname}" 검색 결과가 없습니다.</p>
+                                <p className="font-bold text-gray-400">&ldquo;{searchedNickname}&rdquo; 검색 결과가 없습니다.</p>
                                 <p className="text-xs text-muted-foreground mt-1">닉네임을 다시 확인해주세요.</p>
                             </Card>
                         ) : (
