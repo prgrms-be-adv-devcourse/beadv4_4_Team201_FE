@@ -12,24 +12,29 @@ export const cartHandlers: HttpHandler[] = [
       .reduce((sum, item) => sum + item.amount, 0);
 
     return HttpResponse.json({
-      cartId: 1,
-      memberId: 1,
-      items: cartItems.map(item => ({
-        targetType: item.targetType,
-        targetId: item.targetId,
-        receiverId: 1,
-        receiverNickname: '테스터',
-        productId: item.productId,
-        productName: item.funding.product.name,
-        imageKey: 'mock-key',
-        productPrice: item.funding.product.price,
-        contributionAmount: item.amount,
-        currentAmount: 0,
-        fundingId: item.fundingId ? parseInt(item.fundingId.replace('funding-', ''), 10) : null,
-        status: 'AVAILABLE',
-        statusMessage: null
-      })),
-      totalAmount,
+      result: 'SUCCESS',
+      data: {
+        cartId: 1,
+        memberId: 1,
+        items: cartItems.map(item => ({
+          targetType: item.targetType,
+          targetId: item.targetId,
+          receiverId: item.funding.recipientId ? parseInt(item.funding.recipientId.replace('member-', '').replace('user-', ''), 10) : 1,
+          receiverNickname: item.funding.recipient.nickname || '테스터',
+          productId: item.productId,
+          productName: item.funding.product.name,
+          imageKey: 'mock-key',
+          productPrice: item.funding.product.price,
+          contributionAmount: item.amount,
+          currentAmount: item.funding.currentAmount || 0,
+          fundingId: item.fundingId ? parseInt(item.fundingId.replace('funding-', ''), 10) : null,
+          status: 'AVAILABLE',
+          statusMessage: null
+        })),
+        totalAmount,
+      },
+      message: null,
+      errorCode: null,
     });
   }),
 

@@ -4,8 +4,13 @@ import { walletBalance, walletTransactions, WalletTransaction, setWalletBalance 
 export const walletHandlers: HttpHandler[] = [
   http.get('**/api/v2/wallet/balance', () => {
     return HttpResponse.json({
-      walletId: 1,
-      balance: walletBalance,
+      result: 'SUCCESS',
+      data: {
+        walletId: 1,
+        balance: walletBalance,
+      },
+      message: null,
+      errorCode: null,
     });
   }),
 

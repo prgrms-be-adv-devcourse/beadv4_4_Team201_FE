@@ -72,7 +72,7 @@ describe('ParticipateModal Component', () => {
             />
         );
 
-        expect(screen.getByText('장바구니 담기')).toBeInTheDocument();
+        expect(screen.getAllByText('장바구니 담기').length).toBeGreaterThan(0);
         expect(screen.getByText('Test Funding Item')).toBeInTheDocument();
         expect(screen.getByAltText('Test Funding Item')).toBeInTheDocument();
         expect(screen.getByText('for @John')).toBeInTheDocument();
