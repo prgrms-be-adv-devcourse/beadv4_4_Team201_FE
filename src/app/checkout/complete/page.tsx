@@ -65,11 +65,6 @@ function CheckoutCompleteContent() {
         }
     }, [phase, isError, order, isLoading]);
 
-    const fundingItems = useMemo(
-        () => order?.items.filter((item) => item.orderItemType === 'FUNDING_GIFT') ?? [],
-        [order?.items]
-    );
-
     const handleClose = () => {
         router.push('/');
     };
