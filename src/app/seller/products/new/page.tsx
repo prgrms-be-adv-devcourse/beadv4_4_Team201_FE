@@ -57,8 +57,9 @@ export default function NewProductPage() {
             queryClient.invalidateQueries({ queryKey: queryKeys.sellerProductsPrefix });
             router.push('/seller/products');
         },
-        onError: (err: any) => {
-            toast.error(err.message || '상품 등록에 실패했습니다.');
+        onError: (err: unknown) => {
+            const error = err as { message?: string };
+            toast.error(error.message || '상품 등록에 실패했습니다.');
         },
     });
 

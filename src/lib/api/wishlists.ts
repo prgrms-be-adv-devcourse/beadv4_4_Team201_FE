@@ -9,7 +9,10 @@ import type {
   PublicWishlist,
   WishlistQueryParams,
   WishItemStatus,
+  WishItem,
 } from '@/types/wishlist';
+import type { MemberPublic } from '@/types/member';
+import type { PageInfo } from '@/types/api';
 
 export interface UpdateWishlistSettingsRequest {
   visibility: WishlistVisibility;
@@ -56,13 +59,12 @@ export async function getWishlist(memberId: string, params?: WishlistQueryParams
  * Handles both flat (v2) and nested (v1/mock) item structures.
  */
 function transformWishlist(data: unknown): Wishlist {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  if (!data) return data as any;
+  if (!data) return {} as Wishlist;
 
   const isArray = Array.isArray(data);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const dataObj = data as any;
-  const rawItems = isArray ? data : (Array.isArray(dataObj.items) ? dataObj.items : (dataObj.items?.content || []));
+  const dataObj = data as Record<string, unknown>;
+  const dataItems = dataObj.items as { content?: unknown[] } | unknown[] | undefined;
+  const rawItems = isArray ? data : (Array.isArray(dataItems) ? dataItems : ((dataItems as { content?: unknown[] })?.content || []));
 
   const mapStatus = (s: string): WishItemStatus => {
     const status = (s || '').toUpperCase();
@@ -79,19 +81,23 @@ function transformWishlist(data: unknown): Wishlist {
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const items = rawItems.map((item: any) => {
+  const items = rawItems.map((item: Record<string, unknown>): WishItem => {
     // If it's already a WishItem (nested product), return as is
-    if (item.product && typeof item.product === 'object' && item.product.id) {
+    const product = item.product as { id?: string } | undefined;
+    if (product && typeof product === 'object' && product.id) {
       return {
-        ...item,
         id: (item.id || item.wishlistItemId || '').toString(),
-        productId: (item.productId || item.product.id || '').toString(),
-        status: mapStatus(item.status),
+        wishlistId: (item.wishlistId || '').toString(),
+        productId: (item.productId || product.id || '').toString(),
+        product: product as WishItem['product'],
+        status: mapStatus((item.status as string) || ''),
+        fundingId: (item.fundingId as string | null) || null,
+        createdAt: (item.createdAt as string) || '',
       };
     }
 
-    const category = item.category || item.productCategory || '';
+    const category = ((item.category || item.productCategory || '') as string);
+    const imageKey = (item.imageKey || item.imageUrl || item.productImageUrl || '') as string | null | undefined;
     // Otherwise, it's a flat style, transform it
     return {
       id: (item.wishlistItemId || item.id || '').toString(),
@@ -99,19 +105,19 @@ function transformWishlist(data: unknown): Wishlist {
       productId: (item.productId || '').toString(),
       product: {
         id: (item.productId || '').toString(),
-        name: item.productName || item.name || '',
-        price: item.price || 0,
-        imageUrl: resolveImageUrl(item.imageKey || item.imageUrl || item.productImageUrl, category),
+        name: (item.productName || item.name || '') as string,
+        price: (item.price || 0) as number,
+        imageUrl: resolveImageUrl(imageKey, category),
         status: 'ON_SALE' as const,
-        brandName: item.brandName || item.sellerNickname || '',
-        sellerNickname: item.sellerNickname || '',
+        brandName: (item.brandName || item.sellerNickname || '') as string,
+        sellerNickname: (item.sellerNickname || '') as string,
         category: category,
-        isSoldout: item.isSoldout || false,
-        isActive: item.isActive !== false,
+        isSoldout: (item.isSoldout || false) as boolean,
+        isActive: (item.isActive !== false) as boolean,
       },
-      status: mapStatus(item.status),
-      fundingId: item.fundingId || null,
-      createdAt: item.addedAt || item.createdAt || '',
+      status: mapStatus((item.status as string) || ''),
+      fundingId: (item.fundingId as string | null) || null,
+      createdAt: (item.addedAt || item.createdAt || '') as string,
     };
   });
 
@@ -119,53 +125,65 @@ function transformWishlist(data: unknown): Wishlist {
     return {
       id: '',
       memberId: '',
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      member: { nickname: '친구' } as any,
+      member: { id: '', nickname: '친구', avatarUrl: null },
       visibility: 'PUBLIC',
       items,
       itemCount: items.length,
     };
   }
 
-  const member = dataObj.member || {
+  const dataMember = dataObj.member as Record<string, unknown> | undefined;
+  const member: MemberPublic = dataMember ? {
+    id: (dataMember.id || '').toString(),
+    nickname: (dataMember.nickname || '친구') as string,
+    avatarUrl: (dataMember.avatarUrl || null) as string | null,
+  } : {
     id: (dataObj.memberId || dataObj.id || '').toString(),
-    nickname: dataObj.nickname || dataObj.memberNickname || '친구',
-    avatarUrl: dataObj.avatarUrl || dataObj.memberAvatarUrl || null
+    nickname: ((dataObj.nickname || dataObj.memberNickname || '친구') as string),
+    avatarUrl: ((dataObj.avatarUrl || dataObj.memberAvatarUrl || null) as string | null),
   };
 
   // Improved total elements extraction based on user's specific response format
-  const totalElements = dataObj.items?.totalElements ?? dataObj.totalElements ?? dataObj.itemCount ?? items.length;
+  const dataItemsObj = dataObj.items as Record<string, unknown> | undefined;
+  const totalElements = (dataItemsObj?.totalElements || dataObj.totalElements || dataObj.itemCount || items.length) as number;
 
   // Map pagination data from items object
-  let page = dataObj.page;
-  if (!page && dataObj.items && typeof dataObj.items === 'object') {
-    const p = dataObj.items;
+  let page: PageInfo | undefined = dataObj.page as PageInfo | undefined;
+  if (!page && dataItemsObj && typeof dataItemsObj === 'object') {
+    const p = dataItemsObj as Record<string, unknown>;
     if ('pageNumber' in p) {
+      const pageNumber = p.pageNumber as number;
+      const pageSize = p.pageSize as number;
+      const pTotalPages = p.totalPages as number;
       page = {
-        pageNumber: p.pageNumber,
-        pageSize: p.pageSize,
-        totalElements: p.totalElements,
-        totalPages: p.totalPages,
-        isFirst: p.isFirst,
-        isLast: p.isLast,
+        page: pageNumber,
+        size: pageSize,
+        totalElements: p.totalElements as number,
+        totalPages: pTotalPages,
+        hasNext: pageNumber < pTotalPages - 1,
+        hasPrevious: pageNumber > 0,
       };
     } else if (p.pageable) {
+      const pageable = p.pageable as Record<string, unknown>;
+      const pageNumber = (p.number ?? pageable.pageNumber) as number;
+      const pageSize = (p.size ?? pageable.pageSize) as number;
+      const pTotalPages = p.totalPages as number;
       page = {
-        pageNumber: p.number ?? p.pageable.pageNumber,
-        pageSize: p.size ?? p.pageable.pageSize,
+        page: pageNumber,
+        size: pageSize,
         totalElements: totalElements,
-        totalPages: p.totalPages,
-        isFirst: p.first,
-        isLast: p.last,
+        totalPages: pTotalPages,
+        hasNext: pageNumber < pTotalPages - 1,
+        hasPrevious: pageNumber > 0,
       };
     }
   }
 
   return {
-    ...dataObj,
     id: (dataObj.id || '').toString(),
     memberId: (dataObj.memberId || '').toString(),
     member,
+    visibility: (dataObj.visibility || 'PUBLIC') as 'PUBLIC' | 'PRIVATE' | 'FRIENDS_ONLY',
     items,
     itemCount: totalElements,
     page,
@@ -178,8 +196,7 @@ export async function checkWishlistItemExistence(productId: string): Promise<boo
 }
 
 export async function addWishlistItem(data: WishItemCreateRequest): Promise<void> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const id = 'productId' in data ? data.productId : (data as any).id;
+  const id = 'productId' in data ? data.productId : (data as { id: string }).id;
   return apiClient.post<void>(`/api/v2/wishlists/me/items/add?productId=${id}`, {});
 }
 

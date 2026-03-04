@@ -72,7 +72,7 @@ export function getErrorMessage(code: string): string {
  */
 export function getMessageFromError(error: unknown): string {
     if (error && typeof error === 'object') {
-        const err = error as any;
+        const err = error as { code?: string; errorCode?: string; message?: string; details?: unknown; data?: unknown };
         const code = err.code || err.errorCode;
         const messageFromBackend = err.message;
         const details = err.details || err.data;

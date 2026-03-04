@@ -19,6 +19,7 @@ import { toast } from 'sonner';
 import { formatPrice } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { getMessageFromError } from '@/lib/error/error-messages';
+import type { CartItem } from '@/types/cart';
 
 export default function CartPage() {
     const router = useRouter();
@@ -195,7 +196,7 @@ export default function CartPage() {
         router.push(`/fundings/${fundingId}`);
     };
 
-    const handleViewProduct = (item: any) => {
+    const handleViewProduct = (item: CartItem) => {
         const productId = item.productId;
 
         if (!productId) {

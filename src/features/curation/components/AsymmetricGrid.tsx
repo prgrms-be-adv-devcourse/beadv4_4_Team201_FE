@@ -1,7 +1,17 @@
 import { CuratedProductCard } from './CuratedProductCard';
+import type { Product } from '@/types/product';
+
+interface CuratedProduct {
+    id: string;
+    name: string;
+    brandName: string;
+    price: number;
+    imageUrl: string;
+    category?: string;
+}
 
 interface AsymmetricGridProps {
-    products: any[];
+    products: CuratedProduct[];
 }
 
 export function AsymmetricGrid({ products }: AsymmetricGridProps) {

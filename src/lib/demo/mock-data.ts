@@ -1,6 +1,6 @@
 interface MockResponse {
   status: number;
-  body: { result: string; data: any };
+  body: { result: string; data: unknown };
 }
 
 interface RouteHandler {

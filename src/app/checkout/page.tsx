@@ -94,8 +94,9 @@ export default function CheckoutPage() {
             });
 
             router.push(`/checkout/complete?orderId=${result.orderId}`);
-        } catch (error: any) {
-            const errorCode = error?.code;
+        } catch (error: unknown) {
+            const err = error as { code?: string; message?: string };
+            const errorCode = err?.code;
 
             switch (errorCode) {
                 case 'INSUFFICIENT_BALANCE':
@@ -107,7 +108,7 @@ export default function CheckoutPage() {
                     toast.error('주문 처리 중 오류가 발생했습니다.');
                     break;
                 default:
-                    toast.error(error?.message || '결제 중 오류가 발생했습니다. 다시 시도해주세요.');
+                    toast.error(err?.message || '결제 중 오류가 발생했습니다. 다시 시도해주세요.');
             }
         } finally {
             setIsProcessing(false);

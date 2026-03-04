@@ -8,7 +8,7 @@ import {
   toggleCartItemSelection,
   parseCartItemId,
 } from '@/lib/api/cart';
-import type { CartItemCreateRequest, CartItemUpdateRequest } from '@/types/cart';
+import type { Cart, CartItemCreateRequest, CartItemUpdateRequest } from '@/types/cart';
 
 /**
  * Hook to add an item to the cart
@@ -56,11 +56,11 @@ export function useUpdateCartItem() {
       const previousCart = queryClient.getQueryData(queryKeys.cart);
 
       // Optimistically update to the new value
-      queryClient.setQueryData(queryKeys.cart, (old: any) => {
+      queryClient.setQueryData(queryKeys.cart, (old: Cart | undefined) => {
         if (!old) return old;
         return {
           ...old,
-          items: old.items.map((item: any) =>
+          items: old.items.map((item) =>
             item.id === itemId ? { ...item, ...data } : item
           ),
         };
@@ -126,11 +126,11 @@ export function useRemoveCartItems() {
       const previousCart = queryClient.getQueryData(queryKeys.cart);
 
       // Optimistically update to the new value
-      queryClient.setQueryData(queryKeys.cart, (old: any) => {
+      queryClient.setQueryData(queryKeys.cart, (old: Cart | undefined) => {
         if (!old) return old;
         return {
           ...old,
-          items: old.items.filter((item: any) => !itemIds.includes(item.id)),
+          items: old.items.filter((item) => !itemIds.includes(item.id)),
         };
       });
 
@@ -167,11 +167,11 @@ export function useToggleCartSelection() {
 
       const previousCart = queryClient.getQueryData(queryKeys.cart);
 
-      queryClient.setQueryData(queryKeys.cart, (old: any) => {
+      queryClient.setQueryData(queryKeys.cart, (old: Cart | undefined) => {
         if (!old) return old;
         return {
           ...old,
-          items: old.items.map((item: any) =>
+          items: old.items.map((item) =>
             item.id === itemId ? { ...item, selected } : item
           ),
         };
@@ -205,13 +205,13 @@ export function useUpdateCartItems() {
       await queryClient.cancelQueries({ queryKey: queryKeys.cart });
       const previousCart = queryClient.getQueryData(queryKeys.cart);
 
-      queryClient.setQueryData(queryKeys.cart, (old: any) => {
+      queryClient.setQueryData(queryKeys.cart, (old: Cart | undefined) => {
         if (!old) return old;
         const updateMap = new Map(updates.map((u) => [u.itemId, u.amount]));
         return {
           ...old,
-          items: old.items.map((item: any) =>
-            updateMap.has(item.id) ? { ...item, amount: updateMap.get(item.id) } : item
+          items: old.items.map((item) =>
+            updateMap.has(item.id) ? { ...item, amount: updateMap.get(item.id)! } : item
           ),
         };
       });

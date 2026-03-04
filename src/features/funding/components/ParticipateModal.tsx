@@ -72,7 +72,7 @@ export function ParticipateModal({
                     onSuccess('cart');
                     setAmount(0);
                 },
-                onError: (error: any) => {
+                onError: (error: unknown) => {
                     toast.error(getMessageFromError(error) || '펀딩 참여에 실패했습니다.');
                 },
             }
