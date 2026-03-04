@@ -78,7 +78,10 @@ let walletTransactions: WalletTransaction[] = [
 interface CartItem {
   id: string;
   cartId: string;
-  fundingId: string;
+  targetType: 'FUNDING' | 'FUNDING_PENDING';
+  targetId: number;
+  productId: number;
+  fundingId: string | null;
   funding: Funding;
   amount: number;
   selected: boolean;
@@ -863,39 +866,52 @@ export const handlers = [
   // ============================================
   // CART
   // ============================================
-  http.get('**/api/v2/cart', () => {
+  http.get('**/api/v2/carts', () => {
     const selectedCount = cartItems.filter((item: any) => item.selected).length;
     const totalAmount = cartItems
       .filter((item: any) => item.selected)
       .reduce((sum: number, item: any) => sum + item.amount, 0);
 
     return HttpResponse.json({
-      id: 'cart-1',
-      memberId: currentUser.id,
-      items: cartItems,
-      selectedCount,
+      cartId: 1,
+      memberId: 1,
+      items: cartItems.map(item => ({
+        targetType: item.targetType,
+        targetId: item.targetId,
+        receiverId: 1,
+        receiverNickname: '테스터',
+        productId: item.productId,
+        productName: item.funding.product.name,
+        imageKey: 'mock-key',
+        productPrice: item.funding.product.price,
+        contributionAmount: item.amount,
+        currentAmount: 0,
+        fundingId: item.fundingId ? parseInt(item.fundingId.replace('funding-', ''), 10) : null,
+        status: 'AVAILABLE',
+        statusMessage: null
+      })),
       totalAmount,
     });
   }),
 
-  http.post('**/api/v2/cart/items', async ({ request }) => {
+  http.post('**/api/v2/carts', async ({ request }) => {
     const body = await request.json();
-    const { fundingId, wishItemId, amount } = body as {
-      fundingId?: string;
-      wishItemId?: string;
+    const { targetType, targetId, amount } = body as {
+      targetType: 'FUNDING' | 'FUNDING_PENDING';
+      targetId: number;
       amount: number;
     };
 
     let funding: Funding | undefined;
     let isNewFunding = false;
 
-    if (fundingId) {
-      funding = fundings.find((f) => f.id === fundingId);
-    } else if (wishItemId) {
+    if (targetType === 'FUNDING') {
+      funding = fundings.find((f) => f.id === `funding-${targetId}`);
+    } else {
       // Create new PENDING funding
       funding = {
         id: `funding-${Date.now()}`,
-        wishItemId,
+        wishItemId: `wish-item-${targetId}`,
         product: products[0],
         organizerId: currentUser.id,
         organizer: {
@@ -928,6 +944,9 @@ export const handlers = [
     const newCartItem: CartItem = {
       id: `cart-item-${Date.now()}`,
       cartId: 'cart-1',
+      targetType,
+      targetId,
+      productId: parseInt(funding.product.id.replace('product-', ''), 10) || 1,
       fundingId: funding.id,
       funding,
       amount,
