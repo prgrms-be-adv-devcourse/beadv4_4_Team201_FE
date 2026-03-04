@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { queryKeys } from '@/lib/query/keys';
 import { toast } from 'sonner';
@@ -28,6 +29,7 @@ const NOTIFICATION_EVENT_TYPES = [
 export function useNotificationSSE() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const router = useRouter();
   const eventSourceRef = useRef<EventSource | null>(null);
   const reconnectAttempts = useRef(0);
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -48,7 +50,7 @@ export function useNotificationSSE() {
             action: {
               label: '확인',
               onClick: () => {
-                window.location.href = '/notifications';
+                router.push('/notifications');
               },
             },
           });
@@ -58,7 +60,7 @@ export function useNotificationSSE() {
         // ignore malformed events
       }
     },
-    [invalidateNotifications],
+    [invalidateNotifications, router],
   );
 
   const connect = useCallback(() => {
