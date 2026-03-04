@@ -25,6 +25,7 @@ export interface FundingCardProps {
         currentAmount: number;
         status: FundingStatus;
         expiresAt: string;
+        daysRemaining?: number;
         participantCount: number;
         recipient: {
             nickname: string | null;
@@ -45,7 +46,12 @@ export function FundingCard({
 }: FundingCardProps) {
     const isCarousel = variant === 'carousel';
     const percentage = Math.round((funding.currentAmount / funding.targetAmount) * 100);
-    const daysLeft = differenceInDays(parseISO(funding.expiresAt), new Date());
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const expiresDate = parseISO(funding.expiresAt);
+    expiresDate.setHours(0, 0, 0, 0);
+    const daysLeft = differenceInDays(expiresDate, today);
+    const days = funding.daysRemaining ?? daysLeft;
     const recipientNickname = funding.recipient.nickname || '알 수 없음';
 
     const handleCartClick = (e: React.MouseEvent) => {
@@ -54,25 +60,22 @@ export function FundingCard({
     };
 
     const getStatusLabel = () => {
-        if (funding.status === 'ACHIEVED') {
-            return <span className="text-xs font-medium text-foreground">달성</span>;
+        switch (funding.status) {
+            case 'IN_PROGRESS':
+                if (days === 0) return <span className="text-xs font-medium text-primary">D-Day</span>;
+                if (days < 0) return <span className="text-xs text-muted-foreground">만료</span>;
+                return <span className="text-xs font-medium text-primary">D-{days}</span>;
+            case 'ACHIEVED':
+                return <span className="text-xs font-medium text-foreground">달성</span>;
+            case 'ACCEPTED':
+            case 'REFUSED':
+                return <span className="text-xs font-medium text-foreground">완료</span>;
+            case 'EXPIRED':
+            case 'CLOSED':
+                return <span className="text-xs text-muted-foreground">만료</span>;
+            default:
+                return <span className="text-xs text-muted-foreground">{funding.status}</span>;
         }
-        if (funding.status === 'ACCEPTED') {
-            return <span className="text-xs font-medium text-foreground">수락</span>;
-        }
-        if (funding.status === 'REFUSED') {
-            return <span className="text-xs text-muted-foreground">거절</span>;
-        }
-        if (funding.status === 'CLOSED') {
-            return <span className="text-xs text-muted-foreground">종료</span>;
-        }
-        if (funding.status === 'EXPIRED' || Number.isNaN(daysLeft) || daysLeft < 0) {
-            return <span className="text-xs text-muted-foreground">만료</span>;
-        }
-        if (daysLeft === 0) {
-            return <span className="text-xs font-medium text-foreground">D-Day</span>;
-        }
-        return <span className="text-xs text-muted-foreground">D-{daysLeft}</span>;
     };
 
     if (isCarousel) {

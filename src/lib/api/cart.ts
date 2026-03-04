@@ -31,13 +31,15 @@ interface BackendCartItemRequest {
 interface BackendCartItemResponse {
   targetType: BackendTargetType;
   targetId: number;
-  receiverId: number;
-  receiverNickname: string;
+  receiverId: number | null;
+  receiverNickname: string | null;
   productName: string | null;
+  productId: number | null;
   imageKey: string | null;
   productPrice: number;
   contributionAmount: number;
   currentAmount: number | null;
+  fundingId: number | null;
   status: string; // ItemStatus enum (AVAILABLE, SOLD_OUT, DISCONTINUED, FUNDING_ENDED)
   statusMessage: string | null;
 }
@@ -73,18 +75,20 @@ function mapBackendCartItem(item: BackendCartItemResponse, cartId: number): Cart
     targetType: item.targetType as any,
     targetId: item.targetId.toString(),
     receiverId: item.receiverId?.toString() || null,
-    receiverNickname: item.receiverNickname,
+    receiverNickname: item.receiverNickname || '',
     imageKey: item.imageKey,
     productName: item.productName,
     productPrice: item.productPrice,
     contributionAmount: item.contributionAmount,
     currentAmount: item.currentAmount,
     amount: item.contributionAmount,
+    fundingId: item.fundingId?.toString() || null,
+    productId: item.productId?.toString() || '',
     funding: {
-      id: item.targetType === 'FUNDING' ? item.targetId.toString() : '',
+      id: item.fundingId?.toString() || (item.targetType === 'FUNDING' ? item.targetId.toString() : ''),
       wishItemId: item.targetType === 'FUNDING_PENDING' ? item.targetId.toString() : '',
       product: {
-        id: '',
+        id: item.productId?.toString() || '',
         name: item.productName || '',
         price: item.productPrice,
         imageUrl: resolveImageUrl(item.imageKey),
