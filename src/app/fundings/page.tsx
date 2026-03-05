@@ -187,9 +187,8 @@ export default function FundingsPage() {
                     recipient={{
                         nickname: selectedFunding.recipient.nickname || selectedFunding.receiverNickname || '알 수 없음'
                     }}
-                    onSuccess={() => {
-                        toast.success('장바구니에 담겼습니다.', {
-                            description: '펀딩 참여가 장바구니에 추가되었습니다.',
+                    onSuccess={(mode, message) => {
+                        toast.success(message || '장바구니에 상품을 추가했습니다.', {
                             action: {
                                 label: '장바구니 확인',
                                 onClick: () => router.push('/cart')

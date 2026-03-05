@@ -23,7 +23,8 @@ export function useAddToCart() {
 
   return useMutation({
     mutationFn: async (data: CartItemCreateRequest) => {
-      await addCartItem(data);
+      const message = await addCartItem(data);
+      return message;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.cart });

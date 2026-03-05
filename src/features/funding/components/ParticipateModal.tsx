@@ -32,7 +32,7 @@ interface ParticipateModalProps {
     recipient: {
         nickname: string;
     };
-    onSuccess: (mode: 'cart' | 'checkout') => void;
+    onSuccess: (mode: 'cart' | 'checkout', message?: string) => void;
 }
 
 export function ParticipateModal({
@@ -67,9 +67,9 @@ export function ParticipateModal({
                 amount,
             },
             {
-                onSuccess: () => {
+                onSuccess: (data) => {
                     onOpenChange(false);
-                    onSuccess('cart');
+                    onSuccess('cart', data.message);
                     setAmount(0);
                 },
                 onError: (error: unknown) => {

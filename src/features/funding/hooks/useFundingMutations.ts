@@ -29,13 +29,13 @@ export function useCreateFunding() {
       message?: string;
     }) => {
       // 장바구니에 FUNDING_PENDING 타입으로 추가
-      await addCartItem({
+      const responseMessage = await addCartItem({
         targetType: 'FUNDING_PENDING',
         targetId: wishItemId,
         amount,
       });
 
-      return { wishItemId, amount };
+      return { wishItemId, amount, message: responseMessage };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.cart });
@@ -58,13 +58,13 @@ export function useParticipateFunding() {
   return useMutation({
     mutationFn: async ({ wishItemId, amount }: { wishItemId: string; amount: number }) => {
       // 장바구니에 FUNDING 타입으로 추가
-      await addCartItem({
+      const responseMessage = await addCartItem({
         targetType: 'FUNDING',
         targetId: wishItemId,
         amount,
       });
 
-      return { wishItemId, amount };
+      return { wishItemId, amount, message: responseMessage };
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.cart });

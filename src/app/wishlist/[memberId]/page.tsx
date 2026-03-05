@@ -354,9 +354,8 @@ export default function PublicWishlistPage({ params }: { params: Promise<{ membe
                     open={isStartFundingOpen}
                     onOpenChange={setIsStartFundingOpen}
                     wishItem={selectedItem}
-                    onSuccess={() => {
-                        toast.success('장바구니에 담겼습니다.', {
-                            description: '상품이 장바구니에 추가되었습니다.',
+                    onSuccess={(message) => {
+                        toast.success(message || '장바구니에 상품을 추가했습니다.', {
                             action: {
                                 label: '장바구니 확인',
                                 onClick: () => router.push('/cart')
@@ -378,9 +377,8 @@ export default function PublicWishlistPage({ params }: { params: Promise<{ membe
                     recipient={{
                         nickname: wishlist?.member?.nickname || '알 수 없음'
                     }}
-                    onSuccess={() => {
-                        toast.success('장바구니에 담겼습니다.', {
-                            description: '펀딩 참여가 장바구니에 추가되었습니다.',
+                    onSuccess={(_, message) => {
+                        toast.success(message || '장바구니에 상품을 추가했습니다.', {
                             action: {
                                 label: '장바구니 확인',
                                 onClick: () => router.push('/cart')

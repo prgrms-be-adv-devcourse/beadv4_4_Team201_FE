@@ -182,10 +182,9 @@ export default function ParticipatedFundingDetailPage() {
                     recipient={{
                         nickname: funding.receiverNickname || '알 수 없음'
                     }}
-                    onSuccess={(mode) => {
+                    onSuccess={(mode, message) => {
                         if (mode === 'cart') {
-                            toast.success('장바구니에 담겼습니다.', {
-                                description: '결제를 진행하시겠습니까?',
+                            toast.success(message || '장바구니에 상품을 추가했습니다.', {
                                 action: {
                                     label: '장바구니 확인',
                                     onClick: () => router.push('/cart')

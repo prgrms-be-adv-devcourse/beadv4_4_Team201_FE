@@ -18,10 +18,11 @@ export class ApiError extends Error {
 interface RequestConfig extends RequestInit {
     token?: string;
     idempotencyKey?: string;
+    includeFullResponse?: boolean;
 }
 
 async function request<T>(endpoint: string, config: RequestConfig = {}): Promise<T> {
-    const { token, idempotencyKey, headers, ...customConfig } = config;
+    const { token, idempotencyKey, includeFullResponse, headers, ...customConfig } = config;
 
     const defaultHeaders: HeadersInit = {
         'Content-Type': 'application/json',
@@ -70,6 +71,10 @@ async function request<T>(endpoint: string, config: RequestConfig = {}): Promise
             const errorMessage = (json.message as string) || 'Operation failed';
             const errorCode = (json.errorCode as string) || 'UNKNOWN_ERROR';
             throw new ApiError(errorMessage, errorCode, response.status, json.data);
+        }
+
+        if (includeFullResponse) {
+            return json as T;
         }
 
         return ('data' in json ? json.data : json) as T;

@@ -143,14 +143,17 @@ export async function getCart(): Promise<Cart> {
  * 장바구니에 아이템 추가
  * @endpoint POST /api/v2/carts
  */
-export async function addCartItem(data: CartItemCreateRequest): Promise<void> {
+export async function addCartItem(data: CartItemCreateRequest): Promise<string> {
   const request: BackendCartItemRequest = {
     targetType: data.targetType,
     targetId: parseInt(data.targetId, 10),
     amount: data.amount,
   };
 
-  await apiClient.post<void>('/api/v2/carts', request);
+  const response = await apiClient.post<{ message: string }>('/api/v2/carts', request, {
+    includeFullResponse: true,
+  });
+  return response.message;
 }
 
 /**

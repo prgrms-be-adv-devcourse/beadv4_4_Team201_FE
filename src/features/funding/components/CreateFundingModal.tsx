@@ -20,6 +20,7 @@ import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCreateFunding } from '@/features/funding/hooks/useFundingMutations';
 import { resolveImageUrl } from '@/lib/image';
+import { getMessageFromError } from '@/lib/error/error-messages';
 
 interface CreateFundingModalProps {
     open: boolean;
@@ -34,7 +35,7 @@ interface CreateFundingModalProps {
         };
     };
     /** 장바구니에 추가 성공 시 호출 (checkout으로 이동 권장) */
-    onSuccess: () => void;
+    onSuccess: (message?: string) => void;
 }
 
 export function CreateFundingModal({
@@ -59,8 +60,11 @@ export function CreateFundingModal({
 
     const createFunding = useCreateFunding();
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = (e?: React.FormEvent) => {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
 
         if (amount < 1000) {
             toast.error('최소 참여 금액은 1,000원입니다.');
@@ -85,15 +89,15 @@ export function CreateFundingModal({
                 message: message.trim() || undefined,
             },
             {
-                onSuccess: () => {
+                onSuccess: (data) => {
                     onOpenChange(false);
-                    onSuccess();
+                    onSuccess(data.message);
                     setAmount(0);
                     setMessage('');
                     setExpiresInDays(14);
                 },
-                onError: (error) => {
-                    toast.error(error instanceof Error ? error.message : '펀딩 시작에 실패했습니다.');
+                onError: (error: unknown) => {
+                    toast.error(getMessageFromError(error) || '장바구니 담기에 실패했습니다.');
                 },
             }
         );

@@ -34,13 +34,13 @@ export function AddToCartButton({
         if (addToCartMutation.isPending) return;
 
         try {
-            await addToCartMutation.mutateAsync({
+            const message = await addToCartMutation.mutateAsync({
                 targetType: 'FUNDING_PENDING',
                 targetId: productId,
                 amount: 10000,
             });
 
-            toast.success('장바구니에 담겼습니다.');
+            toast.success(message || '장바구니에 상품을 추가했습니다.');
         } catch (error: unknown) {
             toast.error(getMessageFromError(error) || '장바구니 담기에 실패했습니다.');
         }
