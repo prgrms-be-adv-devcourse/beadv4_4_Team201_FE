@@ -41,7 +41,7 @@ export function AddToCartButton({
             });
 
             toast.success('장바구니에 담겼습니다.');
-        } catch (error: any) {
+        } catch (error: unknown) {
             toast.error(getMessageFromError(error) || '장바구니 담기에 실패했습니다.');
         }
     };

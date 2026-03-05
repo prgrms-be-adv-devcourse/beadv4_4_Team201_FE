@@ -3,6 +3,7 @@ import { auth0 } from '@/lib/auth/auth0';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'edge';
 
 export async function GET() {
   let accessToken: string | undefined;
@@ -40,7 +41,6 @@ export async function GET() {
     headers: {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache, no-transform',
-      Connection: 'keep-alive',
     },
   });
 }

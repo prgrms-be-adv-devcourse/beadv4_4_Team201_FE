@@ -141,7 +141,7 @@ export default function SellerProductsPage() {
                             <Label className="text-xs font-medium">판매 상태</Label>
                             <select
                                 value={filters.status ?? ''}
-                                onChange={e => setFilters(f => ({ ...f, status: (e.target.value || undefined) as any }))}
+                                onChange={e => setFilters(f => ({ ...f, status: (e.target.value || undefined) as SellerProductSearchParams['status'] }))}
                                 className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                             >
                                 {FILTER_STATUS_OPTIONS.map(o => (

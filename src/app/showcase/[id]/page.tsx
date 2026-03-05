@@ -1,6 +1,6 @@
 'use client';
 
-import { use } from 'react';
+import { use, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { AppShell } from '@/components/layout/AppShell';
 import { Footer } from '@/components/layout/Footer';
@@ -11,8 +11,22 @@ import { useFunding } from '@/features/funding/hooks/useFunding';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 
-// Mock content for showcase (In a real app, this would come from an API)
-const showcaseContents: Record<string, any> = {
+interface ShowcaseContent {
+    hero: {
+        title: string;
+        subtitle: string;
+        image: string;
+    };
+    stories: Array<{
+        title: string;
+        description: string;
+        image: string;
+        position?: 'left' | 'right';
+        isFullWidth?: boolean;
+    }>;
+}
+
+const showcaseContents: Record<string, ShowcaseContent> = {
     'default': {
         hero: {
             title: "소중한 마음을 전하는\n가장 특별한 방법",
@@ -50,7 +64,7 @@ export function ShowcaseContent({ id }: { id: string }) {
 
     // Creates a fallback mock funding object if real data fails or loading finishes with no data
     // This ensures showcase pages work for mocked IDs from the Special page
-    const funding: Funding | undefined = realFunding || {
+    const mockFunding = useMemo<Funding>(() => ({
         id: id,
         wishItemId: `wi-${id}`,
         organizerId: 'mock-organizer',
@@ -70,7 +84,9 @@ export function ShowcaseContent({ id }: { id: string }) {
         participantCount: 15,
         expiresAt: new Date(Date.now() + 86400000 * 7).toISOString(),
         createdAt: new Date().toISOString()
-    };
+    }), [id]);
+
+    const funding: Funding | undefined = realFunding || mockFunding;
 
     if (isLoading && !realFunding) {
         return (
@@ -109,7 +125,7 @@ export function ShowcaseContent({ id }: { id: string }) {
                 />
 
                 <div className="bg-white">
-                    {content.stories.map((story: any, index: number) => (
+                    {content.stories.map((story, index) => (
                         <ShowcaseStory
                             key={index}
                             title={story.title}

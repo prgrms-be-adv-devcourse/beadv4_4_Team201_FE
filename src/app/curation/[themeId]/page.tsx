@@ -60,11 +60,11 @@ export function CurationContent({ themeId }: { themeId: string }) {
             {/* Editor's Note Section */}
             <div className="bg-[#f4f4f4] py-24 my-12">
                 <div className="max-w-screen-md mx-auto px-6 text-center">
-                    <h3 className="text-2xl font-bold mb-6">Editor's Note</h3>
+                    <h3 className="text-2xl font-bold mb-6">Editor&apos;s Note</h3>
                     <p className="text-lg text-muted-foreground leading-relaxed">
-                        "선물은 물건을 주는 것이 아니라, 마음을 전하는 것입니다.<br />
+                        &ldquo;선물은 물건을 주는 것이 아니라, 마음을 전하는 것입니다.<br />
                         받는 분의 취향을 가장 잘 아는 당신의 선택이<br />
-                        가장 완벽한 선물이 될 것입니다."
+                        가장 완벽한 선물이 될 것입니다.&rdquo;
                     </p>
                     <div className="mt-8">
                         <span className="text-sm font-medium tracking-widest uppercase text-muted-foreground">Giftify Curator</span>

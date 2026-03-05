@@ -1,8 +1,6 @@
 import { members } from './members';
 import { products } from './products';
 import { Funding, FundingParticipant, FundingStatus } from '@/types/funding';
-import { Product } from '@/types/product';
-import { MemberPublic } from '@/types/member';
 
 export type { FundingStatus };
 

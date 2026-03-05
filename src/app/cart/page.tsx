@@ -14,11 +14,12 @@ import { useUpdateCartItem, useUpdateCartItems, useRemoveCartItems, useToggleCar
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { Skeleton } from '@/components/ui/skeleton';
 import { InlineError } from '@/components/common/InlineError';
-import { Gift, Loader2, AlertCircle, X, ExternalLink } from 'lucide-react';
+import { Gift, AlertCircle, X, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatPrice } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { getMessageFromError } from '@/lib/error/error-messages';
+import type { CartItem } from '@/types/cart';
 
 export default function CartPage() {
     const router = useRouter();
@@ -27,6 +28,12 @@ export default function CartPage() {
     const [editingItemIds, setEditingItemIds] = useState<Set<string>>(new Set());
     const [tempAmounts, setTempAmounts] = useState<Record<string, string>>({});
 
+    // All hooks must be called before early returns
+    const updateCartItem = useUpdateCartItem();
+    const updateCartItems = useUpdateCartItems();
+    const removeCartItems = useRemoveCartItems();
+    const toggleSelection = useToggleCartSelection();
+
     // Redirect to login if not authenticated
     if (!isAuthLoading && !isAuthenticated) {
         window.location.href = '/auth/login';
@@ -34,10 +41,6 @@ export default function CartPage() {
     }
 
     const isLoading = isAuthLoading || isCartLoading;
-    const updateCartItem = useUpdateCartItem();
-    const updateCartItems = useUpdateCartItems();
-    const removeCartItems = useRemoveCartItems();
-    const toggleSelection = useToggleCartSelection();
 
     const selectedItems = cart?.items.filter(item => item.selected) || [];
     const purchasableSelectedItems = selectedItems.filter(item => item.status === 'AVAILABLE');
@@ -193,7 +196,7 @@ export default function CartPage() {
         router.push(`/fundings/${fundingId}`);
     };
 
-    const handleViewProduct = (item: any) => {
+    const handleViewProduct = (item: CartItem) => {
         const productId = item.productId;
 
         if (!productId) {

@@ -43,13 +43,20 @@ async function request<T>(endpoint: string, config: RequestConfig = {}): Promise
         },
     });
 
-    const json = await response.json().catch(() => ({}));
+    let json: Record<string, unknown> = {};
+    const contentType = response.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+        json = await response.json().catch(() => ({}));
+    }
 
     if (!response.ok) {
         // Handle specific error codes if needed
-        const errorMessage = json.message || 'Something went wrong';
+        const errorMessage = (json.message as string) ||
+            (Object.keys(json).length === 0
+                ? `Server responded with ${response.status} ${response.statusText}`
+                : 'Something went wrong');
         // Support RsData errorCode first, fallback to code
-        const errorCode = json.errorCode || json.code || 'UNKNOWN_ERROR';
+        const errorCode = (json.errorCode as string) || (json.code as string) || 'UNKNOWN_ERROR';
 
         throw new ApiError(errorMessage, errorCode, response.status, json.details || json.data);
     }
@@ -57,11 +64,11 @@ async function request<T>(endpoint: string, config: RequestConfig = {}): Promise
     // Extract data from CommonResponse wrapper if present
     // Backend uses 'result' field instead of 'success' for RsData
     if (json && typeof json === 'object' && ('success' in json || 'result' in json)) {
-        // If result is FAIL (conceptually should be caught by !response.ok if status is used correctly, 
+        // If result is FAIL (conceptually should be caught by !response.ok if status is used correctly,
         // but just in case of 200 OK with FAIL result)
         if ('result' in json && json.result === 'FAIL') {
-            const errorMessage = json.message || 'Operation failed';
-            const errorCode = json.errorCode || 'UNKNOWN_ERROR';
+            const errorMessage = (json.message as string) || 'Operation failed';
+            const errorCode = (json.errorCode as string) || 'UNKNOWN_ERROR';
             throw new ApiError(errorMessage, errorCode, response.status, json.data);
         }
 

@@ -44,7 +44,7 @@ export function CuratedProductCard({
                         {product.editorial && (
                             <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                 <p className="text-sm font-medium leading-snug">
-                                    "{product.editorial}"
+                                    &ldquo;{product.editorial}&rdquo;
                                 </p>
                             </div>
                         )}
@@ -73,7 +73,7 @@ export function CuratedProductCard({
                 {product.editorial && (
                     <div className="pt-3 mt-auto">
                         <p className="text-xs text-muted-foreground italic border-l-2 border-black pl-3 py-1">
-                            MD's Pick
+                            MD&apos;s Pick
                         </p>
                     </div>
                 )}

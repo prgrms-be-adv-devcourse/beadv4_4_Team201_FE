@@ -9,7 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { InlineError } from '@/components/common/InlineError';
 import { useMyParticipatedFundings } from '@/features/funding/hooks/useFunding';
-import type { FundingStatus } from '@/types/funding';
+import type { Funding, FundingStatus } from '@/types/funding';
 
 const PARTICIPATED_STATUS_FILTERS: { label: string; value: FundingStatus | 'all' }[] = [
     { label: '전체', value: 'all' },
@@ -67,7 +67,7 @@ export default function ParticipatedFundingsPage() {
 }
 
 function FundingList({ data, isLoading, isError, onRetry }: {
-    data: any;
+    data: { items: (Funding & { myContribution?: number })[] } | undefined;
     isLoading: boolean;
     isError: boolean;
     onRetry: () => void;
@@ -109,7 +109,7 @@ function FundingList({ data, isLoading, isError, onRetry }: {
 
     return (
         <div className="space-y-4">
-            {data.items.map((funding: any) => (
+            {data.items.map((funding) => (
                 <Link key={funding.id} href={`/fundings/participated/${funding.id}`} className="block">
                     <FundingCard funding={funding} variant="list" />
                 </Link>

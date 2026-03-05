@@ -33,6 +33,7 @@ export function WelcomeSection() {
                         </p>
                         <div className="mt-6 flex gap-3">
                             <Button asChild size="lg">
+                                {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
                                 <a href="/auth/login">로그인</a>
                             </Button>
                             <Button asChild variant="outline" size="lg">

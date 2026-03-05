@@ -1,0 +1,23 @@
+name: Sync Fork
+
+on:
+  schedule:
+    # 매일 오전 9시 KST (00:00 UTC)
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Sync fork
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.mergeUpstream({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              branch: 'main'
+            });

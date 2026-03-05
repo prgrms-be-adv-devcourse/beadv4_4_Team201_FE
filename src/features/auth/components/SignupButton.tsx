@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
 /**
@@ -9,9 +10,9 @@ import { Button } from '@/components/ui/button';
 export function SignupButton() {
     return (
         <Button asChild variant="default" size="sm">
-            <a href="/auth/login?screen_hint=signup" className="text-sm font-medium">
+            <Link href="/auth/login?screen_hint=signup" className="text-sm font-medium">
                 회원가입
-            </a>
+            </Link>
         </Button>
     );
 }

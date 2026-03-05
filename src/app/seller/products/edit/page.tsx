@@ -84,7 +84,7 @@ function EditProductContent() {
                 category: product.category || CATEGORIES[0].value,
                 price: product.price.toString(),
                 stock: product.stock.toString(),
-                status: product.status as any,
+                status: product.status as FormState['status'],
                 imageKey: product.imageKey || '',
             });
             expectedStockRef.current = product.stock;
@@ -98,8 +98,9 @@ function EditProductContent() {
             queryClient.invalidateQueries({ queryKey: queryKeys.sellerProductsPrefix });
             router.push('/seller/products');
         },
-        onError: (err: any) => {
-            toast.error(err.message || '상품 수정에 실패했습니다.');
+        onError: (err: unknown) => {
+            const error = err as { message?: string };
+            toast.error(error.message || '상품 수정에 실패했습니다.');
         },
     });
 
@@ -130,7 +131,7 @@ function EditProductContent() {
             changed.stock = stockNum;
             changed.expectedStock = expectedStockRef.current;
         }
-        if (form.status !== product.status) changed.status = form.status as any;
+        if (form.status !== product.status) changed.status = form.status;
         if (trimmedImageKey !== (product.imageKey || '')) changed.imageKey = trimmedImageKey;
 
 
@@ -190,7 +191,7 @@ function EditProductContent() {
                                     <select
                                         id="status"
                                         value={form.status}
-                                        onChange={(e) => setForm({ ...form, status: e.target.value as any })}
+                                        onChange={(e) => setForm({ ...form, status: e.target.value as FormState['status'] })}
                                         className="h-7 min-w-[90px] rounded border border-input bg-background px-2 py-0 text-[11px] font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring transition-colors"
                                     >
                                         <option value="ACTIVE">판매 중</option>

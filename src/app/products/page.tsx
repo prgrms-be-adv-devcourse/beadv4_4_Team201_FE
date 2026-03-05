@@ -253,7 +253,7 @@ function ProductSearchContent() {
                 </div>
                 {searchQuery && (
                   <div className="flex items-center gap-2 bg-black text-white px-3 py-1 text-[10px] font-bold">
-                    <span>"{searchQuery}"</span>
+                    <span>&ldquo;{searchQuery}&rdquo;</span>
                     <button onClick={clearSearch}>
                       <X className="h-3 w-3" strokeWidth={1.5} />
                     </button>

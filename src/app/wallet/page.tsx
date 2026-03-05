@@ -27,14 +27,6 @@ export default function WalletPage() {
         size: 20
     });
 
-    // Redirect to login if not authenticated
-    if (!isAuthLoading && !isAuthenticated) {
-        window.location.href = '/auth/login';
-        return null;
-    }
-
-    const isLoading = isAuthLoading || isLoadingWallet || isLoadingHistory;
-
     const handleRefresh = useCallback(async () => {
         setIsRefreshing(true);
         try {
@@ -43,6 +35,14 @@ export default function WalletPage() {
             setIsRefreshing(false);
         }
     }, [refetchWallet, refetchHistory]);
+
+    // Redirect to login if not authenticated
+    if (!isAuthLoading && !isAuthenticated) {
+        window.location.href = '/auth/login';
+        return null;
+    }
+
+    const isLoading = isAuthLoading || isLoadingWallet || isLoadingHistory;
 
     if (isLoading) {
         return (

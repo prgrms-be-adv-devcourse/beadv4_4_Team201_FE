@@ -219,6 +219,7 @@ function DesktopTopNav() {
                             </span>
                         )}
                     </Link>
+                    {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
                     <a href="/auth/logout" className="flex items-center gap-1 hover:opacity-60 transition-opacity">
                         <LogOut className="w-3 h-3" />
                         LOGOUT

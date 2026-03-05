@@ -12,6 +12,14 @@ vi.mock('@/components/layout/AppShell', () => ({
     ),
 }));
 
+// Mock useAuth hook
+vi.mock('@/features/auth/hooks/useAuth', () => ({
+    useAuth: () => ({
+        isAuthenticated: true,
+        isLoading: false,
+    }),
+}));
+
 // Mock useWallet hooks
 vi.mock('@/features/wallet/hooks/useWallet', () => ({
     useWallet: vi.fn(),
@@ -72,6 +80,7 @@ describe('WalletPage Feature', () => {
             data: mockWallet,
             isLoading: false,
             error: null,
+            refetch: vi.fn(),
         });
 
         (useWalletHistory as any).mockReturnValue({
@@ -82,6 +91,7 @@ describe('WalletPage Feature', () => {
             },
             isLoading: false,
             error: null,
+            refetch: vi.fn(),
         });
     });
 

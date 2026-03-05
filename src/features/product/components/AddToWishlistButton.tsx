@@ -34,16 +34,17 @@ export function AddToWishlistButton({
       toast.success('위시리스트에 추가되었습니다', {
         description: productName,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as { code?: string; status?: number; message?: string };
       console.error('Failed to add to wishlist:', error);
 
-      if (error.code === 'WISHLIST_001') {
+      if (err.code === 'WISHLIST_001') {
         toast.error('이미 위시리스트에 있는 상품입니다');
-      } else if (error.status === 401) {
+      } else if (err.status === 401) {
         toast.error('로그인이 필요합니다');
       } else {
         toast.error('위시리스트 추가에 실패했습니다', {
-          description: error.message || '다시 시도해주세요',
+          description: err.message || '다시 시도해주세요',
         });
       }
     }

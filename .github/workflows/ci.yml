@@ -17,8 +17,12 @@ jobs:
 
       - run: npm ci
 
-      - name: Lint (non-blocking)
-        run: npm run lint || true
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm run test -- --run
+        continue-on-error: true
 
       - run: npm run build
         env:
