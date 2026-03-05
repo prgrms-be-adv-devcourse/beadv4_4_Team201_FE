@@ -959,32 +959,38 @@ export const handlers = [
     return HttpResponse.json(newCartItem, { status: 201 });
   }),
 
-  http.patch('**/api/v2/cart/items/:itemId', async ({ params, request }) => {
-    const { itemId } = params;
+  http.patch('**/api/v2/carts/items', async ({ request }) => {
     const body = await request.json();
-    const { amount, selected } = body as {
-      amount?: number;
-      selected?: boolean;
-    };
+    const updates = body as { targetType: string; targetId: number; amount: number }[];
 
-    const item = cartItems.find((i: any) => i.id === itemId);
-    if (!item) {
-      return new HttpResponse(null, { status: 404 });
-    }
+    updates.forEach(update => {
+      const item = cartItems.find(
+        i => i.targetType === update.targetType && i.targetId === update.targetId
+      );
+      if (item) {
+        item.amount = update.amount;
+      }
+    });
 
-    if (amount !== undefined) item.amount = amount;
-    if (selected !== undefined) item.selected = selected;
-
-    return HttpResponse.json(item);
-  }),
-
-  http.delete('**/api/v2/cart/items/:itemId', ({ params }) => {
-    const { itemId } = params;
-    cartItems = cartItems.filter((i: any) => i.id !== itemId);
     return new HttpResponse(null, { status: 204 });
   }),
 
-  http.delete('**/api/v2/cart/clear', () => {
+  http.delete('**/api/v2/carts/items/:targetType', ({ params, request }) => {
+    const { targetType } = params;
+    const url = new URL(request.url);
+    const targetIdsStr = url.searchParams.get('targetIds');
+
+    if (targetIdsStr) {
+      const targetIds = targetIdsStr.split(',').map(id => parseInt(id, 10));
+      cartItems = cartItems.filter(
+        i => !(i.targetType === targetType && targetIds.includes(i.targetId))
+      );
+    }
+
+    return new HttpResponse(null, { status: 204 });
+  }),
+
+  http.delete('**/api/v2/carts', () => {
     cartItems = [];
     return new HttpResponse(null, { status: 204 });
   }),

@@ -88,9 +88,17 @@ export default function CheckoutPage() {
                 return;
             }
 
+            const itemsToRemove = selectedItems.map(item => ({
+                targetType: item.targetType,
+                targetId: item.targetId,
+            }));
+
             const result = await placeOrder.mutateAsync({
-                items: orderItems,
-                method: 'DEPOSIT',
+                request: {
+                    items: orderItems,
+                    method: 'DEPOSIT',
+                },
+                itemsToRemove,
             });
 
             router.push(`/checkout/complete?orderId=${result.orderId}`);

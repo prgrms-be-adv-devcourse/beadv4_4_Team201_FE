@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query/keys';
 import { placeOrder } from '@/lib/api/orders';
-import { clearCart } from '@/lib/api/cart';
+import { removeCartItems } from '@/lib/api/cart';
 import type { PlaceOrderRequest, PlaceOrderResult } from '@/types/order';
 
 /**
@@ -12,22 +12,32 @@ import type { PlaceOrderRequest, PlaceOrderResult } from '@/types/order';
  *
  * Invalidates: orders, cart, myParticipatedFundings
  */
+export interface PlaceOrderMutationParams {
+  request: PlaceOrderRequest;
+  itemsToRemove?: { targetType: string; targetId: string }[];
+}
+
+/**
+ * Hook to place an order with payment (V2 unified API)
+ */
 export function usePlaceOrder() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (request: PlaceOrderRequest): Promise<PlaceOrderResult> => {
+    mutationFn: ({ request }: PlaceOrderMutationParams): Promise<PlaceOrderResult> => {
       const idempotencyKey = crypto.randomUUID();
       return placeOrder(request, idempotencyKey);
     },
-    onSuccess: async () => {
+    onSuccess: async (_, variables) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.orders });
       queryClient.invalidateQueries({ queryKey: queryKeys.myParticipatedFundings });
 
-      try {
-        await clearCart();
-      } catch {
-        // cart clear failure should not affect order success
+      if (variables.itemsToRemove && variables.itemsToRemove.length > 0) {
+        try {
+          await removeCartItems(variables.itemsToRemove);
+        } catch (error) {
+          console.error('Failed to remove ordered items from cart:', error);
+        }
       }
       queryClient.invalidateQueries({ queryKey: queryKeys.cart });
     },

@@ -191,11 +191,24 @@ export async function updateCartItems(updates: { itemId: string; amount: number 
  * @endpoint DELETE /api/v2/carts/items/{targetType}?targetIds={id1,id2,...}
  */
 export async function removeCartItem(targetType: string, targetIds: number[]): Promise<void> {
-  // 1. 배열을 쉼표로 연결 (예: [8, 9] -> "8,9")
   const ids = targetIds.join(',');
-
-  // 2. URL 뒤에 직접 ?targetIds=... 를 붙임
   await apiClient.delete(`/api/v2/carts/items/${targetType}?targetIds=${ids}`);
+}
+
+/**
+ * 장바구니 아이템 다중 삭제
+ * @note 백엔드가 targetType별로 targetIds를 받으므로, 그룹화하여 요청
+ */
+export async function removeCartItems(items: { targetType: string; targetId: string }[]): Promise<void> {
+  const groups = items.reduce((acc, item) => {
+    if (!acc[item.targetType]) acc[item.targetType] = [];
+    acc[item.targetType].push(parseInt(item.targetId, 10));
+    return acc;
+  }, {} as Record<string, number[]>);
+
+  await Promise.all(
+    Object.entries(groups).map(([type, ids]) => removeCartItem(type, ids))
+  );
 }
 
 /**
