@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { AppShell } from '@/components/layout/AppShell';
@@ -8,14 +9,17 @@ import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { InlineError } from '@/components/common/InlineError';
 import { useParticipatedFunding } from '@/features/funding/hooks/useFunding';
+import { ParticipateModal } from '@/features/funding/components/ParticipateModal';
 import { formatPrice } from '@/lib/format';
 import { resolveImageUrl } from '@/lib/image';
 import { Calendar, Gift, TrendingUp, Coins } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function ParticipatedFundingDetailPage() {
     const params = useParams();
     const router = useRouter();
     const id = params.id as string;
+    const [participateModalOpen, setParticipateModalOpen] = useState(false);
 
     const { data: funding, isLoading, isError, refetch } = useParticipatedFunding(id);
 
@@ -147,7 +151,15 @@ export default function ParticipatedFundingDetailPage() {
                 </div>
 
                 {/* 하단 버튼 */}
-                <div className="pt-4">
+                <div className="space-y-3 pt-4">
+                    {funding.status === 'IN_PROGRESS' && (
+                        <Button
+                            className="w-full h-12"
+                            onClick={() => setParticipateModalOpen(true)}
+                        >
+                            장바구니 담기
+                        </Button>
+                    )}
                     <Button
                         variant="outline"
                         className="w-full"
@@ -156,6 +168,34 @@ export default function ParticipatedFundingDetailPage() {
                         목록으로 돌아가기
                     </Button>
                 </div>
+
+                {/* 참여 모달 */}
+                <ParticipateModal
+                    open={participateModalOpen}
+                    onOpenChange={setParticipateModalOpen}
+                    wishItemId={funding.wishItemId}
+                    product={{
+                        name: funding.product?.name || '상품 정보 없음',
+                        imageUrl: resolveImageUrl(funding.imageKey),
+                        price: funding.targetAmount
+                    }}
+                    recipient={{
+                        nickname: funding.receiverNickname || '알 수 없음'
+                    }}
+                    onSuccess={(mode) => {
+                        if (mode === 'cart') {
+                            toast.success('장바구니에 담겼습니다.', {
+                                description: '결제를 진행하시겠습니까?',
+                                action: {
+                                    label: '장바구니 확인',
+                                    onClick: () => router.push('/cart')
+                                }
+                            });
+                        } else {
+                            router.push('/checkout');
+                        }
+                    }}
+                />
             </div>
         </AppShell>
     );

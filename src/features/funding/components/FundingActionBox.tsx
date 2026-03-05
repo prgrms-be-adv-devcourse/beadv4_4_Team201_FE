@@ -13,12 +13,9 @@ interface FundingActionBoxProps {
  */
 export function FundingActionBox({ onParticipate }: FundingActionBoxProps) {
     return (
-        <div className="space-y-3 mt-4">
+        <div className="mt-4">
             <Button variant="default" className="w-full h-12" onClick={onParticipate}>
                 장바구니 담기
-            </Button>
-            <Button variant="outline" className="w-full h-12" onClick={onParticipate}>
-                펀딩 참여하기
             </Button>
         </div>
     );
