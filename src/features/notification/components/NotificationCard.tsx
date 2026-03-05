@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { Gift, UserPlus, CreditCard, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getMyFunding, getParticipatedFunding } from '@/lib/api/fundings';
 import { useMarkAsRead } from '../hooks/useNotificationMutations';
 import type { Notification, NotificationType } from '@/types/notification';
 
@@ -44,12 +45,35 @@ export function NotificationCard({ notification }: NotificationCardProps) {
   const Icon = ICON_MAP[notification.type] || Gift;
   const path = getNavigationPath(notification);
 
-  const handleClick = () => {
+  const handleClick = async () => {
     if (!notification.isRead) {
       markAsRead.mutate(notification.id);
     }
-    if (path) {
-      router.push(path);
+
+    let targetPath = path;
+
+    // 펀딩 관련 알림인 경우 유저의 역할(수령인/참여자)에 따라 관리 페이지로 이동
+    if (notification.referenceType === 'FUNDING' && notification.referenceId) {
+      const fundingId = notification.referenceId;
+      try {
+        // 1. 수령인(나의 펀딩)인지 확인
+        await getMyFunding(fundingId);
+        targetPath = `/fundings/my/${fundingId}`;
+      } catch {
+        // 2. 수령인이 아니라면 참여자(참여한 펀딩)인지 확인
+        try {
+          const participated = await getParticipatedFunding(fundingId);
+          if (participated.myContribution && participated.myContribution > 0) {
+            targetPath = `/fundings/participated/${fundingId}`;
+          }
+        } catch {
+          // 3. 둘 다 아니면 기본 공개 페이지 유지
+        }
+      }
+    }
+
+    if (targetPath) {
+      router.push(targetPath);
     }
   };
 

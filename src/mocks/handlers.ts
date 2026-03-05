@@ -761,6 +761,54 @@ export const handlers = [
     });
   }),
 
+  http.get('**/api/v2/fundings/my/:fundingId', ({ params }) => {
+    const { fundingId } = params;
+    // For simplicity, reuse getFunding data but only if user is organizer/recipient
+    const funding = fundings.find((f) => f.id === `funding-${fundingId}` && f.organizerId === currentUser.id);
+    if (!funding) return new HttpResponse(null, { status: 404 });
+
+    return HttpResponse.json({
+      fundingId: parseInt(fundingId as string, 10),
+      wishlistItemId: parseInt(funding.wishItemId.replace('wish-item-', ''), 10),
+      targetAmount: funding.targetAmount,
+      currentAmount: funding.currentAmount,
+      status: funding.status,
+      deadline: funding.expiresAt,
+      productName: funding.product.name,
+      imageKey: funding.product.imageUrl.split('/').pop(),
+      achievementRate: Math.floor((funding.currentAmount / funding.targetAmount) * 100),
+      daysRemaining: 14,
+      participants: [],
+    });
+  }),
+
+  http.get('**/api/v2/fundings/participated/:fundingId', ({ params }) => {
+    const { fundingId } = params;
+    // Check if user has participation
+    const participants = fundingParticipants[`funding-${fundingId}`] || [];
+    const myP = participants.find(p => p.memberId === currentUser.id);
+
+    if (!myP) return new HttpResponse(null, { status: 404 });
+
+    const funding = fundings.find((f) => f.id === `funding-${fundingId}`);
+    if (!funding) return new HttpResponse(null, { status: 404 });
+
+    return HttpResponse.json({
+      fundingId: parseInt(fundingId as string, 10),
+      targetAmount: funding.targetAmount,
+      currentAmount: funding.currentAmount,
+      status: funding.status,
+      deadline: funding.expiresAt,
+      wishlistItemId: parseInt(funding.wishItemId.replace('wish-item-', ''), 10),
+      productId: parseInt(funding.product.id.replace('product-', ''), 10),
+      productName: funding.product.name,
+      imageKey: funding.product.imageUrl.split('/').pop(),
+      achievementRate: Math.floor((funding.currentAmount / funding.targetAmount) * 100),
+      daysRemaining: 14,
+      myContribution: myP.amount,
+    });
+  }),
+
   http.post('**/api/v2/fundings/:fundingId/accept', ({ params }) => {
     const { fundingId } = params;
     const funding = fundings.find((f) => f.id === fundingId);

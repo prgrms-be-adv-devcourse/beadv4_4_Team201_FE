@@ -1,6 +1,17 @@
 import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query/keys';
-import { getMember, getMemberFriends } from '@/lib/api/members';
+import { getMember, getMemberFriends, getMe } from '@/lib/api/members';
+
+/**
+ * Hook to fetch the current member profile
+ */
+export function useMe() {
+    return useQuery({
+        queryKey: queryKeys.member('me'),
+        queryFn: getMe,
+        staleTime: 5 * 60 * 1000,
+    });
+}
 import type { PageParams } from '@/types/api';
 
 /**
