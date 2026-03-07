@@ -28,10 +28,8 @@ export function useAddToCart() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.cart });
-      // Also invalidate the specific funding
-      if (variables.targetType === 'FUNDING') {
-        queryClient.invalidateQueries({ queryKey: queryKeys.funding(variables.targetId) });
-      }
+      // Also invalidate the specific funding unconditionally
+      queryClient.invalidateQueries({ queryKey: queryKeys.funding(variables.targetId) });
     },
   });
 }

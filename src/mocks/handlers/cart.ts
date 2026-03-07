@@ -40,11 +40,13 @@ export const cartHandlers: HttpHandler[] = [
 
   http.post('**/api/v2/carts', async ({ request }) => {
     const body = await request.json();
-    const { targetType, targetId, amount } = body as {
-      targetType: 'FUNDING' | 'FUNDING_PENDING';
+    const { targetId, amount } = body as {
       targetId: number;
       amount: number;
     };
+
+    let funding = fundings.find((f) => f.id === `funding-${targetId}`);
+    const targetType = funding ? 'FUNDING' : 'FUNDING_PENDING';
 
     // Check if already in cart
     const existingItem = (cartItems || []).find(
@@ -61,12 +63,9 @@ export const cartHandlers: HttpHandler[] = [
       });
     }
 
-    let funding: Funding | undefined;
     let isNewFunding = false;
 
-    if (targetType === 'FUNDING') {
-      funding = fundings.find((f) => f.id === `funding-${targetId}`);
-    } else {
+    if (!funding) {
       funding = {
         id: `funding-${Date.now()}`,
         wishItemId: `wish-item-${targetId}`,

@@ -51,13 +51,11 @@ describe('cart API', () => {
             const mockPost = vi.spyOn(apiClient.apiClient, 'post').mockResolvedValue(undefined);
 
             await addCartItem({
-                targetType: 'FUNDING',
                 targetId: '10',
                 amount: 5000,
             });
 
             expect(mockPost).toHaveBeenCalledWith('/api/v2/carts', {
-                targetType: 'FUNDING',
                 targetId: 10,
                 amount: 5000,
             });

@@ -43,7 +43,6 @@ export interface CartItem {
 }
 
 export interface CartItemCreateRequest {
-    targetType: 'FUNDING' | 'FUNDING_PENDING';
     targetId: string;
     amount: number;
 }

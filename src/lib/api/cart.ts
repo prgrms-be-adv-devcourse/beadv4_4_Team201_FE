@@ -16,6 +16,15 @@ import type {
 type BackendTargetType = 'FUNDING_PENDING' | 'FUNDING';
 
 /**
+ * 백엔드 CartItemCreateRequest
+ * @see CartController POST /api/v2/carts (targetType is determined by the server)
+ */
+interface BackendCartItemCreateRequest {
+  targetId: number;
+  amount: number;
+}
+
+/**
  * 백엔드 CartItemRequest
  * @see CartController POST /api/v2/carts/{cartId}
  */
@@ -144,8 +153,7 @@ export async function getCart(): Promise<Cart> {
  * @endpoint POST /api/v2/carts
  */
 export async function addCartItem(data: CartItemCreateRequest): Promise<string> {
-  const request: BackendCartItemRequest = {
-    targetType: data.targetType,
+  const request: BackendCartItemCreateRequest = {
     targetId: parseInt(data.targetId, 10),
     amount: data.amount,
   };

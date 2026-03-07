@@ -28,9 +28,8 @@ export function useCreateFunding() {
       expiresInDays?: number;
       message?: string;
     }) => {
-      // 장바구니에 FUNDING_PENDING 타입으로 추가
+      // 장바구니에 타입 구분 없이 추가 (서버에서 결정)
       const responseMessage = await addCartItem({
-        targetType: 'FUNDING_PENDING',
         targetId: wishItemId,
         amount,
       });
@@ -57,9 +56,8 @@ export function useParticipateFunding() {
 
   return useMutation({
     mutationFn: async ({ wishItemId, amount }: { wishItemId: string; amount: number }) => {
-      // 장바구니에 FUNDING 타입으로 추가
+      // 장바구니에 타입 구분 없이 추가 (서버에서 결정)
       const responseMessage = await addCartItem({
-        targetType: 'FUNDING',
         targetId: wishItemId,
         amount,
       });

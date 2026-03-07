@@ -35,7 +35,6 @@ export function AddToCartButton({
 
         try {
             const message = await addToCartMutation.mutateAsync({
-                targetType: 'FUNDING_PENDING',
                 targetId: productId,
                 amount: 10000,
             });
