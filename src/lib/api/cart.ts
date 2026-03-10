@@ -17,20 +17,21 @@ type BackendTargetType = 'FUNDING_PENDING' | 'FUNDING';
 
 /**
  * 백엔드 CartItemCreateRequest
- * @see CartController POST /api/v2/carts (targetType is determined by the server)
+ * @see CartController POST /api/v2/carts
  */
 interface BackendCartItemCreateRequest {
-  targetId: number;
+  wishlistId?: number | null;
+  wishlistItemId: number;
   amount: number;
 }
 
 /**
  * 백엔드 CartItemRequest
- * @see CartController POST /api/v2/carts/{cartId}
+ * @see CartController POST /api/v2/carts/{cartId}  (and PATCH items)
  */
 interface BackendCartItemRequest {
-  targetType: BackendTargetType;
-  targetId: number;
+  wishlistId?: number; // Optional for updates if missing
+  wishlistItemId: number;
   amount: number;
 }
 
@@ -38,17 +39,16 @@ interface BackendCartItemRequest {
  * 백엔드 CartItemResponse
  */
 interface BackendCartItemResponse {
-  targetType: BackendTargetType;
-  targetId: number;
+  wishlistItemId: number;
   receiverId: number | null;
   receiverNickname: string | null;
-  productName: string | null;
   productId: number | null;
+  productName: string | null;
   imageKey: string | null;
   productPrice: number;
   contributionAmount: number;
-  currentAmount: number | null;
   fundingId: number | null;
+  currentAmount: number | null;
   status: string; // ItemStatus enum (AVAILABLE, SOLD_OUT, DISCONTINUED, FUNDING_ENDED)
   statusMessage: string | null;
 }
@@ -76,13 +76,14 @@ function mapBackendCart(backend: BackendCartResponse): Cart {
 }
 
 function mapBackendCartItem(item: BackendCartItemResponse, cartId: number): CartItem {
-  const isNewFunding = item.targetType === 'FUNDING_PENDING';
+  const isNewFunding = item.fundingId === null;
+  const targetType = isNewFunding ? 'FUNDING_PENDING' : 'FUNDING';
 
   return {
-    id: `${cartId}::${item.targetType}::${item.targetId}`, // 복합 키 생성
+    id: `${cartId}::${item.wishlistItemId}`, // Changed composite key
     cartId: cartId.toString(),
-    targetType: item.targetType as 'FUNDING' | 'FUNDING_PENDING',
-    targetId: item.targetId.toString(),
+    targetType,
+    targetId: item.wishlistItemId.toString(),
     receiverId: item.receiverId?.toString() || null,
     receiverNickname: item.receiverNickname || '',
     imageKey: item.imageKey,
@@ -94,8 +95,8 @@ function mapBackendCartItem(item: BackendCartItemResponse, cartId: number): Cart
     fundingId: item.fundingId?.toString() || null,
     productId: item.productId?.toString() || '',
     funding: {
-      id: item.fundingId?.toString() || (item.targetType === 'FUNDING' ? item.targetId.toString() : ''),
-      wishItemId: item.targetType === 'FUNDING_PENDING' ? item.targetId.toString() : '',
+      id: item.fundingId?.toString() || (!isNewFunding ? item.wishlistItemId.toString() : ''),
+      wishItemId: isNewFunding ? item.wishlistItemId.toString() : '',
       product: {
         id: item.productId?.toString() || '',
         name: item.productName || '',
@@ -129,11 +130,10 @@ function mapBackendCartItem(item: BackendCartItemResponse, cartId: number): Cart
 
 // --- Helpers ---
 
-export function parseCartItemId(itemId: string): { targetType: BackendTargetType; targetId: number } {
+export function parseCartItemId(itemId: string): { wishlistItemId: number } {
   const parts = itemId.split('::');
-  const targetId = parseInt(parts[2], 10);
-  const targetType = parts[1] as BackendTargetType;
-  return { targetType, targetId };
+  const wishlistItemId = parseInt(parts[1], 10);
+  return { wishlistItemId };
 }
 
 // --- API Functions ---
@@ -154,7 +154,8 @@ export async function getCart(): Promise<Cart> {
  */
 export async function addCartItem(data: CartItemCreateRequest): Promise<string> {
   const request: BackendCartItemCreateRequest = {
-    targetId: parseInt(data.targetId, 10),
+    wishlistId: data.wishlistId ? Number(data.wishlistId) : null,
+    wishlistItemId: Number(data.wishlistItemId),
     amount: data.amount,
   };
 
@@ -169,11 +170,10 @@ export async function addCartItem(data: CartItemCreateRequest): Promise<string> 
  * @endpoint PATCH /api/v2/carts/items
  */
 export async function updateCartItem(itemId: string, data: CartItemUpdateRequest): Promise<void> {
-  const { targetType, targetId } = parseCartItemId(itemId);
+  const { wishlistItemId } = parseCartItemId(itemId);
 
   const request: BackendCartItemRequest = {
-    targetType,
-    targetId,
+    wishlistItemId,
     amount: data.amount!,
   };
 
@@ -186,10 +186,9 @@ export async function updateCartItem(itemId: string, data: CartItemUpdateRequest
  */
 export async function updateCartItems(updates: { itemId: string; amount: number }[]): Promise<void> {
   const requests = updates.map(({ itemId, amount }) => {
-    const { targetType, targetId } = parseCartItemId(itemId);
+    const { wishlistItemId } = parseCartItemId(itemId);
     return {
-      targetType,
-      targetId,
+      wishlistItemId,
       amount,
     };
   });
@@ -199,27 +198,23 @@ export async function updateCartItems(updates: { itemId: string; amount: number 
 
 /**
  * 장바구니 아이템 삭제
- * @endpoint DELETE /api/v2/carts/items/{targetType}?targetIds={id1,id2,...}
+ * @endpoint DELETE /api/v2/carts/items?targetIds={id1,id2,...} 
+ * (Assuming the endpoint for deleting item relies on wishlistItemId directly without targetType now, or the old one was specific)
+ * Wait, previously it was /api/v2/carts/items/{targetType}?targetIds={id1,id2,...}
+ * We should probably just pass the ids to a single endpoint. If backend doesn't have targetType, we just pass wishlistItemId?
+ * I will update this assuming the path param targetType is removed, as it's no longer used.
  */
-export async function removeCartItem(targetType: string, targetIds: number[]): Promise<void> {
+export async function removeCartItem(targetIds: number[]): Promise<void> {
   const ids = targetIds.join(',');
-  await apiClient.delete(`/api/v2/carts/items/${targetType}?targetIds=${ids}`);
+  await apiClient.delete(`/api/v2/carts/items?wishlistItemIds=${ids}`);
 }
 
 /**
  * 장바구니 아이템 다중 삭제
- * @note 백엔드가 targetType별로 targetIds를 받으므로, 그룹화하여 요청
  */
-export async function removeCartItems(items: { targetType: string; targetId: string }[]): Promise<void> {
-  const groups = items.reduce((acc, item) => {
-    if (!acc[item.targetType]) acc[item.targetType] = [];
-    acc[item.targetType].push(parseInt(item.targetId, 10));
-    return acc;
-  }, {} as Record<string, number[]>);
-
-  await Promise.all(
-    Object.entries(groups).map(([type, ids]) => removeCartItem(type, ids))
-  );
+export async function removeCartItems(items: { targetId: string }[]): Promise<void> {
+  const ids = items.map((item) => parseInt(item.targetId, 10));
+  await removeCartItem(ids);
 }
 
 /**

@@ -27,6 +27,7 @@ interface CreateFundingModalProps {
     onOpenChange: (open: boolean) => void;
     wishItem: {
         id: string;
+        wishlistId: string;
         product: {
             name: string;
             price: number;
@@ -83,6 +84,7 @@ export function CreateFundingModal({
 
         createFunding.mutate(
             {
+                wishlistId: wishItem.wishlistId,
                 wishItemId: wishItem.id,
                 amount,
                 expiresInDays,

@@ -20,9 +20,11 @@ export function useCreateFunding() {
 
   return useMutation({
     mutationFn: async ({
+      wishlistId,
       wishItemId,
       amount,
     }: {
+      wishlistId?: string;
       wishItemId: string;
       amount: number;
       expiresInDays?: number;
@@ -30,7 +32,8 @@ export function useCreateFunding() {
     }) => {
       // 장바구니에 타입 구분 없이 추가 (서버에서 결정)
       const responseMessage = await addCartItem({
-        targetId: wishItemId,
+        wishlistId,
+        wishlistItemId: wishItemId,
         amount,
       });
 
@@ -55,10 +58,11 @@ export function useParticipateFunding() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ wishItemId, amount }: { wishItemId: string; amount: number }) => {
+    mutationFn: async ({ wishlistId, wishItemId, amount }: { wishlistId?: string; wishItemId: string; amount: number }) => {
       // 장바구니에 타입 구분 없이 추가 (서버에서 결정)
       const responseMessage = await addCartItem({
-        targetId: wishItemId,
+        wishlistId,
+        wishlistItemId: wishItemId,
         amount,
       });
 

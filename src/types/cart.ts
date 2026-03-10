@@ -43,7 +43,8 @@ export interface CartItem {
 }
 
 export interface CartItemCreateRequest {
-    targetId: string;
+    wishlistId?: string | number;
+    wishlistItemId: string | number;
     amount: number;
 }
 

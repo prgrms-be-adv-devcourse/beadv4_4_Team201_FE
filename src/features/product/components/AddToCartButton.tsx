@@ -35,7 +35,7 @@ export function AddToCartButton({
 
         try {
             const message = await addToCartMutation.mutateAsync({
-                targetId: productId,
+                wishlistItemId: productId,
                 amount: 10000,
             });
 
