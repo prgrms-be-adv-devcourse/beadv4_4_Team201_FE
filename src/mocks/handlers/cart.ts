@@ -141,15 +141,14 @@ export const cartHandlers: HttpHandler[] = [
     return new HttpResponse(null, { status: 204 });
   }),
 
-  http.delete('**/api/v2/carts/items/:targetType', ({ params, request }) => {
-    const { targetType } = params;
+  http.delete('**/api/v2/carts/items', ({ request }) => {
     const url = new URL(request.url);
-    const targetIdsStr = url.searchParams.get('targetIds');
+    const targetIdsStr = url.searchParams.get('wishlistItemIds');
 
     if (targetIdsStr) {
       const targetIds = targetIdsStr.split(',').map(id => parseInt(id, 10));
       const updatedCartItems = cartItems.filter(
-        i => !(i.targetType === targetType && targetIds.includes(i.targetId))
+        i => !targetIds.includes(parseInt(String(i.targetId), 10))
       );
       setCartItems(updatedCartItems);
     }
