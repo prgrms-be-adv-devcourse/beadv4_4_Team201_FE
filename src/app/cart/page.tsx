@@ -53,8 +53,10 @@ export default function CartPage() {
             return;
         }
 
+        const item = cart?.items.find(i => i.id === id);
+
         updateCartItem.mutate(
-            { itemId: id, data: { amount } },
+            { itemId: id, data: { amount, wishlistId: item?.wishlistId ?? undefined } },
             {
                 onSuccess: () => {
                     setEditingItemIds((prev) => {
@@ -132,7 +134,7 @@ export default function CartPage() {
     };
 
     const handleBulkUpdate = () => {
-        const updates: { itemId: string; amount: number }[] = [];
+        const updates: { itemId: string; amount: number; wishlistId: string | number | null }[] = [];
         const idsArray = Array.from(editingItemIds);
 
         for (const id of idsArray) {
@@ -143,7 +145,8 @@ export default function CartPage() {
                 toast.error('모든 참여 금액은 1,000원 이상이어야 합니다.');
                 return;
             }
-            updates.push({ itemId: id, amount });
+            const item = cart?.items.find(i => i.id === id);
+            updates.push({ itemId: id, amount, wishlistId: item?.wishlistId ?? null });
         }
 
         if (updates.length === 0) return;

@@ -40,6 +40,7 @@ interface BackendCartItemRequest {
  */
 interface BackendCartItemResponse {
   wishlistItemId: number;
+  wishlistId: number | null;
   receiverId: number | null;
   receiverNickname: string | null;
   productId: number | null;
@@ -84,6 +85,7 @@ function mapBackendCartItem(item: BackendCartItemResponse, cartId: number): Cart
     cartId: cartId.toString(),
     targetType,
     targetId: item.wishlistItemId.toString(),
+    wishlistId: item.wishlistId?.toString() || null,
     receiverId: item.receiverId?.toString() || null,
     receiverNickname: item.receiverNickname || '',
     imageKey: item.imageKey,
@@ -173,6 +175,7 @@ export async function updateCartItem(itemId: string, data: CartItemUpdateRequest
   const { wishlistItemId } = parseCartItemId(itemId);
 
   const request: BackendCartItemRequest = {
+    wishlistId: data.wishlistId ? Number(data.wishlistId) : undefined,
     wishlistItemId,
     amount: data.amount!,
   };
@@ -184,10 +187,11 @@ export async function updateCartItem(itemId: string, data: CartItemUpdateRequest
  * 장바구니 아이템 다중 수정 (참여 금액)
  * @endpoint PATCH /api/v2/carts/items
  */
-export async function updateCartItems(updates: { itemId: string; amount: number }[]): Promise<void> {
-  const requests = updates.map(({ itemId, amount }) => {
+export async function updateCartItems(updates: { itemId: string; amount: number; wishlistId: string | number | null }[]): Promise<void> {
+  const requests = updates.map(({ itemId, amount, wishlistId }) => {
     const { wishlistItemId } = parseCartItemId(itemId);
     return {
+      wishlistId: wishlistId ? Number(wishlistId) : undefined,
       wishlistItemId,
       amount,
     };

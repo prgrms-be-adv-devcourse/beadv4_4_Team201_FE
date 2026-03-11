@@ -184,7 +184,7 @@ export function useUpdateCartItems() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (updates: { itemId: string; amount: number }[]) =>
+    mutationFn: (updates: { itemId: string; amount: number; wishlistId: string | number | null }[]) =>
       updateCartItems(updates),
     onMutate: async (updates) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.cart });

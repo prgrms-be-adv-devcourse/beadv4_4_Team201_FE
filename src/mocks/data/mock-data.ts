@@ -56,6 +56,7 @@ export interface CartItem {
   cartId: string;
   targetType: 'FUNDING' | 'FUNDING_PENDING';
   targetId: number;
+  wishlistId: number | null;
   productId: number;
   fundingId: string | null;
   funding: Funding;
