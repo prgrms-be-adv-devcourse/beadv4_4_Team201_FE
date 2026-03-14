@@ -32,8 +32,7 @@ export function useCreateFunding() {
     }) => {
       // 장바구니에 타입 구분 없이 추가 (서버에서 결정)
       const responseMessage = await addCartItem({
-        wishlistId,
-        wishlistItemId: wishItemId,
+        targetId: wishItemId,
         amount,
       });
 
@@ -61,8 +60,7 @@ export function useParticipateFunding() {
     mutationFn: async ({ wishlistId, wishItemId, amount }: { wishlistId?: string; wishItemId: string; amount: number }) => {
       // 장바구니에 타입 구분 없이 추가 (서버에서 결정)
       const responseMessage = await addCartItem({
-        wishlistId,
-        wishlistItemId: wishItemId,
+        targetId: wishItemId,
         amount,
       });
 

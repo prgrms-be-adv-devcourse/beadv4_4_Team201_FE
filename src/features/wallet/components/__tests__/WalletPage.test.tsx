@@ -54,7 +54,7 @@ const mockWallet: Wallet = {
 const mockTransactions: WalletTransaction[] = [
     {
         id: 't1',
-        type: 'PAYMENT',
+        type: 'PAYMENT' as any,
         amount: 4500,
         balanceAfter: 15000,
         description: '스타벅스 아메리카노 구매',

@@ -13,14 +13,14 @@ describe('getMockResponse', () => {
 
     expect(result).not.toBeNull();
     expect(result!.status).toBe(200);
-    expect(result!.body).toHaveProperty('result', 'SUCCESS');
-    expect(result!.body.data.content).toBeInstanceOf(Array);
-    expect(result!.body.data.content.length).toBeGreaterThan(0);
+    expect((result!.body as any)).toHaveProperty('result', 'SUCCESS');
+    expect((result!.body as any).data.content).toBeInstanceOf(Array);
+    expect((result!.body as any).data.content.length).toBeGreaterThan(0);
   });
 
   test('product items contain demo imageKey', () => {
     const result = getMockResponse('GET', 'api/v2/products/search/es');
-    const product = result!.body.data.content[0];
+    const product = (result!.body as any).data.content[0];
 
     expect(product.imageKey).toBeTruthy();
     expect(product.imageKey).toMatch(/^demo\//);
@@ -30,32 +30,32 @@ describe('getMockResponse', () => {
     const result = getMockResponse('GET', 'api/v2/members/me');
 
     expect(result).not.toBeNull();
-    expect(result!.body.data).toHaveProperty('nickname');
-    expect(result!.body.data).toHaveProperty('email');
+    expect((result!.body as any).data).toHaveProperty('nickname');
+    expect((result!.body as any).data).toHaveProperty('email');
   });
 
   test('returns mock for GET /api/v2/wallet/balance', () => {
     const result = getMockResponse('GET', 'api/v2/wallet/balance');
 
     expect(result).not.toBeNull();
-    expect(result!.body.data).toHaveProperty('balance');
-    expect(typeof result!.body.data.balance).toBe('number');
+    expect((result!.body as any).data).toHaveProperty('balance');
+    expect(typeof (result!.body as any).data.balance).toBe('number');
   });
 
   test('returns mock for GET /api/v2/carts', () => {
     const result = getMockResponse('GET', 'api/v2/carts');
 
     expect(result).not.toBeNull();
-    expect(result!.body.data).toHaveProperty('items');
-    expect(result!.body.data.items).toBeInstanceOf(Array);
+    expect((result!.body as any).data).toHaveProperty('items');
+    expect((result!.body as any).data.items).toBeInstanceOf(Array);
   });
 
   test('matches parameterized path /api/v2/products/:id', () => {
     const result = getMockResponse('GET', 'api/v2/products/42');
 
     expect(result).not.toBeNull();
-    expect(result!.body.data).toHaveProperty('name');
-    expect(result!.body.data).toHaveProperty('imageKey');
+    expect((result!.body as any).data).toHaveProperty('name');
+    expect((result!.body as any).data).toHaveProperty('imageKey');
   });
 
   test('distinguishes HTTP methods', () => {
@@ -72,6 +72,6 @@ describe('getMockResponse', () => {
     const result = getMockResponse('GET', 'api/v2/products/search/es?category=ELECTRONICS&page=0');
 
     expect(result).not.toBeNull();
-    expect(result!.body.data.content).toBeInstanceOf(Array);
+    expect((result!.body as any).data.content).toBeInstanceOf(Array);
   });
 });

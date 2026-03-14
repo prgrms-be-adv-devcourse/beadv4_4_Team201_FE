@@ -20,8 +20,7 @@ type BackendTargetType = 'FUNDING_PENDING' | 'FUNDING';
  * @see CartController POST /api/v2/carts
  */
 interface BackendCartItemCreateRequest {
-  wishlistId?: number | null;
-  wishlistItemId: number;
+  targetId: number;
   amount: number;
 }
 
@@ -30,8 +29,7 @@ interface BackendCartItemCreateRequest {
  * @see CartController POST /api/v2/carts/{cartId}  (and PATCH items)
  */
 interface BackendCartItemRequest {
-  wishlistId?: number; // Optional for updates if missing
-  wishlistItemId: number;
+  targetId: number;
   amount: number;
 }
 
@@ -39,8 +37,8 @@ interface BackendCartItemRequest {
  * 백엔드 CartItemResponse
  */
 interface BackendCartItemResponse {
-  wishlistItemId: number;
-  wishlistId: number | null;
+  targetType: string;
+  targetId: number;
   receiverId: number | null;
   receiverNickname: string | null;
   productId: number | null;
@@ -77,15 +75,15 @@ function mapBackendCart(backend: BackendCartResponse): Cart {
 }
 
 function mapBackendCartItem(item: BackendCartItemResponse, cartId: number): CartItem {
-  const isNewFunding = item.fundingId === null;
+  const isNewFunding = item.targetType === 'FUNDING_PENDING';
   const targetType = isNewFunding ? 'FUNDING_PENDING' : 'FUNDING';
 
   return {
-    id: `${cartId}::${item.wishlistItemId}`, // Changed composite key
+    id: `${cartId}::${item.targetId}`, // Changed composite key
     cartId: cartId.toString(),
     targetType,
-    targetId: item.wishlistItemId.toString(),
-    wishlistId: item.wishlistId?.toString() || null,
+    targetId: item.targetId.toString(),
+    wishlistId: null,
     receiverId: item.receiverId?.toString() || null,
     receiverNickname: item.receiverNickname || '',
     imageKey: item.imageKey,
@@ -97,8 +95,8 @@ function mapBackendCartItem(item: BackendCartItemResponse, cartId: number): Cart
     fundingId: item.fundingId?.toString() || null,
     productId: item.productId?.toString() || '',
     funding: {
-      id: item.fundingId?.toString() || (!isNewFunding ? item.wishlistItemId.toString() : ''),
-      wishItemId: isNewFunding ? item.wishlistItemId.toString() : '',
+      id: item.targetType === 'FUNDING' ? item.targetId.toString() : (item.fundingId?.toString() || ''),
+      wishItemId: isNewFunding ? item.targetId.toString() : '',
       product: {
         id: item.productId?.toString() || '',
         name: item.productName || '',
@@ -132,10 +130,10 @@ function mapBackendCartItem(item: BackendCartItemResponse, cartId: number): Cart
 
 // --- Helpers ---
 
-export function parseCartItemId(itemId: string): { wishlistItemId: number } {
+export function parseCartItemId(itemId: string): { targetId: number } {
   const parts = itemId.split('::');
-  const wishlistItemId = parseInt(parts[1], 10);
-  return { wishlistItemId };
+  const targetId = parseInt(parts[1], 10);
+  return { targetId };
 }
 
 // --- API Functions ---
@@ -156,8 +154,7 @@ export async function getCart(): Promise<Cart> {
  */
 export async function addCartItem(data: CartItemCreateRequest): Promise<string> {
   const request: BackendCartItemCreateRequest = {
-    wishlistId: data.wishlistId ? Number(data.wishlistId) : null,
-    wishlistItemId: Number(data.wishlistItemId),
+    targetId: Number(data.targetId),
     amount: data.amount,
   };
 
@@ -172,11 +169,10 @@ export async function addCartItem(data: CartItemCreateRequest): Promise<string> 
  * @endpoint PATCH /api/v2/carts/items
  */
 export async function updateCartItem(itemId: string, data: CartItemUpdateRequest): Promise<void> {
-  const { wishlistItemId } = parseCartItemId(itemId);
+  const { targetId } = parseCartItemId(itemId);
 
   const request: BackendCartItemRequest = {
-    wishlistId: data.wishlistId ? Number(data.wishlistId) : undefined,
-    wishlistItemId,
+    targetId,
     amount: data.amount!,
   };
 
@@ -189,10 +185,9 @@ export async function updateCartItem(itemId: string, data: CartItemUpdateRequest
  */
 export async function updateCartItems(updates: { itemId: string; amount: number; wishlistId: string | number | null }[]): Promise<void> {
   const requests = updates.map(({ itemId, amount, wishlistId }) => {
-    const { wishlistItemId } = parseCartItemId(itemId);
+    const { targetId } = parseCartItemId(itemId);
     return {
-      wishlistId: wishlistId ? Number(wishlistId) : undefined,
-      wishlistItemId,
+      targetId,
       amount,
     };
   });
@@ -210,7 +205,7 @@ export async function updateCartItems(updates: { itemId: string; amount: number;
  */
 export async function removeCartItem(targetIds: number[]): Promise<void> {
   const ids = targetIds.join(',');
-  await apiClient.delete(`/api/v2/carts/items?wishlistItemIds=${ids}`);
+  await apiClient.delete(`/api/v2/carts/items?targetIds=${ids}`);
 }
 
 /**

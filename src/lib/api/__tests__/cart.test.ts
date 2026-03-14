@@ -48,7 +48,7 @@ describe('cart API', () => {
 
     describe('addCartItem', () => {
         it('GIVEN cart item data, THEN it should POST to cart endpoint', async () => {
-            const mockPost = vi.spyOn(apiClient.apiClient, 'post').mockResolvedValue(undefined);
+            const mockPost = vi.spyOn(apiClient.apiClient, 'post').mockResolvedValue({ message: 'Success' } as any);
 
             await addCartItem({
                 targetId: '10',
@@ -58,15 +58,14 @@ describe('cart API', () => {
             expect(mockPost).toHaveBeenCalledWith('/api/v2/carts', {
                 targetId: 10,
                 amount: 5000,
-            });
+            }, expect.objectContaining({ includeFullResponse: true }));
         });
     });
 
     describe('parseCartItemId', () => {
         it('GIVEN composite cart item ID, THEN it should parse correctly', () => {
-            const result = parseCartItemId('1::FUNDING::10');
+            const result = parseCartItemId('1::10');
 
-            expect(result.targetType).toBe('FUNDING');
             expect(result.targetId).toBe(10);
         });
     });

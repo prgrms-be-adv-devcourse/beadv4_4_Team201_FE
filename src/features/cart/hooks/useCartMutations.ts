@@ -29,7 +29,7 @@ export function useAddToCart() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.cart });
       // Also invalidate the specific funding unconditionally
-      queryClient.invalidateQueries({ queryKey: queryKeys.funding(variables.wishlistItemId as string) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.funding(variables.targetId as string) });
     },
   });
 }
@@ -100,7 +100,7 @@ export function useRemoveCartItems() {
 
   return useMutation({
     mutationFn: async (itemIds: string[]) => {
-      const idsToRemove = itemIds.map((id) => parseCartItemId(id).wishlistItemId);
+      const idsToRemove = itemIds.map((id) => parseCartItemId(id).targetId);
       await removeCartItem(idsToRemove);
     },
     onMutate: async (itemIds) => {
