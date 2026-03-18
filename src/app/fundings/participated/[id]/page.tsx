@@ -65,7 +65,9 @@ export default function ParticipatedFundingDetailPage() {
     const statusLabel: Record<string, string> = {
         IN_PROGRESS: '진행 중',
         ACHIEVED: '달성 완료',
+        ACCEPTING: '수락 진행 중',
         ACCEPTED: '수락됨',
+        ACCEPT_FAILED: '수락 실패',
         REFUSED: '거절됨',
         EXPIRED: '기간 만료',
         CLOSED: '종료됨',

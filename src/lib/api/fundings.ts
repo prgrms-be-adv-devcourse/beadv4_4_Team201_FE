@@ -113,8 +113,12 @@ function mapFundingStatus(status: string): FundingStatus {
       return "EXPIRED";
     case "CLOSED":
       return "CLOSED";
+    case "ACCEPTING":
+      return "ACCEPTING";
     case "ACCEPTED":
       return "ACCEPTED";
+    case "ACCEPT_FAILED":
+      return "ACCEPT_FAILED";
     case "REFUSED":
       return "REFUSED";
     default:
@@ -547,6 +551,14 @@ export async function participateFunding(
  */
 export async function acceptFunding(fundingId: string): Promise<FundingCompleteResponse> {
   return apiClient.post<FundingCompleteResponse>(`/api/v2/fundings/${fundingId}/accept`, {});
+}
+
+/**
+ * 펀딩 수락 재시도 (수령자)
+ * @endpoint POST /api/v2/fundings/retryAccept/{id}
+ */
+export async function retryAcceptFunding(fundingId: string): Promise<FundingCompleteResponse> {
+  return apiClient.post<FundingCompleteResponse>(`/api/v2/fundings/retryAccept/${fundingId}`, {});
 }
 
 /**

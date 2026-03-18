@@ -124,7 +124,7 @@ export default function MyFundingDetailPage() {
                                 <Users className="h-5 w-5 mb-1 text-muted-foreground" />
                                 <span className="text-xs text-muted-foreground">참여자</span>
                                 <span className="font-bold">
-                                    {['ACHIEVED', 'ACCEPTED', 'REFUSED'].includes(funding.status)
+                                    {['ACHIEVED', 'ACCEPTING', 'ACCEPTED', 'ACCEPT_FAILED', 'REFUSED'].includes(funding.status)
                                         ? `${funding.participantCount}명`
                                         : '달성 후 조회 가능'}
                                 </span>
@@ -140,11 +140,11 @@ export default function MyFundingDetailPage() {
                         <div className="flex items-center justify-between mb-3">
                             <h3 className="text-sm font-bold flex items-center gap-2">
                                 <Users className="h-4 w-4" />
-                                참여자 목록 {['ACHIEVED', 'ACCEPTED', 'REFUSED'].includes(funding.status) && `(${funding.participantCount})`}
+                                참여자 목록 {['ACHIEVED', 'ACCEPTING', 'ACCEPTED', 'ACCEPT_FAILED', 'REFUSED'].includes(funding.status) && `(${funding.participantCount})`}
                             </h3>
                         </div>
 
-                        {['ACHIEVED', 'ACCEPTED', 'REFUSED'].includes(funding.status) ? (
+                        {['ACHIEVED', 'ACCEPTING', 'ACCEPTED', 'ACCEPT_FAILED', 'REFUSED'].includes(funding.status) ? (
                             funding.participantCount > 0 ? (
                                 <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
                                     {funding.participants.map((participant, index) => (
@@ -178,8 +178,8 @@ export default function MyFundingDetailPage() {
 
             {/* Sticky Action Box */}
             <div className="fixed bottom-0 left-0 right-0 bg-background z-20 md:static">
-                {funding.status === 'ACHIEVED' && (
-                    <RecipientActionButtons fundingId={funding.id} />
+                {['ACHIEVED', 'ACCEPT_FAILED'].includes(funding.status) && (
+                    <RecipientActionButtons fundingId={funding.id} status={funding.status} />
                 )}
             </div>
         </AppShell>

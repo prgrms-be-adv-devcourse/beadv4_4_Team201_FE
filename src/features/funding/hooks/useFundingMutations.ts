@@ -3,6 +3,7 @@ import { queryKeys } from '@/lib/query/keys';
 import {
   acceptFunding,
   refuseFunding,
+  retryAcceptFunding,
   type RefuseFundingRequest,
 } from '@/lib/api/fundings';
 import { addCartItem } from '@/lib/api/cart';
@@ -104,6 +105,24 @@ export function useRefuseFunding() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.funding(variables.fundingId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.myFunding(variables.fundingId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.myReceivedFundings });
+    },
+  });
+}
+
+/**
+ * Hook to retry accepting a completed funding (recipient action)
+ *
+ * Invalidates: funding(id), myReceivedFundings
+ */
+export function useRetryAcceptFunding() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (fundingId: string) => retryAcceptFunding(fundingId),
+    onSuccess: (_, fundingId) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.funding(fundingId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.myFunding(fundingId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.myReceivedFundings });
     },
   });

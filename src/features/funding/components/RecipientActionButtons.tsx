@@ -15,18 +15,21 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Loader2, Check, X } from 'lucide-react';
 import { toast } from 'sonner';
-import { useAcceptFunding, useRefuseFunding } from '@/features/funding/hooks/useFundingMutations';
+import { useAcceptFunding, useRefuseFunding, useRetryAcceptFunding } from '@/features/funding/hooks/useFundingMutations';
+import type { FundingStatus } from '@/types/funding';
 
 interface RecipientActionButtonsProps {
     fundingId: string;
+    status: FundingStatus;
 }
 
-export function RecipientActionButtons({ fundingId }: RecipientActionButtonsProps) {
+export function RecipientActionButtons({ fundingId, status }: RecipientActionButtonsProps) {
     const [acceptDialogOpen, setAcceptDialogOpen] = useState(false);
     const [refuseDialogOpen, setRefuseDialogOpen] = useState(false);
 
     const acceptFunding = useAcceptFunding();
     const refuseFunding = useRefuseFunding();
+    const retryAcceptFunding = useRetryAcceptFunding();
 
     const handleAccept = () => {
         acceptFunding.mutate(fundingId, {
@@ -57,6 +60,43 @@ export function RecipientActionButtons({ fundingId }: RecipientActionButtonsProp
             }
         );
     };
+
+    const handleRetryAccept = () => {
+        retryAcceptFunding.mutate(fundingId, {
+            onSuccess: () => {
+                toast.success('수락 재시도를 성공했습니다.');
+            },
+            onError: (error: Error) => {
+                toast.error(error.message || '수락 재시도에 실패했습니다.');
+            },
+        });
+    };
+
+    if (status === 'ACCEPT_FAILED') {
+        return (
+            <Card className="p-4 shadow-sm border-t md:border">
+                <div className="space-y-3">
+                    <p className="text-sm font-medium text-center text-destructive">
+                        수락 처리에 실패했습니다. 다시 시도해주세요.
+                    </p>
+                    <div className="flex gap-2">
+                        <Button
+                            className="flex-1 h-12"
+                            onClick={handleRetryAccept}
+                            disabled={retryAcceptFunding.isPending}
+                        >
+                            {retryAcceptFunding.isPending ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                                <Check className="mr-2 h-4 w-4" />
+                            )}
+                            수락 재시도하기
+                        </Button>
+                    </div>
+                </div>
+            </Card>
+        );
+    }
 
     return (
         <>

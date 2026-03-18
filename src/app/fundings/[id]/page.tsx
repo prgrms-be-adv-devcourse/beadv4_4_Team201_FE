@@ -84,7 +84,9 @@ export default function FundingDetailPage() {
     const statusLabel: Record<string, string> = {
         IN_PROGRESS: '진행 중',
         ACHIEVED: '달성 완료',
+        ACCEPTING: '수락 진행 중',
         ACCEPTED: '수락됨',
+        ACCEPT_FAILED: '수락 실패',
         REFUSED: '거절됨',
         EXPIRED: '기간 만료',
         CLOSED: '종료됨',
@@ -182,7 +184,7 @@ export default function FundingDetailPage() {
                     {funding.status !== 'IN_PROGRESS' && (
                         <div className="bg-secondary/30 rounded-xl p-6 text-center">
                             <p className="text-sm font-medium text-muted-foreground">
-                                {funding.status === 'ACHIEVED' || funding.status === 'ACCEPTED'
+                                {['ACHIEVED', 'ACCEPTING', 'ACCEPTED', 'ACCEPT_FAILED'].includes(funding.status)
                                     ? '펀딩이 성공적으로 달성되었습니다!'
                                     : '펀딩이 종료되었습니다.'}
                             </p>

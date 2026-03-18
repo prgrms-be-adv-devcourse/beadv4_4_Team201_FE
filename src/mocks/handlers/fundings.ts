@@ -154,6 +154,21 @@ export const fundingsHandlers: HttpHandler[] = [
     return HttpResponse.json(updatedFunding);
   }),
 
+  http.post('**/api/v2/fundings/retryAccept/:fundingId', ({ params }) => {
+    const { fundingId } = params;
+    if (!fundingId) {
+      return new HttpResponse(null, { status: 400 });
+    }
+    // fundingId might be a number or string like 'funding-123'
+    const id = fundingId.toString().startsWith('funding-') ? fundingId : `funding-${fundingId}`;
+    const funding = fundings.find((f) => f.id === id);
+    if (!funding) {
+      return new HttpResponse(null, { status: 404 });
+    }
+    const updatedFunding = { ...funding, status: 'ACCEPTED' as const };
+    return HttpResponse.json(updatedFunding);
+  }),
+
   http.post('**/api/v2/fundings/:fundingId/refuse', ({ params }) => {
     const { fundingId } = params;
     const funding = fundings.find((f) => f.id === fundingId);

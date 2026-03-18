@@ -16,7 +16,9 @@ export type FundingStatus =
     | 'PENDING'
     | 'IN_PROGRESS'
     | 'ACHIEVED'
+    | 'ACCEPTING'
     | 'ACCEPTED'
+    | 'ACCEPT_FAILED'
     | 'REFUSED'
     | 'EXPIRED'
     | 'CLOSED';
