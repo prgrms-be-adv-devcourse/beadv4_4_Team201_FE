@@ -37,8 +37,9 @@ interface BackendCartItemRequest {
  * 백엔드 CartItemResponse
  */
 interface BackendCartItemResponse {
-  targetType: string;
-  targetId: number;
+  targetType?: string;
+  targetId?: number;
+  wishlistItemId?: number; // New backend property name
   receiverId: number | null;
   receiverNickname: string | null;
   productId: number | null;
@@ -77,30 +78,31 @@ function mapBackendCart(backend: BackendCartResponse): Cart {
 function mapBackendCartItem(item: BackendCartItemResponse, cartId: number): CartItem {
   const isNewFunding = item.targetType === 'FUNDING_PENDING';
   const targetType = isNewFunding ? 'FUNDING_PENDING' : 'FUNDING';
+  const targetId = (item.targetId ?? item.wishlistItemId ?? 0).toString();
 
   return {
-    id: `${cartId}::${item.targetId}`, // Changed composite key
+    id: `${cartId}::${targetId}`,
     cartId: cartId.toString(),
     targetType,
-    targetId: item.targetId.toString(),
+    targetId,
     wishlistId: null,
     receiverId: item.receiverId?.toString() || null,
     receiverNickname: item.receiverNickname || '',
     imageKey: item.imageKey,
-    productName: item.productName,
-    productPrice: item.productPrice,
+    productName: item.productName || '상품 정보 없음',
+    productPrice: item.productPrice || 0,
     contributionAmount: item.contributionAmount,
     currentAmount: item.currentAmount,
     amount: item.contributionAmount,
     fundingId: item.fundingId?.toString() || null,
     productId: item.productId?.toString() || '',
     funding: {
-      id: item.targetType === 'FUNDING' ? item.targetId.toString() : (item.fundingId?.toString() || ''),
-      wishItemId: isNewFunding ? item.targetId.toString() : '',
+      id: item.targetType === 'FUNDING' ? targetId : (item.fundingId?.toString() || ''),
+      wishItemId: isNewFunding ? targetId : '',
       product: {
         id: item.productId?.toString() || '',
-        name: item.productName || '',
-        price: item.productPrice,
+        name: item.productName || '상품 정보 없음',
+        price: item.productPrice || 0,
         imageUrl: resolveImageUrl(item.imageKey),
         status: 'ON_SALE',
         brandName: '',
@@ -113,14 +115,14 @@ function mapBackendCartItem(item: BackendCartItemResponse, cartId: number): Cart
         nickname: item.receiverNickname || '',
         avatarUrl: null
       },
-      targetAmount: item.productPrice,
+      targetAmount: item.productPrice || 0,
       currentAmount: item.currentAmount || 0,
       status: 'IN_PROGRESS',
       participantCount: 0,
       expiresAt: '',
       createdAt: '',
     },
-    selected: item.status === 'AVAILABLE', // unavailable 아이템은 비선택
+    selected: item.status === 'AVAILABLE',
     isNewFunding,
     createdAt: new Date().toISOString(),
     status: (item.status as ItemStatus) || 'AVAILABLE',
