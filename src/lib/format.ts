@@ -84,3 +84,28 @@ export function formatPercent(value: number | undefined | null, decimals: number
     }
     return `${value.toFixed(decimals)}%`;
 }
+
+/**
+ * Funding status labels in Korean
+ */
+const FUNDING_STATUS_LABELS: Record<string, string> = {
+    IN_PROGRESS: '진행 중',
+    ACHIEVED: '펀딩 성공',
+    ACCEPTING: '선물 수락 대기 중',
+    ACCEPTED: '수락 완료',
+    ACCEPT_FAILED: '수락 실패',
+    REFUSED: '거절',
+    EXPIRED: '기한 만료',
+    CLOSED: '종료',
+    PENDING: '대기 중',
+};
+
+/**
+ * Format funding status to Korean label
+ * @param status - The funding status
+ * @returns Korean label for the status
+ */
+export function formatFundingStatus(status: string | undefined | null): string {
+    if (!status) return '알 수 없음';
+    return FUNDING_STATUS_LABELS[status] || status;
+}

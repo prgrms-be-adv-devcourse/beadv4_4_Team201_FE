@@ -15,7 +15,7 @@ import { InlineError } from '@/components/common/InlineError';
 import { Button } from '@/components/ui/button';
 import { resolveImageUrl } from '@/lib/image';
 import { Progress } from '@/components/ui/progress';
-import { formatPrice } from '@/lib/format';
+import { formatPrice, formatFundingStatus } from '@/lib/format';
 import { Calendar, Gift, TrendingUp, Coins } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -81,17 +81,6 @@ export default function FundingDetailPage() {
     // 달성률이 0보다 크지만 소수점 등으로 인해 0%로 보일 수 있는 경우 최소 1% 표시
     const displayProgress = (funding.currentAmount > 0 && progressPercent < 1) ? 1 : Math.round(progressPercent);
 
-    const statusLabel: Record<string, string> = {
-        IN_PROGRESS: '진행 중',
-        ACHIEVED: '달성 완료',
-        ACCEPTING: '수락 진행 중',
-        ACCEPTED: '수락됨',
-        ACCEPT_FAILED: '수락 실패',
-        REFUSED: '거절됨',
-        EXPIRED: '기간 만료',
-        CLOSED: '종료됨',
-        PENDING: '대기 중',
-    };
 
     return (
         <AppShell
@@ -115,7 +104,7 @@ export default function FundingDetailPage() {
                         />
                         {/* 상태 배지 */}
                         <span className="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-semibold bg-background/90 backdrop-blur-sm shadow-sm">
-                            {statusLabel[funding.status] ?? funding.status}
+                            {formatFundingStatus(funding.status)}
                         </span>
                     </div>
 

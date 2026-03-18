@@ -8,6 +8,7 @@ import { FundingProgress } from './FundingProgress';
 import { cn } from '@/lib/utils';
 import type { FundingStatus } from '@/types/funding';
 import { ShoppingCart } from 'lucide-react';
+import { formatFundingStatus } from '@/lib/format';
 
 export type { FundingStatus };
 
@@ -60,22 +61,13 @@ export function FundingCard({
     };
 
     const getStatusLabel = () => {
-        switch (funding.status) {
-            case 'IN_PROGRESS':
-                if (days === 0) return <span className="text-xs font-medium text-primary">D-Day</span>;
-                if (days < 0) return <span className="text-xs text-muted-foreground">만료</span>;
-                return <span className="text-xs font-medium text-primary">D-{days}</span>;
-            case 'ACHIEVED':
-                return <span className="text-xs font-medium text-foreground">달성</span>;
-            case 'ACCEPTED':
-            case 'REFUSED':
-                return <span className="text-xs font-medium text-foreground">완료</span>;
-            case 'EXPIRED':
-            case 'CLOSED':
-                return <span className="text-xs text-muted-foreground">만료</span>;
-            default:
-                return <span className="text-xs text-muted-foreground">{funding.status}</span>;
+        if (funding.status === 'IN_PROGRESS') {
+            if (days === 0) return <span className="text-xs font-medium text-primary">D-Day</span>;
+            if (days < 0) return <span className="text-xs text-muted-foreground">만료</span>;
+            return <span className="text-xs font-medium text-primary">D-{days}</span>;
         }
+
+        return <span className="text-xs font-medium text-foreground">{formatFundingStatus(funding.status)}</span>;
     };
 
     if (isCarousel) {

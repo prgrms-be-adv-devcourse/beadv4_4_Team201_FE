@@ -12,6 +12,7 @@ import { InlineError } from '@/components/common/InlineError';
 import { Users, Clock, Target } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { RecipientActionButtons } from '@/features/funding/components/RecipientActionButtons';
+import { formatFundingStatus } from '@/lib/format';
 
 export default function MyFundingDetailPage() {
     const params = useParams();
@@ -88,7 +89,7 @@ export default function MyFundingDetailPage() {
                         />
                         {/* 상태 배지 */}
                         <span className="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-semibold bg-background/90 backdrop-blur-sm shadow-sm">
-                            {funding.status}
+                            {formatFundingStatus(funding.status)}
                         </span>
                     </div>
 
@@ -143,7 +144,7 @@ export default function MyFundingDetailPage() {
                                 <div className="bg-secondary/30 rounded-xl p-4 flex flex-col items-center justify-center space-y-1">
                                     <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">상태</span>
                                     <span className="text-lg font-bold truncate max-w-full px-2">
-                                        {funding.status}
+                                        {formatFundingStatus(funding.status)}
                                     </span>
                                 </div>
                             </div>

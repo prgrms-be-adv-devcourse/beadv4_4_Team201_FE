@@ -14,9 +14,9 @@ import type { Funding, FundingStatus } from '@/types/funding';
 const RECEIVED_STATUS_FILTERS: { label: string; value: FundingStatus | 'all' }[] = [
     { label: '전체', value: 'all' },
     { label: '진행 중', value: 'IN_PROGRESS' },
-    { label: '달성', value: 'ACHIEVED' },
-    { label: '완료', value: 'ACCEPTED' },
-    { label: '만료', value: 'EXPIRED' },
+    { label: '펀딩 성공', value: 'ACHIEVED' },
+    { label: '수락 완료', value: 'ACCEPTED' },
+    { label: '기한 만료', value: 'EXPIRED' },
 ];
 
 export default function ReceivedFundingsPage() {
