@@ -126,6 +126,29 @@ export const fundings: Funding[] = [
     expiresAt: pastDate.toISOString(),
     createdAt: new Date(now.getTime() - 20 * 24 * 60 * 60 * 1000).toISOString(),
   },
+  {
+    id: 'funding-6',
+    wishItemId: 'wish-item-6',
+    product: products[5] || products[0],
+    organizerId: members[1].id,
+    organizer: {
+      id: members[1].id,
+      nickname: members[1].nickname,
+      avatarUrl: members[1].avatarUrl,
+    },
+    recipientId: members[0].id,
+    recipient: {
+      id: members[0].id,
+      nickname: members[0].nickname,
+      avatarUrl: members[0].avatarUrl,
+    },
+    targetAmount: (products[5] || products[0]).price,
+    currentAmount: (products[5] || products[0]).price,
+    status: 'ACCEPT_FAILED',
+    participantCount: 10,
+    expiresAt: pastDate.toISOString(),
+    createdAt: new Date(now.getTime() - 25 * 24 * 60 * 60 * 1000).toISOString(),
+  },
 ];
 
 export const fundingParticipants: Record<string, FundingParticipant[]> = {

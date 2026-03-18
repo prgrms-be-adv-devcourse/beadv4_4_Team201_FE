@@ -150,8 +150,13 @@ export const fundingsHandlers: HttpHandler[] = [
     if (!funding) {
       return new HttpResponse(null, { status: 404 });
     }
-    const updatedFunding = { ...funding, status: 'ACCEPTED' as const };
-    return HttpResponse.json(updatedFunding);
+    return HttpResponse.json({
+      fundingId: parseInt(funding.id.replace('funding-', ''), 10),
+      wishlistItemId: parseInt(funding.wishItemId.replace('wish-item-', ''), 10),
+      productName: funding.product.name,
+      status: 'ACCEPTED',
+      closeAt: new Date().toISOString(),
+    });
   }),
 
   http.post('**/api/v2/fundings/retryAccept/:fundingId', ({ params }) => {
@@ -165,8 +170,13 @@ export const fundingsHandlers: HttpHandler[] = [
     if (!funding) {
       return new HttpResponse(null, { status: 404 });
     }
-    const updatedFunding = { ...funding, status: 'ACCEPTED' as const };
-    return HttpResponse.json(updatedFunding);
+    return HttpResponse.json({
+      fundingId: parseInt(funding.id.replace('funding-', ''), 10),
+      wishlistItemId: parseInt(funding.wishItemId.replace('wish-item-', ''), 10),
+      productName: funding.product.name,
+      status: 'ACCEPTED',
+      closeAt: new Date().toISOString(),
+    });
   }),
 
   http.post('**/api/v2/fundings/:fundingId/refuse', ({ params }) => {
@@ -175,8 +185,13 @@ export const fundingsHandlers: HttpHandler[] = [
     if (!funding) {
       return new HttpResponse(null, { status: 404 });
     }
-    const updatedFunding = { ...funding, status: 'REFUSED' as const };
-    return HttpResponse.json(updatedFunding);
+    return HttpResponse.json({
+      fundingId: parseInt(funding.id.replace('funding-', ''), 10),
+      wishlistItemId: parseInt(funding.wishItemId.replace('wish-item-', ''), 10),
+      productName: funding.product.name,
+      status: 'REFUSED',
+      closeAt: new Date().toISOString(),
+    });
   }),
 
   http.get('**/api/v2/fundings/:fundingId/participants', ({ request, params }) => {

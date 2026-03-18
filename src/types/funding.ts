@@ -103,6 +103,7 @@ export interface FundingQueryParams {
 export interface FundingCompleteResponse {
     fundingId: number;
     wishlistItemId: number;
+    productName: string;
     status: FundingStatus;
     closeAt: string;
 }

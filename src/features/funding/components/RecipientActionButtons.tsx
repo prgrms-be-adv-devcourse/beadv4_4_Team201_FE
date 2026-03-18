@@ -33,8 +33,8 @@ export function RecipientActionButtons({ fundingId, status }: RecipientActionBut
 
     const handleAccept = () => {
         acceptFunding.mutate(fundingId, {
-            onSuccess: () => {
-                toast.success('펀딩을 수락했습니다.');
+            onSuccess: (data) => {
+                toast.success(`'${data.productName}' 펀딩을 수락했습니다.`);
                 setAcceptDialogOpen(false);
             },
             onError: (error) => {
@@ -50,8 +50,8 @@ export function RecipientActionButtons({ fundingId, status }: RecipientActionBut
                 data: { reason: '다른 상품을 원합니다.' },
             },
             {
-                onSuccess: () => {
-                    toast.success('펀딩을 거절했습니다. 참여자들에게 환불됩니다.');
+                onSuccess: (data) => {
+                    toast.success(`'${data.productName}' 펀딩을 거절했습니다. 참여자들에게 환불됩니다.`);
                     setRefuseDialogOpen(false);
                 },
                 onError: (error) => {
@@ -63,8 +63,8 @@ export function RecipientActionButtons({ fundingId, status }: RecipientActionBut
 
     const handleRetryAccept = () => {
         retryAcceptFunding.mutate(fundingId, {
-            onSuccess: () => {
-                toast.success('수락 재시도를 성공했습니다.');
+            onSuccess: (data) => {
+                toast.success(`'${data.productName}' 수락 재시도를 성공했습니다.`);
             },
             onError: (error: Error) => {
                 toast.error(error.message || '수락 재시도에 실패했습니다.');
@@ -80,6 +80,19 @@ export function RecipientActionButtons({ fundingId, status }: RecipientActionBut
                         수락 처리에 실패했습니다. 다시 시도해주세요.
                     </p>
                     <div className="flex gap-2">
+                        <Button
+                            variant="outline"
+                            className="flex-1 h-12"
+                            onClick={() => setRefuseDialogOpen(true)}
+                            disabled={refuseFunding.isPending}
+                        >
+                            {refuseFunding.isPending ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                                <X className="mr-2 h-4 w-4" />
+                            )}
+                            거절하기
+                        </Button>
                         <Button
                             className="flex-1 h-12"
                             onClick={handleRetryAccept}

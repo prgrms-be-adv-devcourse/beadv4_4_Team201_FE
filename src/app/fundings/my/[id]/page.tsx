@@ -95,6 +95,16 @@ export default function MyFundingDetailPage() {
 
                 {/* Content */}
                 <div className="flex-1 p-4 space-y-6">
+                    {/* Product Info */}
+                    <div className="space-y-1">
+                        <h1 className="text-lg font-semibold leading-snug">
+                            {funding.product.name}
+                        </h1>
+                        <p className="text-sm text-muted-foreground">
+                            목표 금액: {funding.targetAmount.toLocaleString()}원
+                        </p>
+                    </div>
+
                     {/* Funding Status Card */}
                     <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-5 space-y-4">
                         <div className="flex justify-between items-baseline">
