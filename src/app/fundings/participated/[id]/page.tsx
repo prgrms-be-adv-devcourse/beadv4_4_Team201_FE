@@ -76,99 +76,114 @@ export default function ParticipatedFundingDetailPage() {
 
     return (
         <AppShell headerTitle="참여한 펀딩" headerVariant="detail" hasBack showBottomNav={false}>
-            <div className="p-4 space-y-6 pb-24">
-                {/* 상품 이미지 */}
-                <div className="relative w-full aspect-square max-h-[300px] max-w-[300px] mx-auto rounded-xl overflow-hidden bg-secondary">
-                    <Image
-                        src={resolveImageUrl(funding.imageKey)}
-                        alt={funding.product?.name || '상품 이미지'}
-                        fill
-                        className="object-cover"
-                        onError={(e) => {
-                            (e.target as HTMLImageElement).src = '/images/placeholder-product.svg';
-                        }}
-                    />
-                    {/* 상태 배지 */}
-                    <span className="absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-medium bg-background/80 backdrop-blur-sm">
-                        {statusLabel[funding.status] ?? funding.status}
-                    </span>
-                </div>
-
-                {/* 상품명 & 수령인 */}
-                <div className="space-y-1">
-                    {funding.receiverNickname && (
-                        <p className="text-sm text-muted-foreground flex items-center gap-1">
-                            <Gift className="h-3.5 w-3.5" />
-                            {funding.receiverNickname}님을 위한 펀딩
-                        </p>
-                    )}
-                    <h1 className="text-lg font-semibold leading-snug">
-                        {funding.product?.name}
-                    </h1>
-                    <p className="text-sm text-muted-foreground">
-                        목표 금액: {formatPrice(funding.targetAmount)}
-                    </p>
-                </div>
-
-                {/* 진행률 */}
-                <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                        <span className="font-medium text-primary">
-                            {displayProgress}% 달성
+            <main className="max-w-screen-2xl mx-auto px-8 py-6 md:py-12">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-start">
+                    {/* Left Column: Product Image */}
+                    <div className="relative aspect-square bg-gray-50 overflow-hidden max-w-[90%] rounded-xl shadow-sm">
+                        <Image
+                            src={resolveImageUrl(funding.imageKey)}
+                            alt={funding.product?.name || '상품 이미지'}
+                            fill
+                            className="object-cover"
+                            onError={(e) => {
+                                (e.target as HTMLImageElement).src = '/images/placeholder-product.svg';
+                            }}
+                        />
+                        {/* 상태 배지 */}
+                        <span className="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-semibold bg-background/90 backdrop-blur-sm shadow-sm">
+                            {statusLabel[funding.status] ?? funding.status}
                         </span>
-                        {funding.daysRemaining !== undefined && (
-                            <span className="flex items-center gap-1 text-muted-foreground">
-                                <Calendar className="h-3.5 w-3.5" />
-                                D-{funding.daysRemaining}
-                            </span>
-                        )}
                     </div>
-                    <Progress value={progressPercent} className="h-2" />
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>모인 금액: {formatPrice(funding.currentAmount)}</span>
-                        <span>목표: {formatPrice(funding.targetAmount)}</span>
-                    </div>
-                </div>
 
-                {/* 통계 카드 */}
-                <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-secondary/60 rounded-xl p-4 space-y-1">
-                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                            <TrendingUp className="h-3.5 w-3.5" />
-                            모인 금액
+                    {/* Right Column: Info & Actions */}
+                    <div className="mt-8 lg:mt-0 space-y-8">
+                        {/* 상품명 & 수령인 */}
+                        <div className="space-y-2">
+                            {funding.receiverNickname && (
+                                <p className="text-sm font-medium text-primary flex items-center gap-1.5">
+                                    <Gift className="h-4 w-4" />
+                                    {funding.receiverNickname}님을 위한 펀딩
+                                </p>
+                            )}
+                            <h1 className="text-2xl md:text-3xl font-bold leading-tight tracking-tight">
+                                {funding.product?.name}
+                            </h1>
+                            <p className="text-sm text-muted-foreground">
+                                목표 금액: {formatPrice(funding.targetAmount)}
+                            </p>
                         </div>
-                        <p className="text-base font-semibold">
-                            {formatPrice(funding.currentAmount)}
-                        </p>
-                    </div>
-                    <div className="bg-primary/10 rounded-xl p-4 space-y-1 border border-primary/20">
-                        <div className="flex items-center gap-1.5 text-xs text-primary/70">
-                            <Coins className="h-3.5 w-3.5" />
-                            내 참여 금액
-                        </div>
-                        <p className="text-base font-semibold text-primary">
-                            {formatPrice(funding.myContribution ?? 0)}
-                        </p>
-                    </div>
-                </div>
 
-                {/* 하단 버튼 */}
-                <div className="space-y-3 pt-4">
-                    {funding.status === 'IN_PROGRESS' && (
-                        <Button
-                            className="w-full h-12"
-                            onClick={() => setParticipateModalOpen(true)}
-                        >
-                            장바구니 담기
-                        </Button>
-                    )}
-                    <Button
-                        variant="outline"
-                        className="w-full"
-                        onClick={() => router.back()}
-                    >
-                        목록으로 돌아가기
-                    </Button>
+                        {/* 통계 & 진행률 */}
+                        <div className="space-y-6">
+                            <div className="flex items-baseline gap-2">
+                                <span className="text-3xl font-bold text-primary">
+                                    {formatPrice(funding.currentAmount)}
+                                </span>
+                                <span className="text-lg font-semibold text-muted-foreground">
+                                    모였습니다
+                                </span>
+                            </div>
+
+                            <div className="space-y-3">
+                                <div className="flex justify-between items-end">
+                                    <div className="flex items-baseline gap-1.5">
+                                        <span className="text-2xl font-bold text-primary">
+                                            {displayProgress}%
+                                        </span>
+                                        <span className="text-sm font-medium text-muted-foreground">달성</span>
+                                    </div>
+                                    {funding.daysRemaining !== undefined && (
+                                        <span className="flex items-center gap-1.5 text-sm font-semibold bg-secondary/50 px-2.5 py-1 rounded-md">
+                                            <Calendar className="h-4 w-4" />
+                                            {funding.daysRemaining === 0 ? '오늘 종료' : `${funding.daysRemaining}일 남음`}
+                                        </span>
+                                    )}
+                                </div>
+                                <Progress value={progressPercent} className="h-3 rounded-full" />
+                            </div>
+                        </div>
+
+                        {/* 상세 정보 카드 */}
+                        <div className="bg-secondary/30 rounded-2xl p-6 grid grid-cols-2 gap-6">
+                            <div className="space-y-1">
+                                <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                    <TrendingUp className="h-3.5 w-3.5" />
+                                    모인 금액
+                                </div>
+                                <p className="text-lg font-bold">
+                                    {formatPrice(funding.currentAmount)}
+                                </p>
+                            </div>
+                            <div className="space-y-1">
+                                <div className="flex items-center gap-1.5 text-xs font-semibold text-primary/70 uppercase tracking-wider">
+                                    <Coins className="h-3.5 w-3.5" />
+                                    내 참여 금액
+                                </div>
+                                <p className="text-lg font-bold text-primary">
+                                    {formatPrice(funding.myContribution ?? 0)}
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* 하단 버튼 */}
+                        <div className="space-y-3 pt-4">
+                            {funding.status === 'IN_PROGRESS' && (
+                                <Button
+                                    className="w-full h-12 text-base font-bold"
+                                    onClick={() => setParticipateModalOpen(true)}
+                                >
+                                    장바구니 담기
+                                </Button>
+                            )}
+                            <Button
+                                variant="outline"
+                                className="w-full h-12 text-base font-bold"
+                                onClick={() => router.back()}
+                            >
+                                목록으로 돌아가기
+                            </Button>
+                        </div>
+                    </div>
                 </div>
 
                 {/* 참여 모달 */}
@@ -197,7 +212,7 @@ export default function ParticipatedFundingDetailPage() {
                         }
                     }}
                 />
-            </div>
+            </main>
         </AppShell>
     );
 }
