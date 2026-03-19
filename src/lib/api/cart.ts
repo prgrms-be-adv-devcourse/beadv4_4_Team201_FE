@@ -20,7 +20,8 @@ type BackendTargetType = 'FUNDING_PENDING' | 'FUNDING';
  * @see CartController POST /api/v2/carts
  */
 interface BackendCartItemCreateRequest {
-  targetId: number;
+  wishlistId?: number | null;
+  wishlistItemId: number;
   amount: number;
 }
 
@@ -29,7 +30,8 @@ interface BackendCartItemCreateRequest {
  * @see CartController POST /api/v2/carts/{cartId}  (and PATCH items)
  */
 interface BackendCartItemRequest {
-  targetId: number;
+  wishlistId?: number; // Optional for updates if missing
+  wishlistItemId: number;
   amount: number;
 }
 
@@ -156,7 +158,8 @@ export async function getCart(): Promise<Cart> {
  */
 export async function addCartItem(data: CartItemCreateRequest): Promise<string> {
   const request: BackendCartItemCreateRequest = {
-    targetId: Number(data.targetId),
+    wishlistId: data.wishlistId ? Number(data.wishlistId) : null,
+    wishlistItemId: Number(data.wishlistItemId),
     amount: data.amount,
   };
 
@@ -174,7 +177,8 @@ export async function updateCartItem(itemId: string, data: CartItemUpdateRequest
   const { targetId } = parseCartItemId(itemId);
 
   const request: BackendCartItemRequest = {
-    targetId,
+    wishlistId: data.wishlistId ? Number(data.wishlistId) : undefined,
+    wishlistItemId: targetId,
     amount: data.amount!,
   };
 
@@ -189,7 +193,8 @@ export async function updateCartItems(updates: { itemId: string; amount: number;
   const requests = updates.map(({ itemId, amount, wishlistId }) => {
     const { targetId } = parseCartItemId(itemId);
     return {
-      targetId,
+      wishlistId: wishlistId ? Number(wishlistId) : undefined,
+      wishlistItemId: targetId,
       amount,
     };
   });
@@ -207,7 +212,7 @@ export async function updateCartItems(updates: { itemId: string; amount: number;
  */
 export async function removeCartItem(targetIds: number[]): Promise<void> {
   const ids = targetIds.join(',');
-  await apiClient.delete(`/api/v2/carts/items?targetIds=${ids}`);
+  await apiClient.delete(`/api/v2/carts/items?wishlistItemIds=${ids}`);
 }
 
 /**

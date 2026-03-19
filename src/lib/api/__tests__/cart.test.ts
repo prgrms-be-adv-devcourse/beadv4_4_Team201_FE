@@ -51,12 +51,13 @@ describe('cart API', () => {
             const mockPost = vi.spyOn(apiClient.apiClient, 'post').mockResolvedValue({ message: 'Success' } as any);
 
             await addCartItem({
-                targetId: '10',
+                wishlistItemId: '10',
                 amount: 5000,
             });
 
             expect(mockPost).toHaveBeenCalledWith('/api/v2/carts', {
-                targetId: 10,
+                wishlistId: null,
+                wishlistItemId: 10,
                 amount: 5000,
             }, expect.objectContaining({ includeFullResponse: true }));
         });

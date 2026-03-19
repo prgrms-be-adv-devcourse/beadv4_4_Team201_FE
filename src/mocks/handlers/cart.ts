@@ -40,11 +40,11 @@ export const cartHandlers: HttpHandler[] = [
 
   http.post('**/api/v2/carts', async ({ request }) => {
     const body = await request.json() as {
-      targetId: number;
+      wishlistItemId: number;
       wishlistId?: number;
       amount: number;
     };
-    const { targetId, wishlistId, amount } = body;
+    const { wishlistItemId: targetId, wishlistId, amount } = body;
 
     let funding = fundings.find((f) => f.id === `funding-${targetId}`);
     const targetType = funding ? 'FUNDING' : 'FUNDING_PENDING';
@@ -129,11 +129,11 @@ export const cartHandlers: HttpHandler[] = [
 
   http.patch('**/api/v2/carts/items', async ({ request }) => {
     const body = await request.json();
-    const updates = body as { targetId: number; amount: number; wishlistId?: number }[];
+    const updates = body as { wishlistItemId: number; amount: number; wishlistId?: number }[];
 
     updates.forEach(update => {
       const item = cartItems.find(
-        i => parseInt(String(i.targetId), 10) === update.targetId
+        i => parseInt(String(i.targetId), 10) === update.wishlistItemId
       );
       if (item) {
         item.amount = update.amount;
@@ -145,7 +145,7 @@ export const cartHandlers: HttpHandler[] = [
 
   http.delete('**/api/v2/carts/items', ({ request }) => {
     const url = new URL(request.url);
-    const targetIdsStr = url.searchParams.get('targetIds');
+    const targetIdsStr = url.searchParams.get('wishlistItemIds');
 
     if (targetIdsStr) {
       const targetIds = targetIdsStr.split(',').map(id => parseInt(id, 10));
