@@ -98,9 +98,9 @@ export default function CheckoutPage() {
                 return;
             }
 
-            const itemsToRemove = selectedItems.map(item => ({
+            const itemsToRemove = selectedItems.map((item) => ({
                 targetType: item.targetType,
-                targetId: item.targetId,
+                targetId: item.wishlistItemId || item.targetId,
             }));
 
             const result = await placeOrder.mutateAsync({
