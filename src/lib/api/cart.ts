@@ -78,9 +78,12 @@ function mapBackendCart(backend: BackendCartResponse): Cart {
 }
 
 function mapBackendCartItem(item: BackendCartItemResponse, cartId: number): CartItem {
-  const isNewFunding = item.targetType === 'FUNDING_PENDING';
+  // If the backend returns targetType, use it. Otherwise, deduce from fundingId === null or undefined
+  const isNewFunding = item.targetType ? item.targetType === 'FUNDING_PENDING' : !item.fundingId;
   const targetType = isNewFunding ? 'FUNDING_PENDING' : 'FUNDING';
-  const targetId = (item.targetId ?? item.wishlistItemId ?? 0).toString();
+  const targetId = isNewFunding
+    ? (item.targetId ?? item.wishlistItemId ?? 0).toString()
+    : (item.targetId ?? item.fundingId ?? 0).toString();
 
   return {
     id: `${cartId}::${targetId}`,
@@ -88,6 +91,7 @@ function mapBackendCartItem(item: BackendCartItemResponse, cartId: number): Cart
     targetType,
     targetId,
     wishlistId: null,
+    wishlistItemId: item.wishlistItemId?.toString() || null,
     receiverId: item.receiverId?.toString() || null,
     receiverNickname: item.receiverNickname || '',
     imageKey: item.imageKey,

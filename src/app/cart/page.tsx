@@ -56,7 +56,11 @@ export default function CartPage() {
         const item = cart?.items.find(i => i.id === id);
 
         updateCartItem.mutate(
-            { itemId: id, data: { amount, wishlistId: item?.wishlistId ?? undefined } },
+            {
+                itemId: id,
+                data: { amount, wishlistId: item?.wishlistId ?? undefined },
+                targetToUpdate: item?.wishlistItemId || item?.targetId || ''
+            },
             {
                 onSuccess: () => {
                     setEditingItemIds((prev) => {
@@ -123,7 +127,10 @@ export default function CartPage() {
     };
 
     const handleRemove = (id: string) => {
-        removeCartItems.mutate([id], {
+        const item = cart?.items.find(i => i.id === id);
+        if (!item) return;
+
+        removeCartItems.mutate([{ itemId: id, targetToRemove: parseInt(item.wishlistItemId || item.targetId, 10) }], {
             onSuccess: () => {
                 toast.success('장바구니에서 삭제되었습니다.');
             },
@@ -134,7 +141,7 @@ export default function CartPage() {
     };
 
     const handleBulkUpdate = () => {
-        const updates: { itemId: string; amount: number; wishlistId: string | number | null }[] = [];
+        const updates: { itemId: string; amount: number; wishlistId: string | number | null; targetToUpdate: string }[] = [];
         const idsArray = Array.from(editingItemIds);
 
         for (const id of idsArray) {
@@ -146,7 +153,12 @@ export default function CartPage() {
                 return;
             }
             const item = cart?.items.find(i => i.id === id);
-            updates.push({ itemId: id, amount, wishlistId: item?.wishlistId ?? null });
+            updates.push({
+                itemId: id,
+                amount,
+                wishlistId: item?.wishlistId ?? null,
+                targetToUpdate: item?.wishlistItemId || item?.targetId || ''
+            });
         }
 
         if (updates.length === 0) return;
@@ -175,7 +187,10 @@ export default function CartPage() {
     const handleRemoveSelected = () => {
         if (!cart || selectedItems.length === 0) return;
 
-        const selectedIds = selectedItems.map(item => item.id);
+        const selectedIds = selectedItems.map(item => ({
+            itemId: item.id,
+            targetToRemove: parseInt(item.wishlistItemId || item.targetId, 10)
+        }));
 
         removeCartItems.mutate(selectedIds, {
             onSuccess: () => {

@@ -368,6 +368,7 @@ export default function PublicWishlistPage({ params }: { params: Promise<{ membe
                 <ParticipateModal
                     open={isParticipateOpen}
                     onOpenChange={setIsParticipateOpen}
+                    wishlistId={selectedItem.wishlistId.toString()}
                     wishItemId={selectedItem.id}
                     product={{
                         name: selectedItem.product.name,

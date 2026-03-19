@@ -92,7 +92,9 @@ export interface OrderDetail {
  * @see PlaceOrderItemRequest.java
  */
 export interface PlaceOrderItemRequest {
-    wishlistItemId: number;
+    productId: number;
+    wishlistItemId?: number;
+    fundingId?: number;
     receiverId: number;
     amount: number;
     orderItemType: OrderItemType;

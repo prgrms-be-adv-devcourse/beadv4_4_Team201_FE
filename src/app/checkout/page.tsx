@@ -22,8 +22,16 @@ import type { CartItem } from '@/types/cart';
 async function resolveOrderItem(item: CartItem): Promise<PlaceOrderItemRequest> {
     const orderItemType: OrderItemType = 'FUNDING_GIFT';
 
-    // targetId is already the wishlistItemId
-    const wishlistItemId = parseInt(item.targetId, 10);
+    const productId = parseInt(item.productId, 10) || 0;
+
+    // Always map wishlistItemId if available from Backend, fallback to generic parsing
+    const wishlistItemId = item.wishlistItemId
+        ? parseInt(item.wishlistItemId, 10)
+        : (item.isNewFunding ? parseInt(item.targetId, 10) : undefined);
+
+    const fundingId = item.fundingId
+        ? parseInt(item.fundingId, 10)
+        : (!item.isNewFunding ? parseInt(item.targetId, 10) : undefined);
 
     const receiverId = item.receiverId
         ? parseInt(item.receiverId, 10)
@@ -32,7 +40,9 @@ async function resolveOrderItem(item: CartItem): Promise<PlaceOrderItemRequest> 
             : 0;
 
     return {
+        productId,
         wishlistItemId,
+        fundingId,
         receiverId,
         amount: item.amount,
         orderItemType,

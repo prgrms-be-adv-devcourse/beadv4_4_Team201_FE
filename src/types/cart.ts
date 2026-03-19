@@ -25,6 +25,7 @@ export interface CartItem {
     targetType: 'FUNDING' | 'FUNDING_PENDING';
     targetId: string;
     wishlistId: string | null;
+    wishlistItemId: string | null;
     receiverId: string | null;
     receiverNickname: string | null;
     imageKey: string | null;

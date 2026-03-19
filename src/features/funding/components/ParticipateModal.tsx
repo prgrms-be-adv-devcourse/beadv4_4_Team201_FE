@@ -23,6 +23,7 @@ import type { Funding } from '@/types/funding';
 interface ParticipateModalProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
+    wishlistId?: string;
     wishItemId: string;
     product: {
         name: string;
@@ -38,6 +39,7 @@ interface ParticipateModalProps {
 export function ParticipateModal({
     open,
     onOpenChange,
+    wishlistId,
     wishItemId,
     product,
     recipient,
@@ -63,6 +65,7 @@ export function ParticipateModal({
 
         participateFunding.mutate(
             {
+                wishlistId,
                 wishItemId,
                 amount,
             },

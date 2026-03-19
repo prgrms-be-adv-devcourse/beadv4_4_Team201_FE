@@ -13,6 +13,7 @@ const mockCart: Cart = {
             cartId: 'cart-1',
             targetType: 'FUNDING',
             targetId: 'wi-1',
+            wishlistItemId: 'wi-1',
             wishlistId: '1',
             productId: 'p1',
             fundingId: 'f1',

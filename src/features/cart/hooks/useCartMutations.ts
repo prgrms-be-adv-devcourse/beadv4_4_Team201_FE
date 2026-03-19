@@ -45,22 +45,31 @@ export function useUpdateCartItem() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ itemId, data }: { itemId: string; data: CartItemUpdateRequest }) =>
-      updateCartItem(itemId, data),
+    mutationFn: async ({ itemId, data, targetToUpdate }: { itemId: string; data: CartItemUpdateRequest; targetToUpdate: string }) => {
+      const parts = itemId.split('::');
+      const fakeItemId = `${parts[0]}::${targetToUpdate}`;
+      await updateCartItem(fakeItemId, data);
+    },
     onMutate: async ({ itemId, data }) => {
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: queryKeys.cart });
 
       // Snapshot the previous value
-      const previousCart = queryClient.getQueryData(queryKeys.cart);
+      const previousCart = queryClient.getQueryData<Cart>(queryKeys.cart);
 
       // Optimistically update to the new value
-      queryClient.setQueryData(queryKeys.cart, (old: Cart | undefined) => {
+      queryClient.setQueryData<Cart | undefined>(queryKeys.cart, (old) => {
         if (!old) return old;
         return {
           ...old,
           items: old.items.map((item) =>
-            item.id === itemId ? { ...item, ...data } : item
+            item.id === itemId
+              ? {
+                ...item,
+                ...data,
+                wishlistId: data.wishlistId ? data.wishlistId.toString() : item.wishlistId
+              }
+              : item
           ),
         };
       });
@@ -99,11 +108,12 @@ export function useRemoveCartItems() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (itemIds: string[]) => {
-      const idsToRemove = itemIds.map((id) => parseCartItemId(id).targetId);
+    mutationFn: async (items: { itemId: string; targetToRemove: number }[]) => {
+      const idsToRemove = items.map((i) => i.targetToRemove);
       await removeCartItem(idsToRemove);
     },
-    onMutate: async (itemIds) => {
+    onMutate: async (items) => {
+      const itemIds = items.map(i => i.itemId);
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: queryKeys.cart });
 
@@ -184,8 +194,15 @@ export function useUpdateCartItems() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (updates: { itemId: string; amount: number; wishlistId: string | number | null }[]) =>
-      updateCartItems(updates),
+    mutationFn: async (updates: { itemId: string; amount: number; wishlistId: string | number | null; targetToUpdate: string }[]) => {
+      const newUpdates = updates.map((u) => {
+        const parts = u.itemId.split('::');
+        const fakeItemId = `${parts[0]}::${u.targetToUpdate}`;
+        return { ...u, itemId: fakeItemId };
+      });
+
+      await updateCartItems(newUpdates);
+    },
     onMutate: async (updates) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.cart });
       const previousCart = queryClient.getQueryData(queryKeys.cart);
